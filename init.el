@@ -1018,8 +1018,8 @@ If on a:
 
        (defvar enlight-email-width
          `( :content
-            ,(concat "\n" (propertize "Block 2" 'face 'enlight-yellow-bold)
-                 "\nEMAIL WIDGET\n\n")
+            ,(concat "\n" (propertize (format "%s" (nerd-icons-octicon "nf-oct-clock")) 'face 'enlight-yellow-bold)
+                 "\n"(current-time-string)"\n\n")
             :padding 2 :width 22 :align center :border t))
 
        (defvar enlight-weather-width
@@ -1048,7 +1048,7 @@ If on a:
            (grid-get-box
             `( :content
                ,(concat
-                 (grid-get-box `( :content ,(propertize "HEADER" 'face 'highlight)
+                 (grid-get-box `( :content ,(propertize "another day another try . . ." 'face 'enlight-yellow-bold)
                           :width 80 :align center))
                  (grid-get-row
                   `(,enlight-guix-widget
@@ -1064,14 +1064,15 @@ If on a:
                 "\n"
                 (enlight-menu
                  '(("Org Mode"
-                ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
+                ("Org-Agenda " (org-agenda nil "D") "D"))
                ("Downloads"
-                ("Transmission" transmission "t")
+                ;; ("Transmission" transmission "t")
                 ("Downloads folder" (dired "~/Downloads") "a"))
                ("Other"
-                ("Projects" project-switch-project "p")))))
+                ("Bookmarks" consult-bookmark "b")))))
               ,(grid-get-column
                 `(,(propertize "THINGS TO REMEMBER" 'face 'highlight)
-                  (:content ,enlight-lipsum :width 50))))))))))))
+                  ;; (:content ,enlight-lipsum :width 50))))))))))))
+                  (:content ,(propertize "* cite:Ackerman_2001 \n* file:~/Code/master/yasf_testing/testbed.py \n* file:~/Roam/master/20231129173749-ma_hub.org" 'face 'enlight-yellow-bold)))))))))))))
 
 (setopt initial-buffer-choice #'enlight)
