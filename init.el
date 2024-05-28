@@ -213,112 +213,119 @@ If on a:
   (setq org-return-follows-link  t)
 
 (use-package general
-      :config
-      (general-evil-setup)
-      ;; Set up 'SPC' as the leader key
-      (general-create-definer start/leader-keys
-        :states '(normal insert visual motion emacs)
-        :keymaps 'override
-        :prefix "SPC"           ;; Set leader key
-        :global-prefix "C-SPC") ;; Set global leader key
+          :config
+          (general-evil-setup)
+          ;; Set up 'SPC' as the leader key
+          (general-create-definer start/leader-keys
+            :states '(normal insert visual motion emacs)
+            :keymaps 'override
+            :prefix "SPC"           ;; Set leader key
+            :global-prefix "C-SPC") ;; Set global leader key
 
-      (start/leader-keys
-        "." '(find-file :wk "Find file")
-        ;; "TAB" '(comment-line :wk "Comment lines")
-        "RET" '(consult-bookmark :wk "Bookmarks!")
-        "p" '(projectile-command-map :wk "Projectile command map")
-        "," '(consult-buffer :wk "Switch buffers")
-        "h" '(evil-window-left :wk "Switch to left window")
-        "j" '(evil-window-down :wk "Switch to lower window")
-        "k" '(evil-window-up :wk "Switch to uppper window")
-        "l" '(evil-window-right :wk "Switch to right window")
-       )
-      (start/leader-keys
-        "d" '(lsp-ui-doc-show :wk "show doc"))
+          (start/leader-keys
+            "." '(find-file :wk "Find file")
+            ;; "TAB" '(comment-line :wk "Comment lines")
+            "RET" '(consult-bookmark :wk "Bookmarks!")
+            "p" '(projectile-command-map :wk "Projectile command map")
+            "," '(consult-buffer :wk "Switch buffers")
+            "h" '(evil-window-left :wk "Switch to left window")
+            "j" '(evil-window-down :wk "Switch to lower window")
+            "k" '(evil-window-up :wk "Switch to uppper window")
+            "l" '(evil-window-right :wk "Switch to right window")
+           )
+          (start/leader-keys
+            "d" '(lsp-ui-doc-show :wk "show doc"))
 
-      (start/leader-keys
-        "o a" '(org-agenda :wk "Open agenda"))
-      
-      (start/leader-keys
-        "TAB n" '(persp-next :wk "Next workspace")
-        "TAB p" '(persp-prev :wk "Previous workspace")
-        "TAB d" '(persp-remove-by-name :wk "Delete workspace")
-        "TAB TAB" '(persp-switch :wk "New persp"))
+          (start/leader-keys
+            "o a" '(org-agenda :wk "Open agenda"))
 
-      (start/leader-keys
-        "s b" '(consult-line :wk "Search buffer")
-        "s p" '(consult-ripgrep :wk "Search project")
-        )
+        (start/leader-keys
+            "c c" '(compile :wk "compile")
+            "c k" '(kill-compilation :wk "kill compilation")
+            "c C" '(recompile :wk "kill compilation"))
 
-      (start/leader-keys
-        "w d" '(delete-window :wk "Close window")
-        "w n" '(split-window-vertically :wk "Split window vertically")
-        "w v" '(split-window-horizontally :wk "Split window horizontally")
-       )
-      (start/leader-keys
-        "f" '(:ignore t :wk "Find")
-        "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-        "f r" '(consult-recent-file :wk "Recent files")
-        "f i" '(consult-imenu :wk "Imenu buffer locations"))
+          (start/leader-keys
+            "TAB n" '(persp-next :wk "Next workspace")
+            "TAB p" '(persp-prev :wk "Previous workspace")
+            "TAB d" '(persp-remove-by-name :wk "Delete workspace")
+            "TAB TAB" '(persp-switch :wk "New persp"))
 
-      (start/leader-keys
-        "b" '(:ignore t :wk "Buffer Bookmarks")
-        "b b" '(consult-buffer :wk "Switch buffer")
-        "b d" '(kill-this-buffer :wk "Kill this buffer")
-        "b i" '(ibuffer :wk "Ibuffer")
-        "b n" '(next-buffer :wk "Next buffer")
-        "b p" '(previous-buffer :wk "Previous buffer")
-        "b r" '(revert-buffer :wk "Reload buffer")
-        "b j" '(consult-bookmark :wk "Bookmark jump"))
+          (start/leader-keys
+            "s b" '(consult-line :wk "Search buffer")
+            "s p" '(consult-ripgrep :wk "Search project")
+            )
 
-      (start/leader-keys
-        "n r f" '(org-roam-node-find :wk "Find roam nodes")
-        "n r i" '(org-roam-node-insert :wk "Insert node")
-        "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
-	  
-      (start/leader-keys
-		"m d" '(org-deadline :wk "Deadline")
-		"m s" '(org-schedule :wk "Schedule")
-		"m t" '(org-timestamp :wk "Timestamp"))
-	  
-      (start/leader-keys
-        "e" '(:ignore t :wk "Eglot Evaluate")
-        "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-        "e f" '(eglot-format :wk "Eglot Format")
-        "e l" '(consult-flymake :wk "Consult Flymake")
-        "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-        "e r" '(eval-region :wk "Evaluate elisp in region"))
+          (start/leader-keys
+            "w d" '(delete-window :wk "Close window")
+            "w n" '(split-window-vertically :wk "Split window vertically")
+            "w v" '(split-window-horizontally :wk "Split window horizontally")
+           )
+          (start/leader-keys
+            "f" '(:ignore t :wk "Find")
+            "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+            "f r" '(consult-recent-file :wk "Recent files")
+            "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-      (start/leader-keys
-        "g" '(:ignore t :wk "Git")
-        "g g" '(magit-status :wk "Magit status"))
+          (start/leader-keys
+            "b" '(:ignore t :wk "Buffer Bookmarks")
+            "b b" '(consult-buffer :wk "Switch buffer")
+            "b d" '(kill-this-buffer :wk "Kill this buffer")
+            "b i" '(ibuffer :wk "Ibuffer")
+            "b n" '(next-buffer :wk "Next buffer")
+            "b p" '(previous-buffer :wk "Previous buffer")
+            "b r" '(revert-buffer :wk "Reload buffer")
+            "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-      (start/leader-keys
-        "N i" '(citar-open :wk "Open citar")
-        "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
-        "N c" '(orb-insert-link :wk "insert orb link"
-))
-      ;; (start/leader-keys
-      ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-      ;;   "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon"))
+          (start/leader-keys
+            "n r f" '(org-roam-node-find :wk "Find roam nodes")
+            "n r i" '(org-roam-node-insert :wk "Insert node")
+            "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
 
-      (start/leader-keys
-        "r r" '((lambda () (interactive)
-                  (load-file "~/.config/emacs/init.el"))
-                :wk "Reload Emacs config"))
+          (start/leader-keys
+        	"m d" '(org-deadline :wk "Deadline")
+        	"m s" '(org-schedule :wk "Schedule")
+        	"m t" '(org-timestamp :wk "Timestamp"))
 
-      ;; (start/leader-keys
-      ;;   "s" '(:ignore t :wk "Show")
-      ;;   "s e" '(eat :wk "Eat terminal"))
+          (start/leader-keys
+            "e" '(:ignore t :wk "Eglot Evaluate")
+            "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+            "e f" '(eglot-format :wk "Eglot Format")
+            "e l" '(consult-flymake :wk "Consult Flymake")
+            "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+            "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-      (start/leader-keys
-        "t" '(:ignore t :wk "Toggle")
-        "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-        "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
-(add-hook 'org-mode-hook (lambda ()
-       (setq-local electric-pair-inhibit-predicate
-               `(lambda (c)
-              (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+          (start/leader-keys
+            "g" '(:ignore t :wk "Git")
+            "g g" '(magit-status :wk "Magit status"))
+
+          (start/leader-keys
+            "N i" '(citar-open :wk "Open citar")
+            "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
+            "N c" '(orb-insert-link :wk "insert orb link"
+    ))
+          ;; (start/leader-keys
+          ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+          ;;   "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon"))
+
+          (start/leader-keys
+            "r r" '((lambda () (interactive)
+                      (load-file "~/.config/emacs/init.el"))
+                    :wk "Reload Emacs config"))
+
+          ;; (start/leader-keys
+          ;;   "s" '(:ignore t :wk "Show")
+          ;;   "s e" '(eat :wk "Eat terminal"))
+
+          (start/leader-keys
+            "t" '(:ignore t :wk "Toggle")
+            "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+            "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+    (add-hook 'org-mode-hook (lambda ()
+           (setq-local electric-pair-inhibit-predicate
+                   `(lambda (c)
+                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
+(setq initial-frame-alist (append initial-frame-alist '((left . 75) (top . 75) (width . 240) (height . 73 ))))
 
 (use-package emacs
   :custom
@@ -525,6 +532,9 @@ If on a:
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
 (setq lsp-ui-doc-position 'at-point)
+(setq lsp-ui-sideline-show-hover nil)
+(setq lsp-ui-sideline-enable t)
+(setq lsp-ui-sideline-show-diagnostics t)
 
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
@@ -637,29 +647,29 @@ If on a:
   :hook (org-mode . toc-org-mode))
 
 (use-package org-modern
-    :after org
-    :ensure t
-    :custom
-    (org-modern-hide-stars nil)		; adds extra indentation
-    (org-modern-table nil)
-    (org-modern-list 
-    '(;; (?- . "-")
-        (?* . "•")
-        (?+ . "‣")))
-    (org-modern-block-name '("" . "")) ; or other chars; so top bracket is drawn promptly
-    :hook
-    (org-mode . org-modern-mode)
-    (org-agenda-finalize . org-modern-agenda))
-    (use-package org-modern-indent
-	  :after org
-      :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent")
-      :config ; add late to hook
-      (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+        :after org
+        :ensure t
+        :custom
+        (org-modern-hide-stars nil)		; adds extra indentation
+        (org-modern-table nil)
+        (org-modern-list 
+        '(;; (?- . "-")
+            (?* . "•")
+            (?+ . "‣")))
+        (org-modern-block-name '("" . "")) ; or other chars; so top bracket is drawn promptly
+        :hook
+        (org-mode . org-modern-mode)
+        (org-agenda-finalize . org-modern-agenda))
+;; -        (use-package org-modern-indent
+;; -    	  :after org
+;; -          :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent")
+;; -          :config ; add late to hook
+;; -          (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
-(use-package org-bullets-mode
-  :ensure org-bullets
-  :config
-  :hook org-mode)
+    (use-package org-bullets-mode
+      :ensure org-bullets
+      :config
+      :hook org-mode)
 
 (use-package org-tempo
   :ensure nil
@@ -702,7 +712,7 @@ If on a:
  ;;   (evil-org-agenda-set-keys))
 
 (use-package org-roam
-		  :straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
+    	  ;;:straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
           :ensure t
           :custom
           (org-roam-directory (file-truename "~/Roam/"))
@@ -1052,25 +1062,12 @@ If on a:
 
        (defvar enlight-guix
          (propertize
-
-        ;;   " ..                             `.
-        ;; `--..```..`           `..```..--`   
-        ;;   .-:///-:::.       `-:::///:-.     
-        ;;      ````.:::`     `:::.````        
-        ;;           -//:`    -::-             
-        ;;            ://:   -::-              
-        ;;            `///- .:::`              
-        ;;             -+++-:::.               
-        ;;              :+/:::-                
-        ;;              `-....`                "
-
             "
 8b,dPPYba,  ,adPPYYba, ,adPPYba, ,adPPYYba,  
 88P'   `\8a ''     `Y8 I8[    '' ''     `Y8  
 88       88 ,adPPPPP88  `*Y8ba,  ,adPPPPP88  
 88       88 88,    ,88 aa    ]8I 88,    ,88  
 88       88 `*8bbdP'Y8 `*YbbdP*' `*8bbdP'Y8  
-
             "
           'face 'enlight-yellow-bold))
 
@@ -1135,16 +1132,17 @@ If on a:
                 ("Bookmarks" consult-bookmark "b")))))
               ,(grid-get-column
             `(,(concat
+    			"         "
                 (propertize "Files" 'face 'highlight)
                 "\n"
+    			"         "
                 (enlight-menu
                  '(("Roam"
-                ("MA Hub" (find-file "~/Roam/master/20231129173749-ma_hub.org") "M")
-                ("Virga Yasf" (find-file "~/Roam/uni/20240311092511-integrate_yasf_into_virga.org") "Y"))
-               ("Code"
-                ("master" (dired "~/Code/master/") "M"))
-               ("Other"
-                ("Bookmarks" consult-bookmark "b")))))
+                ("          MA Hub" (find-file "~/Roam/master/20231129173749-ma_hub.org") "M")
+                ("          Virga Yasf" (find-file "~/Roam/uni/20240311092511-integrate_yasf_into_virga.org") "Y"))
+               ("          Code"
+                ("          master" (dired "~/Code/master/") "M"))
+                )))
                 )))))))))))
 
 
@@ -1175,3 +1173,8 @@ If on a:
           ("REVIEW"     font-lock-keyword-face bold)
           ("NOTE"       success bold)
           ("DEPRECATED" font-lock-doc-face bold))))
+
+(setq mac-option-key-is-meta nil
+      mac-command-key-is-meta t
+      mac-command-modifier 'meta
+      mac-option-modifier 'none)

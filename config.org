@@ -39,6 +39,7 @@
   - [[#cape][Cape]]
   - [[#orderless][Orderless]]
   - [[#vertico-and-marginalia][Vertico and Marginalia]]
+  - [[#embark][Embark]]
   - [[#consult][Consult]]
   - [[#company][Company]]
   - [[#diminish][Diminish]]
@@ -325,113 +326,120 @@ A keybinding framework to set keybindings easily.
 The Leader key is what you will press when you want to access your keybindings (SPC + . Find file).
 To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC to replace n to skip).
 #+begin_src emacs-lisp
-        (use-package general
-          :config
-          (general-evil-setup)
-          ;; Set up 'SPC' as the leader key
-          (general-create-definer start/leader-keys
-            :states '(normal insert visual motion emacs)
-            :keymaps 'override
-            :prefix "SPC"           ;; Set leader key
-            :global-prefix "C-SPC") ;; Set global leader key
+            (use-package general
+              :config
+              (general-evil-setup)
+              ;; Set up 'SPC' as the leader key
+              (general-create-definer start/leader-keys
+                :states '(normal insert visual motion emacs)
+                :keymaps 'override
+                :prefix "SPC"           ;; Set leader key
+                :global-prefix "C-SPC") ;; Set global leader key
 
-          (start/leader-keys
-            "." '(find-file :wk "Find file")
-            ;; "TAB" '(comment-line :wk "Comment lines")
-            "RET" '(consult-bookmark :wk "Bookmarks!")
-            "p" '(projectile-command-map :wk "Projectile command map")
-            "," '(consult-buffer :wk "Switch buffers")
-            "h" '(evil-window-left :wk "Switch to left window")
-            "j" '(evil-window-down :wk "Switch to lower window")
-            "k" '(evil-window-up :wk "Switch to uppper window")
-            "l" '(evil-window-right :wk "Switch to right window")
-           )
-          (start/leader-keys
-            "d" '(lsp-ui-doc-show :wk "show doc"))
+              (start/leader-keys
+                "." '(find-file :wk "Find file")
+                ;; "TAB" '(comment-line :wk "Comment lines")
+                "RET" '(consult-bookmark :wk "Bookmarks!")
+                "p" '(projectile-command-map :wk "Projectile command map")
+                "," '(consult-buffer :wk "Switch buffers")
+                "h" '(evil-window-left :wk "Switch to left window")
+                "j" '(evil-window-down :wk "Switch to lower window")
+                "k" '(evil-window-up :wk "Switch to uppper window")
+                "l" '(evil-window-right :wk "Switch to right window")
+               )
+              (start/leader-keys
+                "d" '(lsp-ui-doc-show :wk "show doc"))
 
-          (start/leader-keys
-            "o a" '(org-agenda :wk "Open agenda"))
-          
-          (start/leader-keys
-            "TAB n" '(persp-next :wk "Next workspace")
-            "TAB p" '(persp-prev :wk "Previous workspace")
-            "TAB d" '(persp-remove-by-name :wk "Delete workspace")
-            "TAB TAB" '(persp-switch :wk "New persp"))
+              (start/leader-keys
+                "o a" '(org-agenda :wk "Open agenda"))
+    		  
+            (start/leader-keys
+                "c c" '(compile :wk "compile")
+                "c k" '(kill-compilation :wk "kill compilation")
+                "c C" '(recompile :wk "kill compilation"))
+              
+              (start/leader-keys
+                "TAB n" '(persp-next :wk "Next workspace")
+                "TAB p" '(persp-prev :wk "Previous workspace")
+                "TAB d" '(persp-remove-by-name :wk "Delete workspace")
+                "TAB TAB" '(persp-switch :wk "New persp"))
 
-          (start/leader-keys
-            "s b" '(consult-line :wk "Search buffer")
-            "s p" '(consult-ripgrep :wk "Search project")
-            )
+              (start/leader-keys
+                "s b" '(consult-line :wk "Search buffer")
+                "s p" '(consult-ripgrep :wk "Search project")
+                )
 
-          (start/leader-keys
-            "w d" '(delete-window :wk "Close window")
-            "w n" '(split-window-vertically :wk "Split window vertically")
-            "w v" '(split-window-horizontally :wk "Split window horizontally")
-           )
-          (start/leader-keys
-            "f" '(:ignore t :wk "Find")
-            "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-            "f r" '(consult-recent-file :wk "Recent files")
-            "f i" '(consult-imenu :wk "Imenu buffer locations"))
+              (start/leader-keys
+                "w d" '(delete-window :wk "Close window")
+                "w n" '(split-window-vertically :wk "Split window vertically")
+                "w v" '(split-window-horizontally :wk "Split window horizontally")
+               )
+              (start/leader-keys
+                "f" '(:ignore t :wk "Find")
+                "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+                "f r" '(consult-recent-file :wk "Recent files")
+                "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-          (start/leader-keys
-            "b" '(:ignore t :wk "Buffer Bookmarks")
-            "b b" '(consult-buffer :wk "Switch buffer")
-            "b d" '(kill-this-buffer :wk "Kill this buffer")
-            "b i" '(ibuffer :wk "Ibuffer")
-            "b n" '(next-buffer :wk "Next buffer")
-            "b p" '(previous-buffer :wk "Previous buffer")
-            "b r" '(revert-buffer :wk "Reload buffer")
-            "b j" '(consult-bookmark :wk "Bookmark jump"))
+              (start/leader-keys
+                "b" '(:ignore t :wk "Buffer Bookmarks")
+                "b b" '(consult-buffer :wk "Switch buffer")
+                "b d" '(kill-this-buffer :wk "Kill this buffer")
+                "b i" '(ibuffer :wk "Ibuffer")
+                "b n" '(next-buffer :wk "Next buffer")
+                "b p" '(previous-buffer :wk "Previous buffer")
+                "b r" '(revert-buffer :wk "Reload buffer")
+                "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-          (start/leader-keys
-            "n r f" '(org-roam-node-find :wk "Find roam nodes")
-            "n r i" '(org-roam-node-insert :wk "Insert node")
-            "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
-    	  
-          (start/leader-keys
-    		"m d" '(org-deadline :wk "Deadline")
-    		"m s" '(org-schedule :wk "Schedule")
-    		"m t" '(org-timestamp :wk "Timestamp"))
-    	  
-          (start/leader-keys
-            "e" '(:ignore t :wk "Eglot Evaluate")
-            "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-            "e f" '(eglot-format :wk "Eglot Format")
-            "e l" '(consult-flymake :wk "Consult Flymake")
-            "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-            "e r" '(eval-region :wk "Evaluate elisp in region"))
+              (start/leader-keys
+                "n r f" '(org-roam-node-find :wk "Find roam nodes")
+                "n r i" '(org-roam-node-insert :wk "Insert node")
+                "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
+        	  
+              (start/leader-keys
+        		"m d" '(org-deadline :wk "Deadline")
+        		"m s" '(org-schedule :wk "Schedule")
+        		"m t" '(org-timestamp :wk "Timestamp"))
+        	  
+              (start/leader-keys
+                "e" '(:ignore t :wk "Eglot Evaluate")
+                "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+                "e f" '(eglot-format :wk "Eglot Format")
+                "e l" '(consult-flymake :wk "Consult Flymake")
+                "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+                "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-          (start/leader-keys
-            "g" '(:ignore t :wk "Git")
-            "g g" '(magit-status :wk "Magit status"))
+              (start/leader-keys
+                "g" '(:ignore t :wk "Git")
+                "g g" '(magit-status :wk "Magit status"))
 
-          (start/leader-keys
-            "N i" '(citar-open :wk "Open citar")
-            "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
-            "N c" '(orb-insert-link :wk "insert orb link"
-    ))
-          ;; (start/leader-keys
-          ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-          ;;   "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon"))
+              (start/leader-keys
+                "N i" '(citar-open :wk "Open citar")
+                "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
+                "N c" '(orb-insert-link :wk "insert orb link"
+        ))
+              ;; (start/leader-keys
+              ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+              ;;   "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon"))
 
-          (start/leader-keys
-            "r r" '((lambda () (interactive)
-                      (load-file "~/.config/emacs/init.el"))
-                    :wk "Reload Emacs config"))
+              (start/leader-keys
+                "r r" '((lambda () (interactive)
+                          (load-file "~/.config/emacs/init.el"))
+                        :wk "Reload Emacs config"))
 
-          ;; (start/leader-keys
-          ;;   "s" '(:ignore t :wk "Show")
-          ;;   "s e" '(eat :wk "Eat terminal"))
+              ;; (start/leader-keys
+              ;;   "s" '(:ignore t :wk "Show")
+              ;;   "s e" '(eat :wk "Eat terminal"))
 
-          (start/leader-keys
-            "t" '(:ignore t :wk "Toggle")
-            "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-            "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
-    (add-hook 'org-mode-hook (lambda ()
-           (setq-local electric-pair-inhibit-predicate
-                   `(lambda (c)
-                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+              (start/leader-keys
+                "t" '(:ignore t :wk "Toggle")
+                "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+                "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+        (add-hook 'org-mode-hook (lambda ()
+               (setq-local electric-pair-inhibit-predicate
+                       `(lambda (c)
+                      (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+        
+    (setq initial-frame-alist (append initial-frame-alist '((left . 75) (top . 75) (width . 240) (height . 73 ))))
 #+end_src
 
 ** Good Defaults
@@ -669,14 +677,23 @@ I like it more than eglot.
 #+begin_src emacs-lisp
         (use-package lsp-ui :commands lsp-ui-mode)
         (use-package lsp-mode
+          :custom
+            (lsp-completion-provider :none) ;; we use Corfu!
           :init
           ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
           (setq lsp-keymap-prefix "C-c l")
+          (defun my/orderless-dispatch-flex-first (_pattern index _total) (and (eq index 0) 'orderless-flex))
+          (defun my/lsp-mode-setup-completion ()
+            (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults)) '(orderless))
+            (add-hook 'orderless-style-dispatchers #'my/orderless-dispatch-flex-first nil 'local)
+            (setq-local completion-at-point-functions (list (cape-capf-buster #'lsp-completion-at-point))))
+
           :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
                  (python-mode . lsp)
                  ;; if you want which-key integration
                  (lsp-mode . lsp-enable-which-key-integration)
                  (lsp-mode . lsp-ui-mode)
+                 (lsp-completion-mode . my/lsp-mode-setup-completion)
                 )
           :commands lsp)
 
@@ -696,6 +713,9 @@ I like it more than eglot.
                               (require 'lsp-pyright)
                               (lsp))))  ; or lsp-deferred
     (setq lsp-ui-doc-position 'at-point)
+    (setq lsp-ui-sideline-show-hover nil)
+    (setq lsp-ui-sideline-enable t)
+    (setq lsp-ui-sideline-show-diagnostics t)
 #+end_src
 
 ** Yasnippet
@@ -853,30 +873,30 @@ much like the literate programming ideas that Donald Knuth made famous.
 **** org-modern
 
 #+begin_src emacs-lisp
-    (use-package org-modern
-        :after org
-        :ensure t
-        :custom
-        (org-modern-hide-stars nil)		; adds extra indentation
-        (org-modern-table nil)
-        (org-modern-list 
-        '(;; (?- . "-")
-            (?* . "•")
-            (?+ . "‣")))
-        (org-modern-block-name '("" . "")) ; or other chars; so top bracket is drawn promptly
-        :hook
-        (org-mode . org-modern-mode)
-        (org-agenda-finalize . org-modern-agenda))
-        (use-package org-modern-indent
-    	  :after org
-          :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent")
-          :config ; add late to hook
-          (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-
-    (use-package org-bullets-mode
-      :ensure org-bullets
-      :config
-      :hook org-mode)
+        (use-package org-modern
+            :after org
+            :ensure t
+            :custom
+            (org-modern-hide-stars nil)		; adds extra indentation
+            (org-modern-table nil)
+            (org-modern-list 
+            '(;; (?- . "-")
+                (?* . "•")
+                (?+ . "‣")))
+            (org-modern-block-name '("" . "")) ; or other chars; so top bracket is drawn promptly
+            :hook
+            (org-mode . org-modern-mode)
+            (org-agenda-finalize . org-modern-agenda))
+    ;; -        (use-package org-modern-indent
+    ;; -    	  :after org
+    ;; -          :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent")
+    ;; -          :config ; add late to hook
+    ;; -          (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+    
+        (use-package org-bullets-mode
+          :ensure org-bullets
+          :config
+          :hook org-mode)
 #+end_src
 
 **** Source Code Block Tag Expansion
@@ -936,7 +956,7 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
 **** Org Roam
 #+begin_src emacs-lisp
             (use-package org-roam
-    		  :straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
+    		  ;;:straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
               :ensure t
               :custom
               (org-roam-directory (file-truename "~/Roam/"))
@@ -1177,6 +1197,8 @@ Read the [[https://github.com/minad/cape#configuration][configuration section]] 
       ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
       ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
       )
+
+ ;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
 #+end_src
 
 ** Orderless
