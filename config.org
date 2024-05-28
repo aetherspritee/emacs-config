@@ -1422,25 +1422,12 @@ We also increase Read Process Output Max so emacs can read more data.
 
            (defvar enlight-guix
              (propertize
-
-            ;;   " ..                             `.
-            ;; `--..```..`           `..```..--`   
-            ;;   .-:///-:::.       `-:::///:-.     
-            ;;      ````.:::`     `:::.````        
-            ;;           -//:`    -::-             
-            ;;            ://:   -::-              
-            ;;            `///- .:::`              
-            ;;             -+++-:::.               
-            ;;              :+/:::-                
-            ;;              `-....`                "
-
                 "
     8b,dPPYba,  ,adPPYYba, ,adPPYba, ,adPPYYba,  
     88P'   `\8a ''     `Y8 I8[    '' ''     `Y8  
     88       88 ,adPPPPP88  `*Y8ba,  ,adPPPPP88  
     88       88 88,    ,88 aa    ]8I 88,    ,88  
     88       88 `*8bbdP'Y8 `*YbbdP*' `*8bbdP'Y8  
-
                 "
               'face 'enlight-yellow-bold))
 
@@ -1505,16 +1492,17 @@ We also increase Read Process Output Max so emacs can read more data.
                     ("Bookmarks" consult-bookmark "b")))))
                   ,(grid-get-column
                 `(,(concat
+    				"         "
                     (propertize "Files" 'face 'highlight)
                     "\n"
+    				"         "
                     (enlight-menu
                      '(("Roam"
-                    ("MA Hub" (find-file "~/Roam/master/20231129173749-ma_hub.org") "M")
-                    ("Virga Yasf" (find-file "~/Roam/uni/20240311092511-integrate_yasf_into_virga.org") "Y"))
-                   ("Code"
-                    ("master" (dired "~/Code/master/") "M"))
-                   ("Other"
-                    ("Bookmarks" consult-bookmark "b")))))
+                    ("          MA Hub" (find-file "~/Roam/master/20231129173749-ma_hub.org") "M")
+                    ("          Virga Yasf" (find-file "~/Roam/uni/20240311092511-integrate_yasf_into_virga.org") "Y"))
+                   ("          Code"
+                    ("          master" (dired "~/Code/master/") "M"))
+                    )))
                     )))))))))))
 
 
