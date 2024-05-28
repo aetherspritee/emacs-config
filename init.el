@@ -238,7 +238,7 @@ If on a:
 
       (start/leader-keys
         "o a" '(org-agenda :wk "Open agenda"))
-
+      
       (start/leader-keys
         "TAB n" '(persp-next :wk "Next workspace")
         "TAB p" '(persp-prev :wk "Previous workspace")
@@ -273,8 +273,14 @@ If on a:
 
       (start/leader-keys
         "n r f" '(org-roam-node-find :wk "Find roam nodes")
-        "n r i" '(org-roam-node-insert :wk "Insert node"))
-
+        "n r i" '(org-roam-node-insert :wk "Insert node")
+        "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
+	  
+      (start/leader-keys
+		"m d" '(org-deadline :wk "Deadline")
+		"m s" '(org-schedule :wk "Schedule")
+		"m t" '(org-timestamp :wk "Timestamp"))
+	  
       (start/leader-keys
         "e" '(:ignore t :wk "Eglot Evaluate")
         "e e" '(eglot-reconnect :wk "Eglot Reconnect")
@@ -508,6 +514,7 @@ If on a:
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp))))  ; or lsp-deferred
+(setq lsp-ui-doc-position 'at-point)
 
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
@@ -620,6 +627,7 @@ If on a:
   :hook (org-mode . toc-org-mode))
 
 (use-package org-modern
+    :after org
     :ensure t
     :custom
     (org-modern-hide-stars nil)		; adds extra indentation
@@ -633,9 +641,8 @@ If on a:
     (org-mode . org-modern-mode)
     (org-agenda-finalize . org-modern-agenda))
     (use-package org-modern-indent
-      :load-path "~/.config/emacs/packages/org-modern-indent/"
-      ; or
-      ; :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent"))
+	  :after org
+      :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent")
       :config ; add late to hook
       (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
@@ -685,6 +692,7 @@ If on a:
  ;;   (evil-org-agenda-set-keys))
 
 (use-package org-roam
+		  :straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
           :ensure t
           :custom
           (org-roam-directory (file-truename "~/Roam/"))
@@ -702,6 +710,8 @@ If on a:
         (LaTeX-mode . citar-capf-setup)
         (org-mode . citar-capf-setup)
     )
+    (setq citar-file-open-functions '(("pdf" . citar-file-open-external)))
+
     (use-package bibtex-completion)
     (setq bibtex-completion-library-path '("~/Roam/master/"))
     (setq bibtex-completion-bibliography "~/Roam/papers/lib.bib")
@@ -752,6 +762,12 @@ If on a:
    :if-new (file+head "~/Roam/Lord of the Rings/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
    :unnarrowed t)
   ))
+(setq org-roam-dailies-capture-templates
+    '(("w" "Weekly" entry "* Thought of the week\n %?\n* Review \n\n* What to keep up\n\n* What to improve\n\n* Vibes/Mood/Interest"
+        :if-new (file+head "weekly/weekly-%<%d-%m-%Y>.org" "#+title: Weekly: %<%d-%m-%Y>\n"))
+        ("d" "Daily" entry "* %?" :if-new (file+head  "daily-%<%d-%m-%Y>.org" "#+title: %<%d-%m-%Y>\n"))
+    )
+)
 
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
@@ -1086,3 +1102,29 @@ If on a:
 
 
 (setopt initial-buffer-choice #'enlight)
+
+(use-package persp-mode
+  :demand t
+  :config
+  (setq persp-auto-resume-time -1 ;; No autoload buffers
+        persp-set-last-persp-for-new-frames nil
+        persp-reset-windows-on-nil-window-conf t
+        persp-autokill-buffer-on-remove t
+        persp-add-buffer-on-after-change-major-mode t
+        persp-kill-foreign-buffer-behaviour 'kill)
+  (persp-mode 1))
+
+;; (setq persp-mode 1)
+
+(use-package hl-todo
+  :hook ((org-mode . hl-todo-mode)
+         (prog-mode . hl-todo-mode))
+  :config
+  (setq hl-todo-highlight-punctuation ":"
+        hl-todo-keyword-faces
+        `(("TODO"       warning bold)
+          ("FIXME"      error bold)
+          ("HACK"       font-lock-constant-face bold)
+          ("REVIEW"     font-lock-keyword-face bold)
+          ("NOTE"       success bold)
+          ("DEPRECATED" font-lock-doc-face bold))))

@@ -48,6 +48,8 @@
 - [[#second-part-of-me-struggling-with-org-mode-ret-binding-in-evil-mode][Second part of me struggling with org-mode RET binding in evil mode]]
 - [[#latex][Latex]]
 - [[#enlight][Enlight]]
+- [[#persp-mode][Persp-mode]]
+- [[#highlight-todo][Highlight todo]]
 
 * Important to load first
 
@@ -662,34 +664,35 @@ I like it more than eglot.
 - I can easily choose my root directory, useful when working with git submodules
 - better symbol highlighting imo, just works with doom-themes
 #+begin_src emacs-lisp
-    (use-package lsp-ui :commands lsp-ui-mode)
-    (use-package lsp-mode
-      :init
-      ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-      (setq lsp-keymap-prefix "C-c l")
-      :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-             (python-mode . lsp)
-             ;; if you want which-key integration
-             (lsp-mode . lsp-enable-which-key-integration)
-             (lsp-mode . lsp-ui-mode)
-            )
-      :commands lsp)
+        (use-package lsp-ui :commands lsp-ui-mode)
+        (use-package lsp-mode
+          :init
+          ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+          (setq lsp-keymap-prefix "C-c l")
+          :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+                 (python-mode . lsp)
+                 ;; if you want which-key integration
+                 (lsp-mode . lsp-enable-which-key-integration)
+                 (lsp-mode . lsp-ui-mode)
+                )
+          :commands lsp)
 
-    ;; optionally
-    ;; if you are helm user
-    ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
-    ;; if you are ivy user
-    ;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-    ;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+        ;; optionally
+        ;; if you are helm user
+        ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+        ;; if you are ivy user
+        ;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+        ;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 
-    ;; optionally if you want to use debugger
-    (use-package dap-mode)
-    ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-(use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+        ;; optionally if you want to use debugger
+        (use-package dap-mode)
+        ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+    (use-package lsp-pyright
+      :ensure t
+      :hook (python-mode . (lambda ()
+                              (require 'lsp-pyright)
+                              (lsp))))  ; or lsp-deferred
+    (setq lsp-ui-doc-position 'at-point)
 #+end_src
 
 ** Yasnippet
@@ -1474,4 +1477,37 @@ We also increase Read Process Output Max so emacs can read more data.
 
 
     (setopt initial-buffer-choice #'enlight)
+#+end_src
+
+* Persp-mode
+#+begin_src emacs-lisp
+    (use-package persp-mode
+      :demand t
+      :config
+      (setq persp-auto-resume-time -1 ;; No autoload buffers
+            persp-set-last-persp-for-new-frames nil
+            persp-reset-windows-on-nil-window-conf t
+            persp-autokill-buffer-on-remove t
+            persp-add-buffer-on-after-change-major-mode t
+            persp-kill-foreign-buffer-behaviour 'kill)
+      (persp-mode 1))
+
+    ;; (setq persp-mode 1)
+#+end_src
+
+* Highlight todo
+#+begin_src emacs-lisp
+(use-package hl-todo
+  :hook ((org-mode . hl-todo-mode)
+         (prog-mode . hl-todo-mode))
+  :config
+  (setq hl-todo-highlight-punctuation ":"
+        hl-todo-keyword-faces
+        `(("TODO"       warning bold)
+          ("FIXME"      error bold)
+          ("HACK"       font-lock-constant-face bold)
+          ("REVIEW"     font-lock-keyword-face bold)
+          ("NOTE"       success bold)
+          ("DEPRECATED" font-lock-doc-face bold))))
+
 #+end_src
