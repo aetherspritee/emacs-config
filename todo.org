@@ -1,0 +1,34 @@
+- [X] return to automatically insert new org item
+- [X] proper keybinds
+  + [X] switch windows
+  + [X] switch buffer
+  + [X] comments
+- [-] org roam
+  + [ ] keybinds
+  + [ ] ivy hydra ersatz -> cite ref
+  + [ ] automatically start org-roam-bibtex-mode
+  + [X] get bibtex integration
+- [ ] workspaces
+  + [ ] properly set up persp-mode
+- [ ] treesitter
+- [ ] search project
+- [ ] swiper integration
+- [ ] org agenda
+  + [ ] evil
+  + [ ] my agenda view
+  + [ ] use correct files
+- [X] prettify org mode
+- [-] lsp/eglot
+  - [ ] languages and servers
+  - [X] autocompletion
+  - [ ] goto references keybinds
+- [ ] dashboard
+  - [ ] use enlight and grid.el and make smth cool looking
+- [-] latex
+  + [ ] Overall
+  + [X] In Org Mode
+- [ ] treemacs
+  + [ ] lsp integration
+  + [ ] themes
+- [X] use C-J and C-K to scroll through lists
+- [ ] delete word with backspace ONLY in find file
