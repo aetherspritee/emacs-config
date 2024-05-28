@@ -550,7 +550,9 @@ Replace the default modeline with a prettier more useful.
       (doom-modeline-height 25)     ;; Sets modeline height
       (doom-modeline-bar-width 5)   ;; Sets right bar width
       (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+      (lsp-modeline-diagnostics-enable nil)
       (doom-modeline-persp-icon t)) ;; Adds folder icon next to persp name
+    
 #+end_src
 
 ** Dashboard
