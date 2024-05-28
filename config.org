@@ -1533,18 +1533,98 @@ We also increase Read Process Output Max so emacs can read more data.
 
 * Persp-mode
 #+begin_src emacs-lisp
-    (use-package persp-mode
-      :demand t
-      :config
-      (setq persp-auto-resume-time -1 ;; No autoload buffers
-            ;; persp-set-last-persp-for-new-frames nil
-            ;; persp-reset-windows-on-nil-window-conf t
-            persp-autokill-buffer-on-remove t
-            ;; persp-add-buffer-on-after-change-major-mode t
-            persp-kill-foreign-buffer-behaviour 'kill)
-      (persp-mode 1))
+        ;; (use-package persp-mode
+        ;;   :demand t
+        ;;   :config
+        ;;   (setq persp-auto-resume-time -1 ;; No autoload buffers
+        ;;         ;; persp-set-last-persp-for-new-frames nil
+        ;;         ;; persp-reset-windows-on-nil-window-conf t
+        ;;         persp-autokill-buffer-on-remove t
+        ;;         ;; persp-add-buffer-on-after-change-major-mode t
+        ;;         persp-kill-foreign-buffer-behaviour 'kill)
+        ;;   (persp-mode 1))
 
-    ;; (setq persp-hook-up-emacs-buffer-completion t)
+     (defvar +workspaces-main "main"
+      "The name of the primary and initial workspace, which cannot be deleted.")
+
+    ;; (defvar +workspaces-switch-project-function #'doom-project-find-file
+    ;;   "The function to run after `projectile-switch-project' or
+    ;; `counsel-projectile-switch-project'. This function must take one argument: the
+    ;; new project directory.")
+
+    (defvar +workspaces-on-switch-project-behavior 'non-empty
+      "Controls the behavior of workspaces when switching to a new project.
+
+    Can be one of the following:
+
+    t           Always create a new workspace for the project
+    'non-empty  Only create a new workspace if the current one already has buffers
+                associated with it.
+    nil         Never create a new workspace on project switch.")
+
+    ;; FIXME actually use this for wconf bookmark system
+    (defvar +workspaces-data-file "_workspaces"
+      "The basename of the file to store single workspace perspectives. Will be
+    stored in `persp-save-dir'.")
+
+    (defvar +workspace--old-uniquify-style nil)
+
+
+    ;;
+    ;; Packages
+
+    (use-package persp-mode
+      :unless noninteractive
+      :commands persp-switch-to-buffer
+      :hook (doom-init-ui . persp-mode)
+      :config
+      (setq persp-autokill-buffer-on-remove 'kill-weak
+            persp-reset-windows-on-nil-window-conf nil
+            persp-nil-hidden t
+            persp-auto-save-fname "autosave"
+            persp-save-dir (concat "workspaces/")
+            persp-set-last-persp-for-new-frames t
+            persp-switch-to-added-buffer nil
+            persp-kill-foreign-buffer-behaviour 'kill
+            persp-remove-buffers-from-nil-persp-behaviour nil
+            persp-auto-resume-time -1 ; Don't auto-load on startup
+            persp-auto-save-opt (if noninteractive 0 1)) ; auto-save on kill
+
+
+      ;;;; Create main workspace
+      ;; The default perspective persp-mode creates is special and doesn't represent
+      ;; a real persp object, so buffers can't really be assigned to it, among other
+      ;; quirks, so I replace it with a "main" perspective.
+      (add-hook '(persp-mode-hook persp-after-load-state-functions)
+        (defun +workspaces-ensure-no-nil-workspaces-h (&rest _)
+          (when persp-mode
+            (dolist (frame (frame-list))
+              (when (string= (safe-persp-name (get-current-persp frame)) persp-nil-name)
+                ;; Take extra steps to ensure no frame ends up in the nil perspective
+                (persp-frame-switch (or (cadr (hash-table-keys *persp-hash*))
+                                        +workspaces-main)
+                                    frame))))))
+
+
+      ;; per-frame workspaces
+      (setq persp-init-frame-behaviour t
+            persp-init-new-frame-behaviour-override nil
+            persp-interactive-init-frame-behaviour-override #'+workspaces-associate-frame-fn
+            persp-emacsclient-init-frame-behaviour-override #'+workspaces-associate-frame-fn)
+      (add-hook 'delete-frame-functions #'+workspaces-delete-associated-workspace-h)
+      (add-hook 'server-done-hook #'+workspaces-delete-associated-workspace-h)
+
+    ;;; tab-bar
+      (add-hook 'tab-bar-mode-hook
+        (defun +workspaces-set-up-tab-bar-integration-h ()
+          (add-hook 'persp-before-deactivate-functions #'+workspaces-save-tab-bar-data-h)
+          (add-hook 'persp-activated-functions #'+workspaces-load-tab-bar-data-h)
+          ;; Load and save configurations for tab-bar.
+          (add-hook 'persp-before-save-state-to-file-functions #'+workspaces-save-tab-bar-data-to-file-h)
+          (+workspaces-load-tab-bar-data-from-file-h))))   
+
+
+        ;; (setq persp-hook-up-emacs-buffer-completion t)
 #+end_src
 
 * Highlight todo
