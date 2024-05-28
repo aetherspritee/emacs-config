@@ -1200,39 +1200,71 @@ We use this packages, because they use emacs native functions. Unlike Ivy or Hel
 One alternative is ivy and counsel, check out the [[https://github.com/MiniApollo/kickstart.emacs/wiki][project wiki]] for more inforomation.
 
 #+begin_src emacs-lisp
-            (use-package vertico
-              :init
-              (vertico-mode)
-              :bind (
-               :map vertico-map
-                ("C-j" . vertico-next)
-                ("C-k" . vertico-previous)))
-    
-        ;; Configure directory extension.
-        (use-package vertico-directory
+        (use-package vertico
+          :init
+          (vertico-mode)
+          :bind (
+           :map vertico-map
+            ("C-j" . vertico-next)
+            ("C-k" . vertico-previous)))
+
+    ;; Configure directory extension.
+    (use-package vertico-directory
+      :after vertico
+      :ensure nil
+      ;; More convenient directory navigation commands
+      :bind (:map vertico-map
+                  ("RET" . vertico-directory-enter)
+                  ("DEL" . vertico-directory-delete-char)
+                  ("M-DEL" . vertico-directory-delete-char))
+      ;; Tidy shadowed file names
+      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
+        (savehist-mode) ;; Enables save history mode
+
+        (use-package marginalia
           :after vertico
-          :ensure nil
-          ;; More convenient directory navigation commands
-          :bind (:map vertico-map
-                      ("RET" . vertico-directory-enter)
-                      ("DEL" . vertico-directory-delete-word)
-                      ("M-DEL" . vertico-directory-delete-char))
-          ;; Tidy shadowed file names
-          :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+          :init
+          (marginalia-mode))
+
+        (use-package nerd-icons-completion
+          :after marginalia
+          :config
+          (nerd-icons-completion-mode)
+          :hook
+          ('marginalia-mode-hook . 'nerd-icons-completion-marginalia-setup))
+#+end_src
+
+** Embark
+#+begin_src emacs-lisp
+    (use-package embark
+      :ensure t
+
+      :bind
+      (("C-." . embark-act)         ;; pick some comfortable binding
+       ("C-;" . embark-dwim)        ;; good alternative: M-.
+       ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+      :init
+
+      ;; Optionally replace the key help with a completing-read interface
+      (setq prefix-help-command #'embark-prefix-help-command))
+
+      ;; Show the Embark target at point via Eldoc. You may adjust the
+      ;; Eldoc strategy, if you want to see the documentation from
+      ;; multiple providers. Beware that using this can be a little
+      ;; jarring since the message shown in the minibuffer can be more
+      ;; than one line, causing the modeline to move up and down:
+
+      ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+      ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+    ;; Consult users will also want the embark-consult package.
+    (use-package embark-consult
+      :ensure t ; only need to install it, embark loads it after consult if found
+      :hook
+      (embark-collect-mode . consult-preview-at-point-mode))
     
-            (savehist-mode) ;; Enables save history mode
-
-            (use-package marginalia
-              :after vertico
-              :init
-              (marginalia-mode))
-
-            (use-package nerd-icons-completion
-              :after marginalia
-              :config
-              (nerd-icons-completion-mode)
-              :hook
-              ('marginalia-mode-hook . 'nerd-icons-completion-marginalia-setup))
 #+end_src
 
 ** Consult
