@@ -1444,9 +1444,19 @@ We also increase Read Process Output Max so emacs can read more data.
                    ("Other"
                     ("Bookmarks" consult-bookmark "b")))))
                   ,(grid-get-column
-                    `(,(propertize "THINGS TO REMEMBER" 'face 'highlight)
-                      ;; (:content ,enlight-lipsum :width 50))))))))))))
-                      (:content ,(propertize "* cite:Ackerman_2001 \n* file:~/Code/master/yasf_testing/testbed.py \n* file:~/Roam/master/20231129173749-ma_hub.org" 'face 'enlight-yellow-bold)))))))))))))
+                `(,(concat
+                    (propertize "Files" 'face 'highlight)
+                    "\n"
+                    (enlight-menu
+                     '(("Roam"
+                    ("MA Hub" (find-file "~/Roam/master/20231129173749-ma_hub.org") "M")
+                    ("Virga Yasf" (find-file "~/Roam/uni/20240311092511-integrate_yasf_into_virga.org") "Y"))
+                   ("Code"
+                    ("master" (dired "~/Code/master/") "M"))
+                   ("Other"
+                    ("Bookmarks" consult-bookmark "b")))))
+                    )))))))))))
+
 
     (setopt initial-buffer-choice #'enlight)
 #+end_src
