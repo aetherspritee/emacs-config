@@ -934,83 +934,90 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
 
 **** Org Roam
 #+begin_src emacs-lisp
-                (use-package org-roam
-        		  :straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
-                  :ensure t
-                  :custom
-                  (org-roam-directory (file-truename "~/Roam/"))
-                  :config
-                  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-                  (org-roam-db-autosync-mode))
-
-            (use-package org-ref)
-            (use-package citar
+            (use-package org-roam
+    		  :straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
+              :ensure t
               :custom
-              (citar-bibliography '("~/Roam/papers/lib.bib"))
-              (citar-library-paths '("~/Roam/papers/"))
-              (citar-notes-paths '("~/Roam/master/" "~/Roam/uni/" "~/Roam/notes/"))
-              :hook
-                (LaTeX-mode . citar-capf-setup)
-                (org-mode . citar-capf-setup)
-            )
-            (setq citar-file-open-functions '(("pdf" . citar-file-open-external)))
+              (org-roam-directory (file-truename "~/Roam/"))
+              :config
+              (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+              (org-roam-db-autosync-mode))
 
-            (use-package bibtex-completion)
-            (setq bibtex-completion-library-path '("~/Roam/master/"))
-            (setq bibtex-completion-bibliography "~/Roam/papers/lib.bib")
-            (setq bibtex-completion-notes-path "~/Roam/master/")
-            (use-package citar-org-roam
-            :after (citar org-roam)
-            :config (citar-org-roam-mode)
-            (setq citar-org-roam-capture-template-key "n")
+        (use-package org-ref)
+        (use-package citar
+          :custom
+          (citar-bibliography '("~/Roam/papers/lib.bib"))
+          (citar-library-paths '("~/Roam/papers/"))
+          (citar-notes-paths '("~/Roam/master/" "~/Roam/uni/" "~/Roam/notes/"))
+          :hook
+            (LaTeX-mode . citar-capf-setup)
+            (org-mode . citar-capf-setup)
         )
-            (use-package org-roam-bibtex
-            :after (org-roam citar)
-            :hook (org-roam-mode . org-roam-bibtex-mode)
-            :config
-            (require 'org-ref)
-            (require 'citar-org-roam)
-            (citar-register-notes-source
-            'orb-citar-source (list :name "Org-Roam Notes"
-                    :category 'org-roam-node
-                    :items #'citar-org-roam--get-candidates
-                    :hasitems #'citar-org-roam-has-notes
-                    :open #'citar-org-roam-open-note
-                    :create #'orb-citar-edit-note
-                    :annotate #'citar-org-roam--annotate))
+        (setq citar-file-open-functions '(("pdf" . citar-file-open-external)))
 
-            (setq citar-notes-source 'orb-citar-source)
-            (setq orb-roam-ref-format 'org-cite)
-            (setq org-roam-bibtex-mode t)
-            ) 
-        (setq org-roam-capture-templates
-          '(("d" "default" plain
-             "%?"
-             :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-             :unnarrowed t)
-          ("m" "master" plain (file "~/Roam/test/templates/stuff.org")
-             :target (file+head "master/%<%Y%m%d%H%M%S>-${citekey}.org" "#+title: ${citekey}\n#+description: ${title}\n#+filetags: :uni:MA:\n\n* Summary\n\n* Further Reading")
-             :unnarrowed t)
-          ("u" "uni" plain
-           "#+STARTUP: latexpreview\n %?"
-           :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ("n" "ref + noter" plain
-           (file "~/Roam/test/templates/noternotes.org")
-           :target (file+head "~/Roam/notes/${citekey}.org" "#+title: ${citekey}\n* ${title}\n")
-           :unnarrowed t
-           )
-          ("l" "lotr" plain
-           "\n\n* Summary\n%?"
-           :if-new (file+head "~/Roam/Lord of the Rings/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)
-          ))
-        (setq org-roam-dailies-capture-templates
-            '(("w" "Weekly" entry "* Thought of the week\n %?\n* Review \n\n* What to keep up\n\n* What to improve\n\n* Vibes/Mood/Interest"
-                :if-new (file+head "weekly/weekly-%<%d-%m-%Y>.org" "#+title: Weekly: %<%d-%m-%Y>\n"))
-                ("d" "Daily" entry "* %?" :if-new (file+head  "daily-%<%d-%m-%Y>.org" "#+title: %<%d-%m-%Y>\n"))
-            )
+        (use-package bibtex-completion)
+        (setq bibtex-completion-library-path '("~/Roam/master/"))
+        (setq bibtex-completion-bibliography "~/Roam/papers/lib.bib")
+        (setq bibtex-completion-notes-path "~/Roam/master/")
+        (use-package citar-org-roam
+        :after (citar org-roam)
+        :config (citar-org-roam-mode)
+        (setq citar-org-roam-capture-template-key "n")
+    )
+        (use-package org-roam-bibtex
+        :after (org-roam citar)
+        :hook (org-roam-mode . org-roam-bibtex-mode)
+        :config
+        (require 'org-ref)
+        (require 'citar-org-roam)
+        (citar-register-notes-source
+        'orb-citar-source (list :name "Org-Roam Notes"
+                :category 'org-roam-node
+                :items #'citar-org-roam--get-candidates
+                :hasitems #'citar-org-roam-has-notes
+                :open #'citar-org-roam-open-note
+                :create #'orb-citar-edit-note
+                :annotate #'citar-org-roam--annotate))
+
+        (setq citar-notes-source 'orb-citar-source)
+        (setq orb-roam-ref-format 'org-cite)
+        (setq org-roam-bibtex-mode t)
+        ) 
+    (setq org-roam-capture-templates
+      '(("d" "default" plain
+         "%?"
+         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+         :unnarrowed t)
+      ("m" "master" plain (file "~/Roam/test/templates/stuff.org")
+         :target (file+head "master/%<%Y%m%d%H%M%S>-${citekey}.org" "#+title: ${citekey}\n#+description: ${title}\n#+filetags: :uni:MA:\n\n* Summary\n\n* Further Reading")
+         :unnarrowed t)
+      ("u" "uni" plain
+       "#+STARTUP: latexpreview\n %?"
+       :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+       :unnarrowed t)
+      ("n" "ref + noter" plain
+       (file "~/Roam/test/templates/noternotes.org")
+       :target (file+head "~/Roam/notes/${citekey}.org" "#+title: ${citekey}\n* ${title}\n")
+       :unnarrowed t
+       )
+      ("l" "lotr" plain
+       "\n\n* Summary\n%?"
+       :if-new (file+head "~/Roam/Lord of the Rings/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+       :unnarrowed t)
+      ))
+    (setq org-roam-dailies-capture-templates
+        '(("w" "Weekly" entry "* Thought of the week\n %?\n* Review \n\n* What to keep up\n\n* What to improve\n\n* Vibes/Mood/Interest"
+            :if-new (file+head "weekly/weekly-%<%d-%m-%Y>.org" "#+title: Weekly: %<%d-%m-%Y>\n"))
+            ("d" "Daily" entry "* %?" :if-new (file+head  "daily-%<%d-%m-%Y>.org" "#+title: %<%d-%m-%Y>\n"))
         )
+    )
+    (setq org-link-frame-setup (quote
+                               ((vm . vm-visit-folder)
+                                (vm-imap . vm-visit-imap-folder)
+                                (gnus . gnus)
+                                (file . find-file)
+                                (wl . wl)))
+                              )
 #+end_src
 
 
