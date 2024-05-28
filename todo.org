@@ -5,25 +5,29 @@
   + [X] comments
 - [-] org roam
   + [ ] keybinds
-  + [ ] ivy hydra ersatz -> cite ref
+  + [ ] cite ref function using cite: syntax
   + [ ] automatically start org-roam-bibtex-mode
   + [X] get bibtex integration
 - [ ] workspaces
-  + [ ] properly set up persp-mode
+  + [ ] fix keybinds and errors
 - [ ] treesitter
-- [ ] search project
-- [ ] swiper integration
-- [ ] org agenda
-  + [ ] evil
-  + [ ] my agenda view
-  + [ ] use correct files
+  - [ ] different modes
+  - [ ] movement keybinds
+- [X] search project
+- [X] swiper integration
+- [X] org agenda
+  + [X] evil
+  + [X] my agenda view
+  + [X] use correct files
 - [X] prettify org mode
 - [-] lsp/eglot
   - [ ] languages and servers
   - [X] autocompletion
+  - [ ] use cape file completion in lsp
   - [ ] goto references keybinds
 - [ ] dashboard
   - [ ] use enlight and grid.el and make smth cool looking
+  - [ ] convert termine into diary file, mark in dashboard calendar
 - [-] latex
   + [ ] Overall
   + [X] In Org Mode
@@ -31,4 +35,4 @@
   + [ ] lsp integration
   + [ ] themes
 - [X] use C-J and C-K to scroll through lists
-- [ ] delete word with backspace ONLY in find file
+- [X] delete word with backspace ONLY in find file
