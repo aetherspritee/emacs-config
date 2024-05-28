@@ -50,6 +50,7 @@
 - [[#enlight][Enlight]]
 - [[#persp-mode][Persp-mode]]
 - [[#highlight-todo][Highlight todo]]
+- [[#mac-stuff][Mac stuff]]
 
 * Important to load first
 
@@ -1550,4 +1551,12 @@ We also increase Read Process Output Max so emacs can read more data.
               ("REVIEW"     font-lock-keyword-face bold)
               ("NOTE"       success bold)
               ("DEPRECATED" font-lock-doc-face bold))))
+#+end_src
+
+* Mac stuff
+#+begin_src emacs-lisp
+(setq mac-option-key-is-meta nil
+      mac-command-key-is-meta t
+      mac-command-modifier 'meta
+      mac-option-modifier 'none)
 #+end_src
