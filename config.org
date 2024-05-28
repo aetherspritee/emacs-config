@@ -1526,29 +1526,28 @@ We also increase Read Process Output Max so emacs can read more data.
       :demand t
       :config
       (setq persp-auto-resume-time -1 ;; No autoload buffers
-            persp-set-last-persp-for-new-frames nil
-            persp-reset-windows-on-nil-window-conf t
+            ;; persp-set-last-persp-for-new-frames nil
+            ;; persp-reset-windows-on-nil-window-conf t
             persp-autokill-buffer-on-remove t
-            persp-add-buffer-on-after-change-major-mode t
+            ;; persp-add-buffer-on-after-change-major-mode t
             persp-kill-foreign-buffer-behaviour 'kill)
       (persp-mode 1))
 
-    ;; (setq persp-mode 1)
+    ;; (setq persp-hook-up-emacs-buffer-completion t)
 #+end_src
 
 * Highlight todo
 #+begin_src emacs-lisp
-(use-package hl-todo
-  :hook ((org-mode . hl-todo-mode)
-         (prog-mode . hl-todo-mode))
-  :config
-  (setq hl-todo-highlight-punctuation ":"
-        hl-todo-keyword-faces
-        `(("TODO"       warning bold)
-          ("FIXME"      error bold)
-          ("HACK"       font-lock-constant-face bold)
-          ("REVIEW"     font-lock-keyword-face bold)
-          ("NOTE"       success bold)
-          ("DEPRECATED" font-lock-doc-face bold))))
-
+    (use-package hl-todo
+      :hook ((org-mode . hl-todo-mode)
+             (prog-mode . hl-todo-mode))
+      :config
+      (setq hl-todo-highlight-punctuation ":"
+            hl-todo-keyword-faces
+            `(("TODO"       warning bold)
+              ("FIXME"      error bold)
+              ("HACK"       font-lock-constant-face bold)
+              ("REVIEW"     font-lock-keyword-face bold)
+              ("NOTE"       success bold)
+              ("DEPRECATED" font-lock-doc-face bold))))
 #+end_src
