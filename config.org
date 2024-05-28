@@ -383,8 +383,14 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 
           (start/leader-keys
             "n r f" '(org-roam-node-find :wk "Find roam nodes")
-            "n r i" '(org-roam-node-insert :wk "Insert node"))
-
+            "n r i" '(org-roam-node-insert :wk "Insert node")
+            "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
+    	  
+          (start/leader-keys
+    		"m d" '(org-deadline :wk "Deadline")
+    		"m s" '(org-schedule :wk "Schedule")
+    		"m t" '(org-timestamp :wk "Timestamp"))
+    	  
           (start/leader-keys
             "e" '(:ignore t :wk "Eglot Evaluate")
             "e e" '(eglot-reconnect :wk "Eglot Reconnect")
@@ -842,6 +848,7 @@ much like the literate programming ideas that Donald Knuth made famous.
 
 #+begin_src emacs-lisp
     (use-package org-modern
+        :after org
         :ensure t
         :custom
         (org-modern-hide-stars nil)		; adds extra indentation
@@ -855,9 +862,8 @@ much like the literate programming ideas that Donald Knuth made famous.
         (org-mode . org-modern-mode)
         (org-agenda-finalize . org-modern-agenda))
         (use-package org-modern-indent
-          :load-path "~/.config/emacs/packages/org-modern-indent/"
-          ; or
-          ; :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent"))
+    	  :after org
+          :straight (org-modern-indent :type git :host github :repo "jdtsmith/org-modern-indent")
           :config ; add late to hook
           (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
@@ -923,74 +929,83 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
 
 **** Org Roam
 #+begin_src emacs-lisp
-            (use-package org-roam
-              :ensure t
+                (use-package org-roam
+        		  :straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
+                  :ensure t
+                  :custom
+                  (org-roam-directory (file-truename "~/Roam/"))
+                  :config
+                  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+                  (org-roam-db-autosync-mode))
+
+            (use-package org-ref)
+            (use-package citar
               :custom
-              (org-roam-directory (file-truename "~/Roam/"))
-              :config
-              (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-              (org-roam-db-autosync-mode))
+              (citar-bibliography '("~/Roam/papers/lib.bib"))
+              (citar-library-paths '("~/Roam/papers/"))
+              (citar-notes-paths '("~/Roam/master/" "~/Roam/uni/" "~/Roam/notes/"))
+              :hook
+                (LaTeX-mode . citar-capf-setup)
+                (org-mode . citar-capf-setup)
+            )
+            (setq citar-file-open-functions '(("pdf" . citar-file-open-external)))
 
-        (use-package org-ref)
-        (use-package citar
-          :custom
-          (citar-bibliography '("~/Roam/papers/lib.bib"))
-          (citar-library-paths '("~/Roam/papers/"))
-          (citar-notes-paths '("~/Roam/master/" "~/Roam/uni/" "~/Roam/notes/"))
-          :hook
-            (LaTeX-mode . citar-capf-setup)
-            (org-mode . citar-capf-setup)
+            (use-package bibtex-completion)
+            (setq bibtex-completion-library-path '("~/Roam/master/"))
+            (setq bibtex-completion-bibliography "~/Roam/papers/lib.bib")
+            (setq bibtex-completion-notes-path "~/Roam/master/")
+            (use-package citar-org-roam
+            :after (citar org-roam)
+            :config (citar-org-roam-mode)
+            (setq citar-org-roam-capture-template-key "n")
         )
-        (use-package bibtex-completion)
-        (setq bibtex-completion-library-path '("~/Roam/master/"))
-        (setq bibtex-completion-bibliography "~/Roam/papers/lib.bib")
-        (setq bibtex-completion-notes-path "~/Roam/master/")
-        (use-package citar-org-roam
-        :after (citar org-roam)
-        :config (citar-org-roam-mode)
-        (setq citar-org-roam-capture-template-key "n")
-    )
-        (use-package org-roam-bibtex
-        :after (org-roam citar)
-        :hook (org-roam-mode . org-roam-bibtex-mode)
-        :config
-        (require 'org-ref)
-        (require 'citar-org-roam)
-        (citar-register-notes-source
-        'orb-citar-source (list :name "Org-Roam Notes"
-                :category 'org-roam-node
-                :items #'citar-org-roam--get-candidates
-                :hasitems #'citar-org-roam-has-notes
-                :open #'citar-org-roam-open-note
-                :create #'orb-citar-edit-note
-                :annotate #'citar-org-roam--annotate))
+            (use-package org-roam-bibtex
+            :after (org-roam citar)
+            :hook (org-roam-mode . org-roam-bibtex-mode)
+            :config
+            (require 'org-ref)
+            (require 'citar-org-roam)
+            (citar-register-notes-source
+            'orb-citar-source (list :name "Org-Roam Notes"
+                    :category 'org-roam-node
+                    :items #'citar-org-roam--get-candidates
+                    :hasitems #'citar-org-roam-has-notes
+                    :open #'citar-org-roam-open-note
+                    :create #'orb-citar-edit-note
+                    :annotate #'citar-org-roam--annotate))
 
-        (setq citar-notes-source 'orb-citar-source)
-        (setq orb-roam-ref-format 'org-cite)
-        (setq org-roam-bibtex-mode t)
-        ) 
-    (setq org-roam-capture-templates
-      '(("d" "default" plain
-         "%?"
-         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-         :unnarrowed t)
-      ("m" "master" plain (file "~/Roam/test/templates/stuff.org")
-         :target (file+head "master/%<%Y%m%d%H%M%S>-${citekey}.org" "#+title: ${citekey}\n#+description: ${title}\n#+filetags: :uni:MA:\n\n* Summary\n\n* Further Reading")
-         :unnarrowed t)
-      ("u" "uni" plain
-       "#+STARTUP: latexpreview\n %?"
-       :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-       :unnarrowed t)
-      ("n" "ref + noter" plain
-       (file "~/Roam/test/templates/noternotes.org")
-       :target (file+head "~/Roam/notes/${citekey}.org" "#+title: ${citekey}\n* ${title}\n")
-       :unnarrowed t
-       )
-      ("l" "lotr" plain
-       "\n\n* Summary\n%?"
-       :if-new (file+head "~/Roam/Lord of the Rings/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-       :unnarrowed t)
-      ))
+            (setq citar-notes-source 'orb-citar-source)
+            (setq orb-roam-ref-format 'org-cite)
+            (setq org-roam-bibtex-mode t)
+            ) 
+        (setq org-roam-capture-templates
+          '(("d" "default" plain
+             "%?"
+             :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+             :unnarrowed t)
+          ("m" "master" plain (file "~/Roam/test/templates/stuff.org")
+             :target (file+head "master/%<%Y%m%d%H%M%S>-${citekey}.org" "#+title: ${citekey}\n#+description: ${title}\n#+filetags: :uni:MA:\n\n* Summary\n\n* Further Reading")
+             :unnarrowed t)
+          ("u" "uni" plain
+           "#+STARTUP: latexpreview\n %?"
+           :target (file+head "uni/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)
+          ("n" "ref + noter" plain
+           (file "~/Roam/test/templates/noternotes.org")
+           :target (file+head "~/Roam/notes/${citekey}.org" "#+title: ${citekey}\n* ${title}\n")
+           :unnarrowed t
+           )
+          ("l" "lotr" plain
+           "\n\n* Summary\n%?"
+           :if-new (file+head "~/Roam/Lord of the Rings/%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)
+          ))
+        (setq org-roam-dailies-capture-templates
+            '(("w" "Weekly" entry "* Thought of the week\n %?\n* Review \n\n* What to keep up\n\n* What to improve\n\n* Vibes/Mood/Interest"
+                :if-new (file+head "weekly/weekly-%<%d-%m-%Y>.org" "#+title: Weekly: %<%d-%m-%Y>\n"))
+                ("d" "Daily" entry "* %?" :if-new (file+head  "daily-%<%d-%m-%Y>.org" "#+title: %<%d-%m-%Y>\n"))
+            )
+        )
 #+end_src
 
 
