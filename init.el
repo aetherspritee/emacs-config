@@ -408,6 +408,7 @@ If on a:
   (doom-modeline-height 25)     ;; Sets modeline height
   (doom-modeline-bar-width 5)   ;; Sets right bar width
   (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+  (lsp-modeline-diagnostics-enable nil)
   (doom-modeline-persp-icon t)) ;; Adds folder icon next to persp name
 
 ;; (use-package dashboard
@@ -488,14 +489,23 @@ If on a:
 
 (use-package lsp-ui :commands lsp-ui-mode)
     (use-package lsp-mode
+      :custom
+        (lsp-completion-provider :none) ;; we use Corfu!
       :init
       ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
       (setq lsp-keymap-prefix "C-c l")
+      (defun my/orderless-dispatch-flex-first (_pattern index _total) (and (eq index 0) 'orderless-flex))
+      (defun my/lsp-mode-setup-completion ()
+        (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults)) '(orderless))
+        (add-hook 'orderless-style-dispatchers #'my/orderless-dispatch-flex-first nil 'local)
+        (setq-local completion-at-point-functions (list (cape-capf-buster #'lsp-completion-at-point))))
+
       :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
              (python-mode . lsp)
              ;; if you want which-key integration
              (lsp-mode . lsp-enable-which-key-integration)
              (lsp-mode . lsp-ui-mode)
+             (lsp-completion-mode . my/lsp-mode-setup-completion)
             )
       :commands lsp)
 
@@ -768,6 +778,13 @@ If on a:
         ("d" "Daily" entry "* %?" :if-new (file+head  "daily-%<%d-%m-%Y>.org" "#+title: %<%d-%m-%Y>\n"))
     )
 )
+(setq org-link-frame-setup (quote
+                           ((vm . vm-visit-folder)
+                            (vm-imap . vm-visit-imap-folder)
+                            (gnus . gnus)
+                            (file . find-file)
+                            (wl . wl)))
+                          )
 
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
@@ -827,28 +844,30 @@ If on a:
   :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package cape
-  :after corfu
-  :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
-  ;; The functions that are added later will be the first in the list
+     :after corfu
+     :init
+     ;; Add to the global default value of `completion-at-point-functions' which is
+     ;; used by `completion-at-point'.  The order of the functions matters, the
+     ;; first function returning a result wins.  Note that the list of buffer-local
+     ;; completion functions takes precedence over the global list.
+     ;; The functions that are added later will be the first in the list
 
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
-  (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
-  (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
-  (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
+     (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
+     (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
+     (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
+     (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
+     (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
 
-  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
-  ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
-  ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
-  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
-  ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
-  ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
-  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
-  )
+     ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
+     ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
+     ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
+     ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
+     ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
+     ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
+     ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
+     )
+
+;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
 
 (use-package orderless
   :custom
@@ -870,7 +889,7 @@ If on a:
   ;; More convenient directory navigation commands
   :bind (:map vertico-map
               ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-word)
+              ("DEL" . vertico-directory-delete-char)
               ("M-DEL" . vertico-directory-delete-char))
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
@@ -888,6 +907,34 @@ If on a:
       (nerd-icons-completion-mode)
       :hook
       ('marginalia-mode-hook . 'nerd-icons-completion-marginalia-setup))
+
+(use-package embark
+  :ensure t
+
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command))
+
+  ;; Show the Embark target at point via Eldoc. You may adjust the
+  ;; Eldoc strategy, if you want to see the documentation from
+  ;; multiple providers. Beware that using this can be a little
+  ;; jarring since the message shown in the minibuffer can be more
+  ;; than one line, causing the modeline to move up and down:
+
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :ensure t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package consult
   ;; Enable automatic preview at point in the *Completions* buffer. This is
@@ -1107,14 +1154,14 @@ If on a:
   :demand t
   :config
   (setq persp-auto-resume-time -1 ;; No autoload buffers
-        persp-set-last-persp-for-new-frames nil
-        persp-reset-windows-on-nil-window-conf t
+        ;; persp-set-last-persp-for-new-frames nil
+        ;; persp-reset-windows-on-nil-window-conf t
         persp-autokill-buffer-on-remove t
-        persp-add-buffer-on-after-change-major-mode t
+        ;; persp-add-buffer-on-after-change-major-mode t
         persp-kill-foreign-buffer-behaviour 'kill)
   (persp-mode 1))
 
-;; (setq persp-mode 1)
+;; (setq persp-hook-up-emacs-buffer-completion t)
 
 (use-package hl-todo
   :hook ((org-mode . hl-todo-mode)
