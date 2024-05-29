@@ -1,3 +1,5 @@
+- [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
+- [ ] vr/replace!!!
 - [X] return to automatically insert new org item
 - [X] proper keybinds
   + [X] switch windows
@@ -37,5 +39,3 @@
   + [X] themes
 - [X] use C-J and C-K to scroll through lists
 - [X] delete word with backspace ONLY in find file
-- [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
-- [ ] vr/replace!!!

@@ -1057,6 +1057,39 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
             (org-mode . citar-capf-setup)
         )
         (setq citar-file-open-functions '(("pdf" . citar-file-open-external)))
+        (defvar citar-indicator-files-icons
+            (citar-indicator-create
+            :symbol (nerd-icons-faicon
+                        "nf-fa-file_o"
+                        :face 'nerd-icons-green
+                        :v-adjust -0.1)
+            :function #'citar-has-files
+            :padding "  " ; need this because the default padding is too low for these icons
+            :tag "has:files"))
+            (defvar citar-indicator-links-icons
+            (citar-indicator-create
+            :symbol (nerd-icons-faicon
+                        "nf-fa-link"
+                        :face 'nerd-icons-orange
+                        :v-adjust 0.01)
+            :function #'citar-has-links
+            :padding "  "
+            :tag "has:links"))
+            (defvar citar-indicator-notes-icons
+            (citar-indicator-create
+            :symbol (nerd-icons-codicon
+                        "nf-cod-note"
+                        :face 'nerd-icons-blue
+                        :v-adjust -0.3)
+            :function #'citar-has-notes
+            :padding "    "
+            :tag "has:notes"))
+    (setq citar-indicators
+    (list citar-indicator-files-icons
+            citar-indicator-links-icons
+            citar-indicator-notes-icons
+            )) 
+
 
         (use-package bibtex-completion)
         (setq bibtex-completion-library-path '("~/Roam/master/"))
@@ -1068,7 +1101,7 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
         (setq citar-org-roam-capture-template-key "n")
     )
         (use-package org-roam-bibtex
-        :after (org-roam citar)
+        :after (org-roam citar bibtex-completion org-ref citar-org-roam)
         :hook (org-roam-mode . org-roam-bibtex-mode)
         :config
         (require 'org-ref)
