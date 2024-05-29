@@ -8,8 +8,8 @@
   + [ ] cite ref function using cite: syntax
   + [ ] automatically start org-roam-bibtex-mode
   + [X] get bibtex integration
-- [ ] workspaces
-  + [ ] fix keybinds and errors
+- [X] workspaces
+  + [X] fix keybinds and errors
 - [ ] treesitter
   - [ ] different modes
   - [ ] movement keybinds
@@ -20,8 +20,12 @@
   + [X] my agenda view
   + [X] use correct files
 - [X] prettify org mode
-- [-] lsp/eglot
+- [-] lsp
   - [ ] languages and servers
+    * fortran
+    * c
+    * julia
+    * go
   - [X] autocompletion
   - [ ] use cape file completion in lsp
   - [ ] goto references keybinds
@@ -36,3 +40,5 @@
   + [ ] themes
 - [X] use C-J and C-K to scroll through lists
 - [X] delete word with backspace ONLY in find file
+- [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
+- [ ] vr/replace!!!
