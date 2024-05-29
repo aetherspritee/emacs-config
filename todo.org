@@ -4,8 +4,8 @@
   + [X] switch buffer
   + [X] comments
 - [-] org roam
-  + [ ] keybinds
-  + [ ] cite ref function using cite: syntax
+  + [X] keybinds
+  + [X] cite ref function using cite: syntax
   + [ ] automatically start org-roam-bibtex-mode
   + [X] get bibtex integration
 - [X] workspaces
@@ -24,7 +24,7 @@
   - [ ] languages and servers
     * more?
   - [X] autocompletion
-  - [ ] use cape file completion in lsp
+  - [X] use cape file completion in lsp
   - [X] goto references keybinds
 - [ ] dashboard
   - [ ] use enlight and grid.el and make smth cool looking

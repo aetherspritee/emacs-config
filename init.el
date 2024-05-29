@@ -316,7 +316,7 @@ If on a:
           (start/leader-keys
             "N i" '(citar-open :wk "Open citar")
             "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
-            "N c" '(orb-insert-link :wk "insert orb link"
+            "N c" '(org-cite-insert :wk "insert orb link"
     ))
           ;; (start/leader-keys
           ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
@@ -803,7 +803,7 @@ If on a:
  ;;   (evil-org-agenda-set-keys))
 
 (use-package org-roam
-    	  ;;:straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
+          ;;:straight (org-roam :type git :host github :repo "org-roam/org-roam" :commit "ca873f7")
           :ensure t
           :custom
           (org-roam-directory (file-truename "~/Roam/"))
@@ -817,6 +817,10 @@ If on a:
       (citar-bibliography '("~/Roam/papers/lib.bib"))
       (citar-library-paths '("~/Roam/papers/"))
       (citar-notes-paths '("~/Roam/master/" "~/Roam/uni/" "~/Roam/notes/"))
+       (org-cite-global-bibliography '("~/Roam/papers/lib.bib"))
+       (org-cite-insert-processor 'citar)
+        (org-cite-follow-processor 'citar)
+        (org-cite-activate-processor 'citar)
       :hook
         (LaTeX-mode . citar-capf-setup)
         (org-mode . citar-capf-setup)
