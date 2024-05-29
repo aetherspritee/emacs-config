@@ -568,7 +568,6 @@ You can use the bindings C-+ C-- for zooming in/out. You can also use CTRL plus 
 Replace the default modeline with a prettier more useful.
 #+begin_src emacs-lisp
         (use-package doom-modeline
-          :init (doom-modeline-mode 1)
           :custom
           (doom-modeline-height 25)     ;; Sets modeline height
           (doom-modeline-bar-width 5)   ;; Sets right bar width
@@ -580,12 +579,12 @@ Replace the default modeline with a prettier more useful.
     (doom-modeline-def-modeline 'my-simple-line
       '(bar matches buffer-info remote-host buffer-position parrot selection-info)
       '(misc-info minor-modes major-mode process check))
-
     ;; Set default mode-line
-    ;; (add-hook 'doom-modeline-mode-hook
-    ;;           (lambda ()
-    ;;             (doom-modeline-set-modeline 'my-simple-line 'default)))
+    (add-hook 'doom-modeline-mode-hook
+              (lambda ()
+                (doom-modeline-set-modeline 'my-simple-line 'default)))
         ) 
+          :init (doom-modeline-mode 1)
 
 #+end_src
 *** git changes

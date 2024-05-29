@@ -422,7 +422,6 @@ If on a:
   ("<C-wheel-down>" . text-scale-decrease))
 
 (use-package doom-modeline
-      :init (doom-modeline-mode 1)
       :custom
       (doom-modeline-height 25)     ;; Sets modeline height
       (doom-modeline-bar-width 5)   ;; Sets right bar width
@@ -434,12 +433,12 @@ If on a:
 (doom-modeline-def-modeline 'my-simple-line
   '(bar matches buffer-info remote-host buffer-position parrot selection-info)
   '(misc-info minor-modes major-mode process check))
-
 ;; Set default mode-line
-;; (add-hook 'doom-modeline-mode-hook
-;;           (lambda ()
-;;             (doom-modeline-set-modeline 'my-simple-line 'default)))
-    )
+(add-hook 'doom-modeline-mode-hook
+          (lambda ()
+            (doom-modeline-set-modeline 'my-simple-line 'default)))
+    ) 
+      :init (doom-modeline-mode 1)
 
 (defun in-git-p ()
           (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
