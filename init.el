@@ -586,59 +586,31 @@ If on a:
   (projectile-project-search-path '("~/projects/" "~/work/" ("~/github" . 1)))) ;; . 1 means only search the first subdirectory level for projects
 ;; Use Bookmarks for smaller, not standard projects
 
-;; (use-package eglot
-;;  :ensure nil ;; Don't install eglot because it's now built-in
-;;  :hook ((c-mode c++-mode ;; Autostart lsp servers for a given mode
-;;                 lua-mode
-;;                 python-mode
-;;                 ) ;; Lua-mode needs to be installed
-;;         . eglot-ensure)
-;;  :custom
-;;  ;; Good default
-;;  (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
-;;  (eglot-autoshutdown t);; Shutdown unused servers.
-;;  (eglot-report-progress nil) ;; Disable lsp server logs (Don't show lsp messages at the bottom, java)
-;;  ;; Manual lsp servers
-;;  :config
-;;  (add-to-list 'eglot-server-programs
-;;               ;; `(lua-mode . ("PATH_TO_THE_LSP_FOLDER/bin/lua-language-server" "-lsp"))) ;; Adds our lua lsp server to eglot's server list
-;;               `(python-mode . ("usr/bin/pyright" "-lsp"))) ;; Adds our lua lsp server to eglot's server list
-;;  )
-
 (use-package lsp-ui :commands lsp-ui-mode)
     (use-package lsp-mode
-      :custom
-        (lsp-completion-provider :none) ;; we use Corfu!
-      :init
-      ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-      (setq lsp-keymap-prefix "C-c l")
-      (defun my/orderless-dispatch-flex-first (_pattern index _total) (and (eq index 0) 'orderless-flex))
-      (defun my/lsp-mode-setup-completion ()
-        (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults)) '(orderless))
-        (add-hook 'orderless-style-dispatchers #'my/orderless-dispatch-flex-first nil 'local)
-        (setq-local completion-at-point-functions (list (cape-capf-buster #'lsp-completion-at-point))))
+      :commands (lsp lsp-deferred)
+    :init
+    (defun my/update-completions-list ()
+        (progn
+            (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
+            (setq completion-at-point-functions
+                '(non-greedy-lsp cape-file cape-dabbrev))))
 
-      :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+      (setq lsp-keymap-prefix "C-c l")
+
+      :hook (
              (python-mode . lsp)
              (c-mode . lsp)
              (f90-mode . lsp)
              (julia-mode . lsp)
              (go-mode . lsp)
-             ;; if you want which-key integration
              (lsp-mode . lsp-enable-which-key-integration)
              (lsp-mode . lsp-ui-mode)
-             (lsp-completion-mode . my/lsp-mode-setup-completion)
+             (lsp-completion-mode . my/update-completions-list)
             )
-      :commands lsp)
+      :custom
+        (lsp-completion-provider :none)) ;; we use Corfu!
 
-    ;; optionally
-    ;; if you are helm user
-    ;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
-    ;; if you are ivy user
-    ;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-    ;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-
-    ;; optionally if you want to use debugger
     (use-package dap-mode)
     ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
 (use-package lsp-pyright
