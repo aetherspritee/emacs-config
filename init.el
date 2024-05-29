@@ -612,6 +612,10 @@ If on a:
 
       :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
              (python-mode . lsp)
+             (c-mode . lsp)
+             (f90-mode . lsp)
+             (julia-mode . lsp)
+             (go-mode . lsp)
              ;; if you want which-key integration
              (lsp-mode . lsp-enable-which-key-integration)
              (lsp-mode . lsp-ui-mode)
@@ -643,6 +647,10 @@ If on a:
   :hook (prog-mode . yas-minor-mode))
 
 (use-package pyvenv)
+
+(use-package go-mode)
+
+(use-package julia-mode)
 
 (use-package org
   :ensure nil

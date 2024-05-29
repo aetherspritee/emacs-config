@@ -798,6 +798,10 @@ I like it more than eglot.
 
           :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
                  (python-mode . lsp)
+                 (c-mode . lsp)
+                 (f90-mode . lsp)
+                 (julia-mode . lsp)
+                 (go-mode . lsp)
                  ;; if you want which-key integration
                  (lsp-mode . lsp-enable-which-key-integration)
                  (lsp-mode . lsp-ui-mode)
@@ -848,11 +852,17 @@ Use SPC-tab to uncomment the lines.
 #       :mode "\\.lua\\'") ;; Only start in a lua file
 # #+end_src
 *** python mode
-
 #+begin_src emacs-lisp
 (use-package pyvenv)
 #+end_src
-
+*** go mode
+#+begin_src emacs-lisp
+    (use-package go-mode)
+#+end_src
+*** julia mode
+#+begin_src emacs-lisp
+    (use-package julia-mode)
+#+end_src
 ** Org Mode
 
 Org mode is one of the things that emacs is loved for.
