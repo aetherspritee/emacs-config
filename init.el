@@ -291,9 +291,9 @@ If on a:
             "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
 
           (start/leader-keys
-        	"m d" '(org-deadline :wk "Deadline")
-        	"m s" '(org-schedule :wk "Schedule")
-        	"m t" '(org-timestamp :wk "Timestamp"))
+            "m d" '(org-deadline :wk "Deadline")
+            "m s" '(org-schedule :wk "Schedule")
+            "m t" '(org-timestamp :wk "Timestamp"))
 
           (start/leader-keys
             "e" '(:ignore t :wk "Eglot Evaluate")
@@ -329,6 +329,9 @@ If on a:
             "t" '(:ignore t :wk "Toggle")
             "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
             "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+
+
+
     (add-hook 'org-mode-hook (lambda ()
            (setq-local electric-pair-inhibit-predicate
                    `(lambda (c)
@@ -419,13 +422,105 @@ If on a:
   ("<C-wheel-down>" . text-scale-decrease))
 
 (use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom
-  (doom-modeline-height 25)     ;; Sets modeline height
-  (doom-modeline-bar-width 5)   ;; Sets right bar width
-  (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
-  (lsp-modeline-diagnostics-enable nil)
-  (doom-modeline-persp-icon t)) ;; Adds folder icon next to persp name
+      :init (doom-modeline-mode 1)
+      :custom
+      (doom-modeline-height 25)     ;; Sets modeline height
+      (doom-modeline-bar-width 5)   ;; Sets right bar width
+      (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+      (lsp-modeline-diagnostics-enable nil)
+      (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+      ;; (doom-modeline-vcs-max-length 0)
+      :config
+(doom-modeline-def-modeline 'my-simple-line
+  '(bar matches buffer-info remote-host buffer-position parrot selection-info)
+  '(misc-info minor-modes major-mode process check))
+
+;; Set default mode-line
+;; (add-hook 'doom-modeline-mode-hook
+;;           (lambda ()
+;;             (doom-modeline-set-modeline 'my-simple-line 'default)))
+    )
+
+(defun in-git-p ()
+          (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
+        (defun git-parse-status ()
+          (interactive)
+          (concat 
+        " ["
+        (let ((plus-minus (vc-git--run-command-string
+                   buffer-file-name "diff" "--numstat" "--")))
+          (if (and plus-minus
+               (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
+               (concat
+            (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'doom-modeline-project-dir)
+            (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
+            (propertize "✔" 'face '(:foreground "green3" :weight bold))))
+        "]"))
+
+     (defun git-remote-status ()
+      (interactive)
+      (let* (;; get the branch we are on.
+             (branch (s-trim
+                      (shell-command-to-string
+                       "git rev-parse --abbrev-ref HEAD")))
+             ;; get the remote the branch points to.
+             (remote (s-trim
+                      (shell-command-to-string
+                       (format "git config branch.%s.remote" branch))))
+             (remote-branch (s-trim
+                             (shell-command-to-string
+                              "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
+             (commits (split-string
+                       (s-trim
+                        (shell-command-to-string
+                         (format
+                          "git rev-list --count --left-right HEAD...%s"
+                          remote-branch)))))
+             (local (nth 0 commits))
+             (remotes (nth 1 commits)))
+        (concat
+         (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
+         (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
+         (propertize "[" 'face 'white)
+         (propertize (format "↑%s" local) 'face 'warning)
+         (propertize "|" 'face 'white)
+         (propertize (format "↓%s" remotes) 'face 'warning)
+         ;; (format "↑%s|↓%s" local remotes)
+         (propertize "]" 'face 'white)
+         )))    
+    (defvar git-modeline-last-update (float-time) "Last time we updated")
+    (defvar git-modeline-update-interval 5 "Minimum time between update in seconds")
+    (defvar git-modeline "" "Last value of the modeline")
+    (define-minor-mode git-mode
+      "minor mode to put git repo status in modeline"
+      nil nil nil
+      (let ((git-modeline '(:eval (if
+                                      (> (- (float-time) git-modeline-last-update)
+                                         git-modeline-update-interval)
+                                      ;; we are updating                              
+                                      (setq git-modeline
+                                            (if (not (in-git-p))
+                                                ""                                   
+                                              (setq  git-modeline-last-update (float-time))
+                                              (concat 
+                                               (git-remote-status)
+                                               (git-parse-status))))
+
+                                  ;; use last value of the modeline
+                                  git-modeline))))
+        (if git-mode
+            ;; put in modeline
+            ;; (push git-modeline mode-line-format)
+            (push git-modeline mode-line-misc-info)
+          ;; remove from modeline
+          (setq mode-line-format
+                (-remove (lambda (x)
+                           (equal x git-modeline))                                  
+                         mode-line-format)))
+))
+(git-mode)
+
+            ;; (setq-default mode-line-misc-info git-modeline)
 
 ;; (use-package dashboard
 ;;   :ensure t
