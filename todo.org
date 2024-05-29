@@ -22,22 +22,19 @@
 - [X] prettify org mode
 - [-] lsp
   - [ ] languages and servers
-    * fortran
-    * c
-    * julia
-    * go
+    * more?
   - [X] autocompletion
   - [ ] use cape file completion in lsp
-  - [ ] goto references keybinds
+  - [X] goto references keybinds
 - [ ] dashboard
   - [ ] use enlight and grid.el and make smth cool looking
   - [ ] convert termine into diary file, mark in dashboard calendar
 - [-] latex
   + [ ] Overall
   + [X] In Org Mode
-- [ ] treemacs
-  + [ ] lsp integration
-  + [ ] themes
+- [X] treemacs
+  + [X] lsp integration
+  + [X] themes
 - [X] use C-J and C-K to scroll through lists
 - [X] delete word with backspace ONLY in find file
 - [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich

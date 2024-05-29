@@ -285,41 +285,44 @@ If you don't want to use evil-mode don't forget to remove:
 #+end_src
   
 #+begin_src emacs-lisp
-        (use-package evil
-          :init ;; Execute code Before a package is loaded
-          (evil-mode)
-          :config ;; Execute code After a package is loaded
-          (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
-          :custom ;; Customization of package custom variables
-          (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
-          (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
-          (evil-want-C-i-jump nil)      ;; Disables C-i jump
-          (evil-undo-system 'undo-redo) ;; C-r to redo
-          (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
-          ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
-          :bind (:map evil-motion-state-map
-                      ("SPC" . nil)
-                      ("RET" . nil)
-                      ;; ("RET" . org-todo)
-                      ("TAB" . nil)))
-        (use-package evil-collection
-          :after evil
-          :config
-          ;; Setting where to use evil-collection
-          ;; (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult lsp-ui-imenu))
-          (evil-set-initial-state 'package-menu-mode 'motion)
-          (evil-collection-init))
-        (use-package evil-commentary
-          :after evil
-          :config
-          (evil-commentary-mode)
-          )
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil))
-    ;; Setting RETURN key in org-mode to follow links
-      (setq org-return-follows-link  t)
+            (use-package evil
+              :init ;; Execute code Before a package is loaded
+              (evil-mode)
+              :config ;; Execute code After a package is loaded
+              (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
+              :custom ;; Customization of package custom variables
+              (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
+              (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
+              (evil-want-C-i-jump nil)      ;; Disables C-i jump
+              (evil-undo-system 'undo-redo) ;; C-r to redo
+              (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
+              ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
+              :bind (:map evil-motion-state-map
+                          ("SPC" . nil)
+                          ("RET" . nil)
+                          ;; ("RET" . org-todo)
+                          ("TAB" . nil)))
+            (use-package evil-collection
+              :after evil
+              :config
+              ;; Setting where to use evil-collection
+              ;; (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult lsp-ui-imenu))
+              (evil-set-initial-state 'package-menu-mode 'motion)
+              (evil-collection-init)
+            (setq evil-collection-want-find-usages-bindings t)
+    )
+            (use-package evil-commentary
+              :after evil
+              :config
+              (evil-commentary-mode)
+              )
+        (with-eval-after-load 'evil-maps
+          (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
+          (define-key evil-motion-state-map (kbd "RET") nil)
+          (define-key evil-motion-state-map (kbd "TAB") nil)
+          (define-key evil-motion-state-map (kbd "g r") 'lsp-find-references))
+        ;; Setting RETURN key in org-mode to follow links
+          (setq org-return-follows-link  t)
 #+end_src
 
 ** General 
@@ -450,7 +453,9 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
                 "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
                 "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 
-
+        ;; (add-hook prog-mode-hook
+        ;; (lambda ()
+        ;; (local-set-key "g r" 'lsp-find-references)))
 
         (add-hook 'org-mode-hook (lambda ()
                (setq-local electric-pair-inhibit-predicate
