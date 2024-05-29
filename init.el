@@ -2269,3 +2269,5 @@ stored in `persp-save-dir'.")
     ;;   :config (treemacs-set-scope-type 'Tabs))
 
 (lsp-treemacs-sync-mode 1)
+
+(use-package visual-regexp-steroids)

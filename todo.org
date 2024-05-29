@@ -1,5 +1,5 @@
 - [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
-- [ ] vr/replace!!!
+- [X] vr/replace!!!
 - [X] return to automatically insert new org item
 - [X] proper keybinds
   + [X] switch windows

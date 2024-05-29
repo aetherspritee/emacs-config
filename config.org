@@ -54,6 +54,7 @@
   - [[#doom-persp-config][doom persp config]]
   - [[#doom-workspaces][doom workspaces]]
 - [[#treemacs][Treemacs]]
+- [[#vr-replace][vr replace]]
 
 * Important to load first
 
@@ -2655,4 +2656,9 @@ We also increase Read Process Output Max so emacs can read more data.
         ;;   :config (treemacs-set-scope-type 'Tabs))
 
     (lsp-treemacs-sync-mode 1)
+#+end_src
+
+* vr replace
+#+begin_src emacs-lisp
+(use-package visual-regexp-steroids)
 #+end_src
