@@ -2687,9 +2687,36 @@ We also increase Read Process Output Max so emacs can read more data.
 
 * Treesitter
 #+begin_src emacs-lisp
-(use-package tree-sitter)
-(use-package tree-sitter-langs)
-(add-hook 'prog-mode-hook 'tree-sitter-hl-mode)
+        (use-package tree-sitter)
+        (use-package tree-sitter-langs)
+        (add-hook 'prog-mode-hook 'tree-sitter-hl-mode)
+        (use-package evil-textobj-tree-sitter)
+
+     ;; Goto start of next function
+    (define-key evil-normal-state-map (kbd "tf") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer")))
+    (define-key evil-visual-state-map (kbd "tf") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer")))
+    ;; Goto start of previous function
+    (define-key evil-normal-state-map (kbd "tF") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer" t)))
+    (define-key evil-visual-state-map (kbd "tF") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer" t)))
+    ;; Goto end of next function
+    (define-key evil-normal-state-map (kbd "Tf") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer" nil t)))
+    (define-key evil-visual-state-map (kbd "Tf") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer" nil t)))
+    ;; Goto end of previous function
+    (define-key evil-normal-state-map (kbd "TF") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer" t t)))   
+    (define-key evil-visual-state-map (kbd "TF") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "function.outer" t t)))   
+    ;; next class
+    (define-key evil-normal-state-map (kbd "tc") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "class.outer")))
+    (define-key evil-visual-state-map (kbd "tc") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "class.outer")))
+    ;; prev class
+    (define-key evil-normal-state-map (kbd "tC") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "class.outer" t)))
+    (define-key evil-visual-state-map (kbd "tC") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "class.outer" t)))
+    ;; next param
+    (define-key evil-normal-state-map (kbd "ta") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "parameter.outer")))
+    (define-key evil-visual-state-map (kbd "ta") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "parameter.outer")))
+    ;; prev param
+    (define-key evil-normal-state-map (kbd "tA") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "parameter.outer" t)))
+    (define-key evil-visual-state-map (kbd "tA") (lambda () (interactive) (evil-textobj-tree-sitter-goto-textobj "parameter.outer" t)))
+
 #+end_src
 
 * direnv
