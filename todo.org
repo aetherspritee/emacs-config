@@ -1,4 +1,6 @@
 - [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
+- [ ] magit todos
+- [X] relative lines!!
 - [X] vr/replace!!!
 - [X] return to automatically insert new org item
 - [X] proper keybinds
@@ -23,9 +25,15 @@
   + [X] use correct files
 - [X] prettify org mode
 - [-] lsp
-  - [ ] languages and servers
-    * more?
+  - [-] languages and servers
+    * [X] c
+    * [X] fortran (f90)
+    * [X] go
+    * [X] julia
+    * [X] python
+    * [ ] more?
   - [X] autocompletion
+  - [ ] fix sideline diagnostics!!
   - [X] use cape file completion in lsp
   - [X] goto references keybinds
 - [ ] dashboard
