@@ -645,7 +645,7 @@ If on a:
   (add-to-list 'global-mode-string
               '(pyvenv-virtual-env-name (" venv:" pyvenv-virtual-env-name " "))
               'append))
-(setq lsp-pyright-venv-path "/home/yulivee/venv")
+(setq lsp-pyright-venv-path "/Users/dusc/venv")
 
 (use-package go-mode)
 
