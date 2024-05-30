@@ -365,7 +365,7 @@ If on a:
   (recentf-mode t) ;; Enable recent file mode
 
   ;;(global-visual-line-mode t)           ;; Enable truncated lines
-  ;;(display-line-numbers-type 'relative) ;; Relative line numbers
+  (display-line-numbers-type 'relative) ;; Relative line numbers
   (global-display-line-numbers-mode t)  ;; Display line numbers
 
   (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
@@ -635,7 +635,6 @@ If on a:
         (doom-modeline-update-env))
       (force-mode-line-update))))
 
-
     (use-package pyvenv
   :after python
   :init
@@ -646,6 +645,16 @@ If on a:
               '(pyvenv-virtual-env-name (" venv:" pyvenv-virtual-env-name " "))
               'append))
 (setq lsp-pyright-venv-path "/home/yulivee/venv")
+
+(setq-default python-indent-offset 4)
+    (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+        (add-hook 'python-mode-hook
+              (lambda ()
+                ;; (setq indent-tabs-mode t)
+                (setq tab-width 1)
+                (setq python-indent-offset 4)
+            (setq evil-shift-width 4)
+))
 
 (use-package go-mode)
 
