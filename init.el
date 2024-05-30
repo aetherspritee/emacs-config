@@ -436,6 +436,7 @@ If on a:
       (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
       (lsp-modeline-diagnostics-enable nil)
       (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+      (doom-modeline-env-enable-python t)
       ;; (doom-modeline-vcs-max-length 0)
       :config
 (doom-modeline-def-modeline 'my-simple-line
@@ -626,7 +627,25 @@ If on a:
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
 
-(use-package pyvenv)
+(defun +modeline-update-env-in-all-windows-h (&rest _)
+  "Update version strings in all buffers."
+  (dolist (window (window-list))
+    (with-selected-window window
+      (when (fboundp 'doom-modeline-update-env)
+        (doom-modeline-update-env))
+      (force-mode-line-update))))
+
+
+    (use-package pyvenv
+  :after python
+  :init
+ (add-hook 'pyvenv-post-activate-hooks #'+modeline-update-env-in-all-windows-h)
+  :config
+  (add-hook 'python-mode-local-vars-hook #'pyvenv-track-virtualenv)
+  (add-to-list 'global-mode-string
+              '(pyvenv-virtual-env-name (" venv:" pyvenv-virtual-env-name " "))
+              'append))
+(setq lsp-pyright-venv-path "/home/yulivee/venv")
 
 (use-package go-mode)
 
@@ -690,6 +709,7 @@ If on a:
             ("KILL" . +org-todo-cancel)))
 
 (setq org-agenda-files '("~/Dropbox/Orga/"))
+(setq org-agenda-window-setup 'only-window)
 (setq org-agenda-custom-commands
     '(
         ("D" "Meine Agenda"
@@ -2271,3 +2291,11 @@ stored in `persp-save-dir'.")
 (lsp-treemacs-sync-mode 1)
 
 (use-package visual-regexp-steroids)
+
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+(add-hook 'prog-mode-hook 'tree-sitter-hl-mode)
+
+(use-package direnv
+ :config
+ (direnv-mode))

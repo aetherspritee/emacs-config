@@ -55,6 +55,8 @@
   - [[#doom-workspaces][doom workspaces]]
 - [[#treemacs][Treemacs]]
 - [[#vr-replace][vr replace]]
+- [[#treesitter][Treesitter]]
+- [[#direnv][direnv]]
 
 * Important to load first
 
@@ -583,6 +585,7 @@ Replace the default modeline with a prettier more useful.
           (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
           (lsp-modeline-diagnostics-enable nil)
           (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+          (doom-modeline-env-enable-python t)
           ;; (doom-modeline-vcs-max-length 0)
           :config
     (doom-modeline-def-modeline 'my-simple-line
@@ -814,7 +817,25 @@ Use SPC-tab to uncomment the lines.
 # #+end_src
 *** python mode
 #+begin_src emacs-lisp
-(use-package pyvenv)
+    (defun +modeline-update-env-in-all-windows-h (&rest _)
+      "Update version strings in all buffers."
+      (dolist (window (window-list))
+        (with-selected-window window
+          (when (fboundp 'doom-modeline-update-env)
+            (doom-modeline-update-env))
+          (force-mode-line-update))))
+
+
+        (use-package pyvenv
+      :after python
+      :init
+     (add-hook 'pyvenv-post-activate-hooks #'+modeline-update-env-in-all-windows-h)
+      :config
+      (add-hook 'python-mode-local-vars-hook #'pyvenv-track-virtualenv)
+      (add-to-list 'global-mode-string
+                  '(pyvenv-virtual-env-name (" venv:" pyvenv-virtual-env-name " "))
+                  'append))
+    (setq lsp-pyright-venv-path "/home/yulivee/venv")
 #+end_src
 *** go mode
 #+begin_src emacs-lisp
@@ -889,6 +910,7 @@ much like the literate programming ideas that Donald Knuth made famous.
                 ("KILL" . +org-todo-cancel)))
 
     (setq org-agenda-files '("~/Dropbox/Orga/"))
+    (setq org-agenda-window-setup 'only-window)
     (setq org-agenda-custom-commands
         '(
             ("D" "Meine Agenda"
@@ -2661,4 +2683,18 @@ We also increase Read Process Output Max so emacs can read more data.
 * vr replace
 #+begin_src emacs-lisp
 (use-package visual-regexp-steroids)
+#+end_src
+
+* Treesitter
+#+begin_src emacs-lisp
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+(add-hook 'prog-mode-hook 'tree-sitter-hl-mode)
+#+end_src
+
+* direnv
+#+begin_src emacs-lisp
+(use-package direnv
+ :config
+ (direnv-mode))
 #+end_src
