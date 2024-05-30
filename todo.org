@@ -12,9 +12,9 @@
   + [X] get bibtex integration
 - [X] workspaces
   + [X] fix keybinds and errors
-- [ ] treesitter
-  - [ ] different modes
-  - [ ] movement keybinds
+- [X] treesitter
+  - [X] different modes
+  - [X] movement keybinds
 - [X] search project
 - [X] swiper integration
 - [X] org agenda
