@@ -1,5 +1,5 @@
 - [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
-- [ ] magit todos
+- [X] magit todos
 - [X] relative lines!!
 - [X] vr/replace!!!
 - [X] return to automatically insert new org item
@@ -33,7 +33,7 @@
     * [X] python
     * [ ] more?
   - [X] autocompletion
-  - [ ] fix sideline diagnostics!!
+  - [X] fix sideline diagnostics!!
   - [X] use cape file completion in lsp
   - [X] goto references keybinds
 - [ ] dashboard

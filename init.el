@@ -399,8 +399,8 @@ If on a:
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'doom-tomorrow-night t)
-  (load-theme 'doom-solarized-light t)
+  (load-theme 'doom-tomorrow-night t)
+  ;; (load-theme 'doom-solarized-light t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -974,6 +974,10 @@ If on a:
 
 (use-package magit
   :commands magit-status)
+
+(use-package magit-todos
+:after magit
+:config (magit-todos-mode 1))
 
 (use-package diff-hl
   :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)

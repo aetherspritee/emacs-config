@@ -529,8 +529,8 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
       ;; Global settings (defaults)
       (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
             doom-themes-enable-italic t) ; if nil, italics is universally disabled
-      ;; (load-theme 'doom-tomorrow-night t)
-      (load-theme 'doom-solarized-light t)
+      (load-theme 'doom-tomorrow-night t)
+      ;; (load-theme 'doom-solarized-light t)
 
       ;; Enable flashing mode-line on errors
       (doom-themes-visual-bell-config)
@@ -1266,6 +1266,10 @@ Complete text-based user interface to Git.
 #+begin_src emacs-lisp
     (use-package magit
       :commands magit-status)
+
+    (use-package magit-todos
+    :after magit
+    :config (magit-todos-mode 1))
 #+end_src
 
 *** Diff-hl
