@@ -399,7 +399,8 @@ If on a:
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-tomorrow-night t)
+  ;; (load-theme 'doom-tomorrow-night t)
+  (load-theme 'doom-solarized-light t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -460,7 +461,7 @@ If on a:
           (if (and plus-minus
                (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
                (concat
-            (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'doom-modeline-project-dir)
+            (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
             (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
             (propertize "✔" 'face '(:foreground "green3" :weight bold))))
         "]"))
@@ -489,12 +490,12 @@ If on a:
         (concat
          (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
          (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
-         (propertize "[" 'face 'white)
+         (propertize "[" 'face 'default)
          (propertize (format "↑%s" local) 'face 'warning)
-         (propertize "|" 'face 'white)
+         (propertize "|" 'face 'default)
          (propertize (format "↓%s" remotes) 'face 'warning)
          ;; (format "↑%s|↓%s" local remotes)
-         (propertize "]" 'face 'white)
+         (propertize "]" 'face 'default)
          )))    
     (defvar git-modeline-last-update (float-time) "Last time we updated")
     (defvar git-modeline-update-interval 5 "Minimum time between update in seconds")
@@ -2334,3 +2335,8 @@ stored in `persp-save-dir'.")
 (use-package direnv
  :config
  (direnv-mode))
+
+(use-package flycheck
+:ensure t
+:config
+(add-hook 'after-init-hook #'global-flycheck-mode))
