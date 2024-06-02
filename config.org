@@ -58,6 +58,8 @@
 - [[#treesitter][Treesitter]]
 - [[#direnv][direnv]]
 - [[#flycheck][flycheck]]
+- [[#promote-popup-buffer-to-full-buffer][Promote popup buffer to full buffer]]
+- [[#use-new-compiled-package-versions][use new compiled package versions]]
 
 * Important to load first
 
@@ -360,7 +362,8 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
                 "d" '(lsp-ui-doc-show :wk "show doc"))
 
               (start/leader-keys
-                "H" '(enlight-open :wk "show dashboard"))
+                ;; "H" '(enlight-open :wk "show dashboard"))
+                "H" '(dashboard-open :wk "show dashboard"))
 
               (start/leader-keys
                 "o a" '(org-agenda :wk "Open agenda")
@@ -406,9 +409,8 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
                 "b b" '(consult-buffer :wk "Switch buffer")
                 "b d" '(kill-this-buffer :wk "Kill this buffer")
                 "b i" '(ibuffer :wk "Ibuffer")
-                "b n" '(next-buffer :wk "Next buffer")
-                "b p" '(previous-buffer :wk "Previous buffer")
-                "b r" '(revert-buffer :wk "Reload buffer")
+                "b r" '(my/raise-popup :wk "Raise popup buffer")
+                "b s" '(bookmark-set :wk "Set bookmark")
                 "b j" '(consult-bookmark :wk "Bookmark jump"))
 
               (start/leader-keys
@@ -529,8 +531,8 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
       ;; Global settings (defaults)
       (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
             doom-themes-enable-italic t) ; if nil, italics is universally disabled
-      (load-theme 'doom-tomorrow-night t)
-      ;; (load-theme 'doom-solarized-light t)
+      ;; (load-theme 'doom-tomorrow-night t)
+      (load-theme 'doom-solarized-light t)
 
       ;; Enable flashing mode-line on errors
       (doom-themes-visual-bell-config)
@@ -544,7 +546,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 ** Transparency
 With Emacs version 29, true transparency has been added.
 #+begin_src emacs-lisp
-    (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
+    (add-to-list 'default-frame-alist '(alpha-background . 100)) ;; For all new frames henceforth
 #+end_src
 
 ** Fonts
@@ -580,25 +582,56 @@ You can use the bindings C-+ C-- for zooming in/out. You can also use CTRL plus 
 
 Replace the default modeline with a prettier more useful.
 #+begin_src emacs-lisp
-        (use-package doom-modeline
-          :custom
-          (doom-modeline-height 25)     ;; Sets modeline height
-          (doom-modeline-bar-width 5)   ;; Sets right bar width
-          (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
-          (lsp-modeline-diagnostics-enable nil)
-          (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
-          (doom-modeline-env-enable-python t)
-          ;; (doom-modeline-vcs-max-length 0)
-          :config
-    (doom-modeline-def-modeline 'my-simple-line
-      '(bar matches buffer-info remote-host buffer-position parrot selection-info)
-      '(misc-info minor-modes major-mode process check))
-    ;; Set default mode-line
-    (add-hook 'doom-modeline-mode-hook
-              (lambda ()
-                (doom-modeline-set-modeline 'my-simple-line 'default)))
-        ) 
-          :init (doom-modeline-mode 1)
+
+        ;; (setq evil-normal-state-tag   (propertize "[Normal]" 'face '((:background "black" :foreground "green")))
+        ;;       evil-emacs-state-tag    (propertize "[Emacs]" 'face '((:background "orange" :foreground "black")))
+        ;;       evil-insert-state-tag   (propertize "[Insert]" 'face '((:background "red") :foreground "white"))
+        ;;       evil-motion-state-tag   (propertize "[Motion]" 'face '((:background "blue") :foreground "white"))
+        ;;       evil-visual-state-tag   (propertize "[Visual]" 'face '((:background "grey80" :foreground "black")))
+        ;;       evil-operator-state-tag (propertize "[Operator]" 'face '((:background "purple"))))
+
+
+
+                (use-package doom-modeline
+                  :custom
+                  (doom-modeline-height 25)     ;; Sets modeline height
+                  (doom-modeline-bar-width 5)   ;; Sets right bar width
+                  (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+                  (lsp-modeline-diagnostics-enable nil)
+                  (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+                  (doom-modeline-env-enable-python t)
+                  (doom-modeline-modal-icon nil)
+                  ;; (doom-modeline-vcs-max-length 0)
+                  :config
+
+            (doom-modeline-def-modeline 'my-simple-line
+              '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
+              '(misc-info minor-modes major-mode process check))
+            ;; Set default mode-line
+            
+    (setq doom-modeline-modal-icon nil
+          evil-normal-state-tag   (propertize " Normal ")
+          evil-emacs-state-tag    (propertize " Emacs " )
+          evil-insert-state-tag   (propertize " Insert ")
+          evil-motion-state-tag   (propertize " Motion ")
+          evil-visual-state-tag   (propertize " Visual ")
+          evil-operator-state-tag (propertize " Operator "))
+
+    (defun setup-doom-modeline-evil-states () ;; setting up colors
+      (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "green3"  :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange3" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "red3"    :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "blue3"   :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "pink3" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-operator-state nil :background "purple3"))
+            (add-hook 'doom-modeline-mode-hook
+                      (lambda ()
+                        (doom-modeline-set-modeline 'my-simple-line 'default)))
+                ) 
+    (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
+                  :init (doom-modeline-mode 1)
+
+
 
 #+end_src
 *** git changes
@@ -688,53 +721,125 @@ Replace the default modeline with a prettier more useful.
 
 ** Dashboard
 #+begin_src emacs-lisp
-    ;; (use-package dashboard
-    ;;   :ensure t
-    ;;     :custom
-    ;;     (dashboard-center-content t)
-    ;;     (dashboard-icon-type 'nerd-icons)
-    ;;     (dashboard-vertically-center-content t)
-    ;;   :config
-    ;;   (dashboard-setup-startup-hook))
+         (defun my/doom-dashboard-insert-recents-shortmenu (&rest _)
+          "Insert recent files short menu widget."
+          (let* ((fn (alist-get 'recents doom-dashboard-shortmenu-functions))
+                 (fn-keymap (format "\\[%s]" fn))
+                 (icon-name (alist-get 'recents dashboard-heading-icons))
+                 (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
+            (if dashboard-display-icons-p
+                (insert (format "%-1s   " icon)))
+            (widget-create 'item
+                           :tag (format "%-30s" "Recently opened files")
+                           :action (lambda (&rest _)
+                                     (call-interactively 
+                                      (alist-get 'recents doom-dashboard-shortmenu-functions)))
+                           :mouse-face 'highlight
+                           :button-face 'dashboard-heading
+                           :button-prefix ""
+                           :button-suffix ""
+                           :format "%[%t%]")
+            (if doom-dashboard-set-widget-binding
+                (insert (propertize "SPC f r"
+                                    'face
+                                    'doom-dashboard-bindings-face)))))
 
-    ;;     (use-package doom-dashboard
-    ;;         ;; For Straight Users
-    ;;         :straight (doom-dashboard :host github
-    ;;                                     :repo "aetherspritee/doom-dashboard")
-    ;;         ;; Or for built-in package-vc
-    ;;         ;; :vc (:url "https://github.com/emacs-dashboard/doom-dashboard.git" :rev :newest)
-    ;;         :after dashboard
-    ;;         :demand t
-    ;;         ;; Movement keys like doom.
-    ;;         :bind
-    ;;         (:map dashboard-mode-map
-    ;;             ("<remap> <dashboard-previous-line>" . widget-backward)
-    ;;             ("<remap> <dashboard-next-line>" . widget-forward)
-    ;;             ("<remap> <previous-line>" . widget-backward)
-    ;;             ("<remap> <next-line>"  . widget-forward)
-    ;;             ("<remap> <right-char>" . widget-forward)
-    ;;             ("<remap> <left-char>"  . widget-backward))
-    ;;         :custom
-    ;;         (dashboard-banner-logo-title "another day another try . . .")
+    (defun my/doom-dashboard-insert-org-agenda-shortmenu (&rest _)
+      "Insert `org-agenda' shortmenu widget."
+      (let* ((fn (alist-get 'agenda doom-dashboard-shortmenu-functions))
+             (fn-keymap (format "\\[%s]" fn))
+             (icon-name (alist-get 'agenda dashboard-heading-icons))
+             (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
+        (if dashboard-display-icons-p
+            (insert (format "%-1s   " icon)))
+        (widget-create 'item
+                       :tag (format "%-30s" "Open org-agenda")
+                       :action (lambda (&rest _)
+                                 (call-interactively 
+                                  (alist-get 'agenda doom-dashboard-shortmenu-functions)))
+                       :mouse-face 'highlight
+                       :button-face 'dashboard-heading
+                       :button-prefix ""
+                       :button-suffix ""
+                       :format "%[%t%]")
+        (if doom-dashboard-set-widget-binding
+            (insert (propertize "SPC o a"
+                                'face
+                                'doom-dashboard-bindings-face)))))
 
-    ;;         (dashboard-startup-banner "~/Stuff/nasa.svg") ; Use banner you want
-    ;;         (dashboard-footer-icon 
-    ;;         (nerd-icons-faicon "nf-fa-github_alt" :face 'success :height 1.5))
-    ;;         (dashboard-page-separator "\n")
-    ;;         (dashboard-startupify-list `(dashboard-insert-banner
-    ;;                                     dashboard-insert-banner-title
-    ;;                                     dashboard-insert-newline
-    ;;                                     dashboard-insert-items
-    ;;                                     ,(dashboard-insert-newline 2)
-    ;;                                     dashboard-insert-init-info
-    ;;                                     ,(dashboard-insert-newline 2)
-    ;;                                     doom-dashboard-insert-homepage-footer))
-    ;;         (dashboard-item-generators
-    ;;         '((recents   . doom-dashboard-insert-recents-shortmenu)
-    ;;             (bookmarks . doom-dashboard-insert-bookmark-shortmenu)
-    ;;             (projects  . doom-dashboard-insert-project-shortmenu)
-    ;;             (agenda    . doom-dashboard-insert-org-agenda-shortmenu)))
-    ;;         (dashboard-items '(projects agenda bookmarks recents)))
+
+    (defun my/doom-dashboard-insert-bookmark-shortmenu (&rest _)
+      "Insert bookmark shortmenu widget."
+      (let* ((fn (alist-get 'bookmarks doom-dashboard-shortmenu-functions))
+             (fn-keymap (format "\\[%s]" fn))
+             (icon-name (alist-get 'bookmarks dashboard-heading-icons))
+             (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
+        (if dashboard-display-icons-p
+            (insert (format "%-1s   " icon)))
+        (widget-create 'item
+                       :tag (format "%-30s" "Jump to bookmark")
+                       :action (lambda (&rest _)
+                                 (call-interactively 
+                                  (alist-get 'bookmarks doom-dashboard-shortmenu-functions)))
+                       :mouse-face 'highlight
+                       :button-face 'dashboard-heading
+                       :button-prefix ""
+                       :button-suffix ""
+                       :format "%[%t%]")
+        (if doom-dashboard-set-widget-binding
+            (insert (propertize "SPC RET"
+                                'face
+                                'doom-dashboard-bindings-face)))))   
+
+        (use-package dashboard
+          :ensure t
+            :custom
+            (dashboard-center-content t)
+            (dashboard-icon-type 'nerd-icons)
+            (dashboard-vertically-center-content t)
+          :config
+          (dashboard-setup-startup-hook))
+
+            (use-package doom-dashboard
+                ;; For Straight Users
+                :straight (doom-dashboard :host github
+                                            :repo "aetherspritee/doom-dashboard")
+                ;; Or for built-in package-vc
+                ;; :vc (:url "https://github.com/emacs-dashboard/doom-dashboard.git" :rev :newest)
+                :after dashboard
+                :demand t
+                ;; Movement keys like doom.
+                :bind
+                (:map dashboard-mode-map
+                    ("<remap> <dashboard-previous-line>" . widget-backward)
+                    ("<remap> <dashboard-next-line>" . widget-forward)
+                    ("<remap> <previous-line>" . widget-backward)
+                    ("<remap> <next-line>"  . widget-forward)
+                    ("<remap> <right-char>" . widget-forward)
+                    ("<remap> <left-char>"  . widget-backward))
+                :custom
+                (dashboard-banner-logo-title "another day another try . . .")
+
+                (dashboard-startup-banner "~/Stuff/nasa.svg") ; Use banner you want
+                (dashboard-footer-icon 
+                (nerd-icons-faicon "nf-fae-planet" :face 'success :height 1.5))
+                (dashboard-page-separator "\n")
+                (dashboard-startupify-list `(dashboard-insert-banner
+                                            dashboard-insert-newline
+                                            dashboard-insert-banner-title
+                                            doom-dashboard-insert-homepage-footer
+                                            dashboard-insert-newline
+                                            dashboard-insert-items
+                                            ,(dashboard-insert-newline 2)
+                                            dashboard-insert-init-info
+                                            ,(dashboard-insert-newline 2)
+                                            ))
+                (dashboard-item-generators
+                '((recents   . my/doom-dashboard-insert-recents-shortmenu)
+                    (bookmarks . my/doom-dashboard-insert-bookmark-shortmenu)
+                    (projects  . doom-dashboard-insert-project-shortmenu)
+                    (agenda    . my/doom-dashboard-insert-org-agenda-shortmenu)))
+                (dashboard-items '(agenda bookmarks recents)))
 #+end_src
 
 * Development
@@ -1573,119 +1678,119 @@ We also increase Read Process Output Max so emacs can read more data.
 
 * Enlight
 #+begin_src emacs-lisp
-        (use-package enlight
-         :init
-         (unless (package-installed-p 'enlight)
-           (package-vc-install
-            '(enlight
-              :vc-backend Git
-              :url "https://github.com/ichernyshovvv/enlight"
-              :branch "master"))))   
+    ;;     (use-package enlight
+    ;;      :init
+    ;;      (unless (package-installed-p 'enlight)
+    ;;        (package-vc-install
+    ;;         '(enlight
+    ;;           :vc-backend Git
+    ;;           :url "https://github.com/ichernyshovvv/enlight"
+    ;;           :branch "master"))))   
 
-           (use-package grid
-             :init
-             (unless (package-installed-p 'grid)
-               (package-vc-install
-                '(grid
-                  :vc-backend Git
-                  :url "https://github.com/ichernyshovvv/grid.el"
-                  :branch "master"))))
+    ;;        (use-package grid
+    ;;          :init
+    ;;          (unless (package-installed-p 'grid)
+    ;;            (package-vc-install
+    ;;             '(grid
+    ;;               :vc-backend Git
+    ;;               :url "https://github.com/ichernyshovvv/grid.el"
+    ;;               :branch "master"))))
 
-           (defvar enlight-lipsum "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    ;;        (defvar enlight-lipsum "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
-           Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")
+    ;;        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")
 
-           (defface enlight-yellow-bold
-             '((t (:foreground "#cabf00" :bold t)))
-             "Yellow bold face")
+    ;;        (defface enlight-yellow-bold
+    ;;          '((t (:foreground "#cabf00" :bold t)))
+    ;;          "Yellow bold face")
 
-           (defvar enlight-guix
-             (propertize
-                "
-    8b,dPPYba,  ,adPPYYba, ,adPPYba, ,adPPYYba,  
-    88P'   `\8a ''     `Y8 I8[    '' ''     `Y8  
-    88       88 ,adPPPPP88  `*Y8ba,  ,adPPPPP88  
-    88       88 88,    ,88 aa    ]8I 88,    ,88  
-    88       88 `*8bbdP'Y8 `*YbbdP*' `*8bbdP'Y8  
-                "
-              'face 'enlight-yellow-bold))
+    ;;        (defvar enlight-guix
+    ;;          (propertize
+    ;;             "
+    ;; 8b,dPPYba,  ,adPPYYba, ,adPPYba, ,adPPYYba,  
+    ;; 88P'   `\8a ''     `Y8 I8[    '' ''     `Y8  
+    ;; 88       88 ,adPPPPP88  `*Y8ba,  ,adPPPPP88  
+    ;; 88       88 88,    ,88 aa    ]8I 88,    ,88  
+    ;; 88       88 `*8bbdP'Y8 `*YbbdP*' `*8bbdP'Y8  
+    ;;             "
+    ;;           'face 'enlight-yellow-bold))
 
-           (defvar enlight-guix-widget
-             `( :content ,(concat "\n" (propertize "Block 1" 'face 'enlight-yellow-bold)
-                          "\nGUIX MANAGEMENT WIDGET\n\n")
-                :width 22 :border t :align center :padding 2))
+    ;;        (defvar enlight-guix-widget
+    ;;          `( :content ,(concat "\n" (propertize "Block 1" 'face 'enlight-yellow-bold)
+    ;;                       "\nGUIX MANAGEMENT WIDGET\n\n")
+    ;;             :width 22 :border t :align center :padding 2))
 
-           (defvar enlight-email-width
-             `( :content
-                ,(concat "\n" (propertize (format "%s" (nerd-icons-octicon "nf-oct-clock")) 'face 'enlight-yellow-bold)
-                     "\n"(current-time-string)"\n\n")
-                :padding 2 :width 22 :align center :border t))
+    ;;        (defvar enlight-email-width
+    ;;          `( :content
+    ;;             ,(concat "\n" (propertize (format "%s" (nerd-icons-octicon "nf-oct-clock")) 'face 'enlight-yellow-bold)
+    ;;                  "\n"(current-time-string)"\n\n")
+    ;;             :padding 2 :width 22 :align center :border t))
 
-           (defvar enlight-weather-width
-             `( :content
-                ,(concat "\n" (propertize "Block 3" 'face 'enlight-yellow-bold)
-                     "\nWEATHER WIDGET\n\n")
-                :padding 2 :width 22 :border t :align center))
+    ;;        (defvar enlight-weather-width
+    ;;          `( :content
+    ;;             ,(concat "\n" (propertize "Block 3" 'face 'enlight-yellow-bold)
+    ;;                  "\nWEATHER WIDGET\n\n")
+    ;;             :padding 2 :width 22 :border t :align center))
 
-           (defvar enlight-calendar
-             (progn
-               (calendar)
-               (diary-mark-entries)
-               (prog1 (with-current-buffer (buffer-name (current-buffer))
-                    (buffer-string))
-                 (calendar-exit))))
+    ;;        (defvar enlight-calendar
+    ;;          (progn
+    ;;            (calendar)
+    ;;            (diary-mark-entries)
+    ;;            (prog1 (with-current-buffer (buffer-name (current-buffer))
+    ;;                 (buffer-string))
+    ;;              (calendar-exit))))
 
-           (use-package enlight
-             :custom
-             (enlight-content
-              (concat
-               (grid-get-box `( :align center :content ,enlight-guix :width 80))
-               (grid-get-row
-                (list
-                 (grid-get-box
-                  (concat
-               (grid-get-box
-                `( :content
-                   ,(concat
-                     (grid-get-box `( :content ,(propertize "another day another try . . ." 'face 'enlight-yellow-bold)
-                              :width 80 :align center))
-                     (grid-get-row
-                      `(,enlight-guix-widget
-                    "     "
-                    ,enlight-email-width
-                    "     "
-                    ,enlight-weather-width)))
-                   :width 80))
-               enlight-calendar "\n"
-               (grid-get-row
-                `(,(concat
-                    (propertize "MENU" 'face 'highlight)
-                    "\n"
-                    (enlight-menu
-                     '(("Org Mode"
-                    ("Org-Agenda " (org-agenda nil "D") "D"))
-                   ("Downloads"
-                    ;; ("Transmission" transmission "t")
-                    ("Downloads folder" (dired "~/Downloads") "a"))
-                   ("Other"
-                    ("Bookmarks" consult-bookmark "b")))))
-                  ,(grid-get-column
-                `(,(concat
-    				"         "
-                    (propertize "Files" 'face 'highlight)
-                    "\n"
-    				"         "
-                    (enlight-menu
-                     '(("Roam"
-                    ("          MA Hub" (find-file "~/Roam/master/20231129173749-ma_hub.org") "M")
-                    ("          Virga Yasf" (find-file "~/Roam/uni/20240311092511-integrate_yasf_into_virga.org") "Y"))
-                   ("          Code"
-                    ("          master" (dired "~/Code/master/") "M"))
-                    )))
-                    )))))))))))
+    ;;        (use-package enlight
+    ;;          :custom
+    ;;          (enlight-content
+    ;;           (concat
+    ;;            (grid-get-box `( :align center :content ,enlight-guix :width 80))
+    ;;            (grid-get-row
+    ;;             (list
+    ;;              (grid-get-box
+    ;;               (concat
+    ;;            (grid-get-box
+    ;;             `( :content
+    ;;                ,(concat
+    ;;                  (grid-get-box `( :content ,(propertize "another day another try . . ." 'face 'enlight-yellow-bold)
+    ;;                           :width 80 :align center))
+    ;;                  (grid-get-row
+    ;;                   `(,enlight-guix-widget
+    ;;                 "     "
+    ;;                 ,enlight-email-width
+    ;;                 "     "
+    ;;                 ,enlight-weather-width)))
+    ;;                :width 80))
+    ;;            enlight-calendar "\n"
+    ;;            (grid-get-row
+    ;;             `(,(concat
+    ;;                 (propertize "MENU" 'face 'highlight)
+    ;;                 "\n"
+    ;;                 (enlight-menu
+    ;;                  '(("Org Mode"
+    ;;                 ("Org-Agenda " (org-agenda nil "D") "D"))
+    ;;                ("Downloads"
+    ;;                 ;; ("Transmission" transmission "t")
+    ;;                 ("Downloads folder" (dired "~/Downloads") "a"))
+    ;;                ("Other"
+    ;;                 ("Bookmarks" consult-bookmark "b")))))
+    ;;               ,(grid-get-column
+    ;;             `(,(concat
+    ;;     			"         "
+    ;;                 (propertize "Files" 'face 'highlight)
+    ;;                 "\n"
+    ;;     			"         "
+    ;;                 (enlight-menu
+    ;;                  '(("Roam"
+    ;;                 ("          MA Hub" (find-file "~/Roam/master/20231129173749-ma_hub.org") "M")
+    ;;                 ("          Virga Yasf" (find-file "~/Roam/uni/20240311092511-integrate_yasf_into_virga.org") "Y"))
+    ;;                ("          Code"
+    ;;                 ("          master" (dired "~/Code/master/") "M"))
+    ;;                 )))
+    ;;                 )))))))))))
 
 
-    (setopt initial-buffer-choice #'enlight)
+    ;; (setopt initial-buffer-choice #'enlight)
 #+end_src
 
 * Highlight todo
@@ -2752,4 +2857,19 @@ Required for lsp-ui
   :ensure t
   :config
   (add-hook 'after-init-hook #'global-flycheck-mode))
+#+end_src
+
+* Promote popup buffer to full buffer 
+#+begin_src emacs-lisp
+    (defun my/raise-popup ()
+      (interactive)
+      (let ((buffer (current-buffer)))
+        (unless (one-window-p)
+          (delete-window))
+        (switch-to-buffer buffer )))
+#+end_src
+
+* use new compiled package versions
+#+begin_src emacs-lisp
+(setq load-prefer-newer t)
 #+end_src
