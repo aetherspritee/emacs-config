@@ -1,4 +1,5 @@
 - [ ] darkroom aufsetzen für org mode
+- [ ] long line mode für orgmode (only)
 - [X] org roam ui
 - [X] org timeblock
 - [X] magit todos
