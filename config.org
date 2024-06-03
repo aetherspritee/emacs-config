@@ -60,6 +60,9 @@
 - [[#flycheck][flycheck]]
 - [[#promote-popup-buffer-to-full-buffer][Promote popup buffer to full buffer]]
 - [[#use-new-compiled-package-versions][use new compiled package versions]]
+- [[#org-roam-ui][org roam ui]]
+- [[#org-timeblock][org-timeblock]]
+- [[#default-compilation-for-python][default compilation for python]]
 
 * Important to load first
 
@@ -368,6 +371,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
               (start/leader-keys
                 "o a" '(org-agenda :wk "Open agenda")
                 "o n" '(treemacs :wk "Treemacs")
+                "o b" '(org-timeblock :wk "Org timeblock")
                 )
 
             (start/leader-keys
@@ -421,7 +425,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
               (start/leader-keys
                 "m d" '(org-deadline :wk "Deadline")
                 "m s" '(org-schedule :wk "Schedule")
-                "m t" '(org-timestamp :wk "Timestamp"))
+                "m t" '(org-time-stamp :wk "Timestamp"))
 
               (start/leader-keys
                 "e" '(:ignore t :wk "Eglot Evaluate")
@@ -2836,4 +2840,26 @@ Required for lsp-ui
 * use new compiled package versions
 #+begin_src emacs-lisp
 (setq load-prefer-newer t)
+#+end_src
+
+* org roam ui
+#+begin_src emacs-lisp
+(use-package org-roam-ui)
+#+end_src
+
+* org-timeblock
+#+begin_src emacs-lisp
+(use-package org-timeblock)
+(setq org-timeblock-span 1)
+#+end_src
+
+* default compilation for python
+https://www.youtube.com/watch?v=6oeE52bIFyE
+#+begin_src emacs-lisp
+        (defun my/compile-python ()
+          "bruh"
+        (setq-local compile-command
+         (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+    
+    (add-hook 'python-mode-hook 'my/compile-python)
 #+end_src

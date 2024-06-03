@@ -246,6 +246,7 @@ If on a:
           (start/leader-keys
             "o a" '(org-agenda :wk "Open agenda")
             "o n" '(treemacs :wk "Treemacs")
+            "o b" '(org-timeblock :wk "Org timeblock")
             )
 
         (start/leader-keys
@@ -299,7 +300,7 @@ If on a:
           (start/leader-keys
             "m d" '(org-deadline :wk "Deadline")
             "m s" '(org-schedule :wk "Schedule")
-            "m t" '(org-timestamp :wk "Timestamp"))
+            "m t" '(org-time-stamp :wk "Timestamp"))
 
           (start/leader-keys
             "e" '(:ignore t :wk "Eglot Evaluate")
@@ -2417,3 +2418,15 @@ stored in `persp-save-dir'.")
     (switch-to-buffer buffer )))
 
 (setq load-prefer-newer t)
+
+(use-package org-roam-ui)
+
+(use-package org-timeblock)
+(setq org-timeblock-span 1)
+
+(defun my/compile-python ()
+      "bruh"
+    (setq-local compile-command
+     (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+
+(add-hook 'python-mode-hook 'my/compile-python)

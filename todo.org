@@ -1,4 +1,6 @@
-- [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
+- [ ] darkroom aufsetzen für org mode
+- [X] org roam ui
+- [X] org timeblock
 - [X] magit todos
 - [X] relative lines!!
 - [X] vr/replace!!!
