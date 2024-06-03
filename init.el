@@ -430,134 +430,98 @@ If on a:
   ("<C-wheel-up>" . text-scale-increase)
   ("<C-wheel-down>" . text-scale-decrease))
 
-;; (setq evil-normal-state-tag   (propertize "[Normal]" 'face '((:background "black" :foreground "green")))
-    ;;       evil-emacs-state-tag    (propertize "[Emacs]" 'face '((:background "orange" :foreground "black")))
-    ;;       evil-insert-state-tag   (propertize "[Insert]" 'face '((:background "red") :foreground "white"))
-    ;;       evil-motion-state-tag   (propertize "[Motion]" 'face '((:background "blue") :foreground "white"))
-    ;;       evil-visual-state-tag   (propertize "[Visual]" 'face '((:background "grey80" :foreground "black")))
-    ;;       evil-operator-state-tag (propertize "[Operator]" 'face '((:background "purple"))))
-
-
-
-            (use-package doom-modeline
-              :custom
-              (doom-modeline-height 25)     ;; Sets modeline height
-              (doom-modeline-bar-width 5)   ;; Sets right bar width
-              (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
-              (lsp-modeline-diagnostics-enable nil)
-              (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
-              (doom-modeline-env-enable-python t)
-              (doom-modeline-modal-icon nil)
-              ;; (doom-modeline-vcs-max-length 0)
-              :config
-
-        (doom-modeline-def-modeline 'my-simple-line
-          '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
-          '(misc-info minor-modes major-mode process check))
-        ;; Set default mode-line
-
-(setq doom-modeline-modal-icon nil
-      evil-normal-state-tag   (propertize " Normal ")
-      evil-emacs-state-tag    (propertize " Emacs " )
-      evil-insert-state-tag   (propertize " Insert ")
-      evil-motion-state-tag   (propertize " Motion ")
-      evil-visual-state-tag   (propertize " Visual ")
-      evil-operator-state-tag (propertize " Operator "))
-
-(defun setup-doom-modeline-evil-states () ;; setting up colors
-  (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "green3"  :foreground "black")
-  (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange3" :foreground "black")
-  (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "red3"    :foreground "white")
-  (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "blue3"   :foreground "white")
-  (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "pink3" :foreground "black")
-  (set-face-attribute 'doom-modeline-evil-operator-state nil :background "purple3"))
-        (add-hook 'doom-modeline-mode-hook
-                  (lambda ()
-                    (doom-modeline-set-modeline 'my-simple-line 'default)))
-            ) 
-(add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
-              :init (doom-modeline-mode 1)
-
 (defun in-git-p ()
-          (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
-        (defun git-parse-status ()
+              (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
+            (defun git-parse-status ()
+              (interactive)
+              (concat 
+            " ["
+            (let ((plus-minus (vc-git--run-command-string
+                       buffer-file-name "diff" "--numstat" "--")))
+              (if (and plus-minus
+                   (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
+                   (concat
+                (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
+                (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
+                (propertize "✔" 'face '(:foreground "green3" :weight bold))))
+            "]"))
+
+         (defun git-remote-status ()
           (interactive)
-          (concat 
-        " ["
-        (let ((plus-minus (vc-git--run-command-string
-                   buffer-file-name "diff" "--numstat" "--")))
-          (if (and plus-minus
-               (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
-               (concat
-            (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-            (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
-            (propertize "✔" 'face '(:foreground "green3" :weight bold))))
-        "]"))
+          (let* (;; get the branch we are on.
+                 (branch (s-trim
+                          (shell-command-to-string
+                           "git rev-parse --abbrev-ref HEAD")))
+                 ;; get the remote the branch points to.
+                 (remote (s-trim
+                          (shell-command-to-string
+                           (format "git config branch.%s.remote" branch))))
+                 (remote-branch (s-trim
+                                 (shell-command-to-string
+                                  "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
+                 (commits (split-string
+                           (s-trim
+                            (shell-command-to-string
+                             (format
+                              "git rev-list --count --left-right HEAD...%s"
+                              remote-branch)))))
+                 (local (nth 0 commits))
+                 (remotes (nth 1 commits)))
+            (concat
+             (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
+             (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
+             (propertize "[" 'face 'default)
+             (propertize (format "↑%s" local) 'face 'warning)
+             (propertize "|" 'face 'default)
+             (propertize (format "↓%s" remotes) 'face 'warning)
+             ;; (format "↑%s|↓%s" local remotes)
+             (propertize "]" 'face 'default)
+             )))
+                (use-package doom-modeline
+                  :custom
+                  (doom-modeline-height 25)     ;; Sets modeline height
+                  (doom-modeline-bar-width 5)   ;; Sets right bar width
+                  (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+                  (lsp-modeline-diagnostics-enable nil)
+                  (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+                  (doom-modeline-env-enable-python t)
+                  (doom-modeline-modal-icon nil)
+                  ;; (doom-modeline-vcs-max-length 0)
+                  :config
+                  (doom-modeline-def-segment my-vcs
+                    (concat
+                    (git-remote-status)
+                    (git-parse-status)
+                    ))
 
-     (defun git-remote-status ()
-      (interactive)
-      (let* (;; get the branch we are on.
-             (branch (s-trim
-                      (shell-command-to-string
-                       "git rev-parse --abbrev-ref HEAD")))
-             ;; get the remote the branch points to.
-             (remote (s-trim
-                      (shell-command-to-string
-                       (format "git config branch.%s.remote" branch))))
-             (remote-branch (s-trim
-                             (shell-command-to-string
-                              "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
-             (commits (split-string
-                       (s-trim
-                        (shell-command-to-string
-                         (format
-                          "git rev-list --count --left-right HEAD...%s"
-                          remote-branch)))))
-             (local (nth 0 commits))
-             (remotes (nth 1 commits)))
-        (concat
-         (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
-         (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
-         (propertize "[" 'face 'default)
-         (propertize (format "↑%s" local) 'face 'warning)
-         (propertize "|" 'face 'default)
-         (propertize (format "↓%s" remotes) 'face 'warning)
-         ;; (format "↑%s|↓%s" local remotes)
-         (propertize "]" 'face 'default)
-         )))    
-    (defvar git-modeline-last-update (float-time) "Last time we updated")
-    (defvar git-modeline-update-interval 5 "Minimum time between update in seconds")
-    (defvar git-modeline "" "Last value of the modeline")
-    (define-minor-mode git-mode
-      "minor mode to put git repo status in modeline"
-      nil nil nil
-      (let ((git-modeline '(:eval (if
-                                      (> (- (float-time) git-modeline-last-update)
-                                         git-modeline-update-interval)
-                                      ;; we are updating                              
-                                      (setq git-modeline
-                                            (if (not (in-git-p))
-                                                ""                                   
-                                              (setq  git-modeline-last-update (float-time))
-                                              (concat 
-                                               (git-remote-status)
-                                               (git-parse-status))))
+            (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+            ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+            (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
+            (doom-modeline-def-modeline 'my-simple-line
+              '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
+              '(my-vcs misc-info minor-modes major-mode process check))
+            (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+            ;; Set default mode-line
 
-                                  ;; use last value of the modeline
-                                  git-modeline))))
-        (if git-mode
-            ;; put in modeline
-            ;; (push git-modeline mode-line-format)
-            (push git-modeline mode-line-misc-info)
-          ;; remove from modeline
-          (setq mode-line-format
-                (-remove (lambda (x)
-                           (equal x git-modeline))                                  
-                         mode-line-format)))
-))
-(git-mode)
+    (setq doom-modeline-modal-icon nil
+          evil-normal-state-tag   (propertize " Normal ")
+          evil-emacs-state-tag    (propertize " Emacs " )
+          evil-insert-state-tag   (propertize " Insert ")
+          evil-motion-state-tag   (propertize " Motion ")
+          evil-visual-state-tag   (propertize " Visual ")
+          evil-operator-state-tag (propertize " Operator "))
 
-            ;; (setq-default mode-line-misc-info git-modeline)
+    (defun setup-doom-modeline-evil-states () ;; setting up colors
+      (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "green3"  :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange3" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "red3"    :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "blue3"   :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "pink3" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-operator-state nil :background "purple3"))
+
+    :hook
+    (after-init . doom-modeline-mode)
+)
 
 (defun my/doom-dashboard-insert-recents-shortmenu (&rest _)
       "Insert recent files short menu widget."
