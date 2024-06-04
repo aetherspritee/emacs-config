@@ -1,5 +1,7 @@
 - [ ] darkroom aufsetzen für org mode
 - [ ] long line mode für orgmode (only)
+- [ ] vterm
+- [ ] snippets support for autocompletion
 - [X] org roam ui
 - [X] org timeblock
 - [X] magit todos
