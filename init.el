@@ -431,127 +431,52 @@ If on a:
   ("<C-wheel-up>" . text-scale-increase)
   ("<C-wheel-down>" . text-scale-decrease))
 
-(defun in-git-p ()
-                 (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
-               (defun git-parse-status ()
-                 (interactive)
-                 (concat 
-               " ["
-               (let ((plus-minus (vc-git--run-command-string
-                          buffer-file-name "diff" "--numstat" "--")))
-                 (if (and plus-minus
-                      (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
-                      (concat
-                   (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-                   (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
-                   (propertize "✔" 'face '(:foreground "green3" :weight bold))))
-               "]"))
+(setq git-modeline "")
 
-            (defun git-remote-status ()
-             (interactive)
-             (let* (;; get the branch we are on.
-                    (branch (s-trim
-                             (shell-command-to-string
-                              "git rev-parse --abbrev-ref HEAD")))
-                    ;; get the remote the branch points to.
-                    (remote (s-trim
-                             (shell-command-to-string
-                              (format "git config branch.%s.remote" branch))))
-                    (remote-branch (s-trim
-                                    (shell-command-to-string
-                                     "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
-                    (commits (split-string
-                              (s-trim
-                               (shell-command-to-string
-                                (format
-                                 "git rev-list --count --left-right HEAD...%s"
-                                 remote-branch)))))
-                    (local (nth 0 commits))
-                    (remotes (nth 1 commits)))
-               (concat
-                (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
-                (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
-                "["
-                (propertize (format "↑%s" local) 'face 'warning)
-                "|"
-                (propertize (format "↓%s" remotes) 'face 'warning)
-                "]"
-                )))
-(setq git-modeline-last-update (float-time))
-   (setq git-modeline-update-interval 5 )
-   (defun git-mode ()
-     (interactive)
-     "minor mode to put git repo status in modeline"
-     (let ((git-modeline '(:eval (if
-                                     (> (- (float-time) git-modeline-last-update)
-                                        git-modeline-update-interval)
-                                     ;; we are updating                              
-                                     (setq git-modeline
-                                           (if (not (in-git-p))
-                                               ""                                   
-                                             (setq  git-modeline-last-update (float-time))
-                                             (concat 
-                                              (git-remote-status)
-                                              (git-parse-status))))
-                                   git-modeline)
-                                )))))
-(defun update-git-diff ()
-  (interactive)
-  (setq git-modeline (concat
-         (git-remote-status)
-         (git-parse-status)
-    )
-  ))
-(add-hook 'after-save-hook 'update-git-diff)
-(add-hook 'after-revert-hook 'update-git-diff)
-(add-hook 'before-revert-hook 'update-git-diff)
-(add-hook 'buffer-list-update-hook 'update-git-diff)
-   ;; (setq git-modeline 'update-git-diff)
+                (use-package doom-modeline
+                  :custom
+                  (doom-modeline-height 25)     ;; Sets modeline height
+                  (doom-modeline-bar-width 5)   ;; Sets right bar width
+                  (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+                  (lsp-modeline-diagnostics-enable nil)
+                  (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+                  (doom-modeline-env-enable-python t)
+                  (doom-modeline-modal-icon nil)
+                  (doom-modeline-buffer-file-name-style 'relative-from-project)
+                  ;; (doom-modeline-vcs-max-length 0)
+                  :config
+                  (doom-modeline-def-segment my-vcs
+                    (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
+                     ))
 
-                   (use-package doom-modeline
-                     :custom
-                     (doom-modeline-height 25)     ;; Sets modeline height
-                     (doom-modeline-bar-width 5)   ;; Sets right bar width
-                     (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
-                     (lsp-modeline-diagnostics-enable nil)
-                     (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
-                     (doom-modeline-env-enable-python t)
-                     (doom-modeline-modal-icon nil)
-                     (doom-modeline-buffer-file-name-style 'relative-from-project)
-                     ;; (doom-modeline-vcs-max-length 0)
-                     :config
-                     (doom-modeline-def-segment my-vcs
-                       (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
-                        ))
+            (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+            ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+            (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
+            (doom-modeline-def-modeline 'my-simple-line
+              '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
+              '(my-vcs misc-info minor-modes major-mode process check))
+            (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+            ;; Set default mode-line
 
-               (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-               ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-               (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
-               (doom-modeline-def-modeline 'my-simple-line
-                 '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
-                 '(my-vcs misc-info minor-modes major-mode process check))
-               (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-               ;; Set default mode-line
+    (setq doom-modeline-modal-icon nil
+          evil-normal-state-tag   (propertize " Normal ")
+          evil-emacs-state-tag    (propertize " Emacs " )
+          evil-insert-state-tag   (propertize " Insert ")
+          evil-motion-state-tag   (propertize " Motion ")
+          evil-visual-state-tag   (propertize " Visual ")
+          evil-operator-state-tag (propertize " Operator "))
 
-       (setq doom-modeline-modal-icon nil
-             evil-normal-state-tag   (propertize " Normal ")
-             evil-emacs-state-tag    (propertize " Emacs " )
-             evil-insert-state-tag   (propertize " Insert ")
-             evil-motion-state-tag   (propertize " Motion ")
-             evil-visual-state-tag   (propertize " Visual ")
-             evil-operator-state-tag (propertize " Operator "))
+    (defun setup-doom-modeline-evil-states () ;; setting up colors
+      (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "green3"  :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange3" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "red3"    :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "blue3"   :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "pink3" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-operator-state nil :background "purple3"))
 
-       (defun setup-doom-modeline-evil-states () ;; setting up colors
-         (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "green3"  :foreground "black")
-         (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange3" :foreground "black")
-         (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "red3"    :foreground "white")
-         (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "blue3"   :foreground "white")
-         (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "pink3" :foreground "black")
-         (set-face-attribute 'doom-modeline-evil-operator-state nil :background "purple3"))
-
-       :hook
-       (after-init . doom-modeline-mode)
-   )
+    :hook
+    (after-init . doom-modeline-mode)
+)
 
 (defun my/doom-dashboard-insert-recents-shortmenu (&rest _)
       "Insert recent files short menu widget."
@@ -718,6 +643,8 @@ If on a:
 (setq lsp-ui-sideline-show-hover nil)
 (setq lsp-ui-sideline-enable t)
 (setq lsp-ui-sideline-show-diagnostics t)
+
+(setq lsp-idle-delay 0.01)
 
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
@@ -1086,8 +1013,9 @@ If on a:
   (corfu-auto t)                 ;; Enable auto completion
   (corfu-auto-prefix 2)          ;; Minimum length of prefix for auto completion.
   (corfu-popupinfo-mode t)       ;; Enable popup information
-  (corfu-popupinfo-delay 0.5)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
+  (corfu-popupinfo-delay 2)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
   (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
+  (corfu-auto-delay 0.05)
   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
   ;; (corfu-preview-current nil)    ;; Disable current candidate preview
@@ -2459,3 +2387,79 @@ stored in `persp-save-dir'.")
      (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
 
 (add-hook 'python-mode-hook 'my/compile-python)
+
+(defun in-git-p ()
+                 (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
+               (defun git-parse-status ()
+                 (interactive)
+                 (concat 
+               " ["
+               (let ((plus-minus (vc-git--run-command-string
+                          buffer-file-name "diff" "--numstat" "--")))
+                 (if (and plus-minus
+                      (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
+                      (concat
+                   (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
+                   (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
+                   (propertize "✔" 'face '(:foreground "green3" :weight bold))))
+               "]"))
+
+            (defun git-remote-status ()
+             (interactive)
+             (let* (;; get the branch we are on.
+                    (branch (s-trim
+                             (shell-command-to-string
+                              "git rev-parse --abbrev-ref HEAD")))
+                    ;; get the remote the branch points to.
+                    (remote (s-trim
+                             (shell-command-to-string
+                              (format "git config branch.%s.remote" branch))))
+                    (remote-branch (s-trim
+                                    (shell-command-to-string
+                                     "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
+                    (commits (split-string
+                              (s-trim
+                               (shell-command-to-string
+                                (format
+                                 "git rev-list --count --left-right HEAD...%s"
+                                 remote-branch)))))
+                    (local (nth 0 commits))
+                    (remotes (nth 1 commits)))
+               (concat
+                (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
+                (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
+                "["
+                (propertize (format "↑%s" local) 'face 'warning)
+                "|"
+                (propertize (format "↓%s" remotes) 'face 'warning)
+                "]"
+                )))
+(setq git-modeline-last-update (float-time))
+   (setq git-modeline-update-interval 5 )
+   (defun git-mode ()
+     (interactive)
+     "minor mode to put git repo status in modeline"
+     (let ((git-modeline '(:eval (if
+                                     (> (- (float-time) git-modeline-last-update)
+                                        git-modeline-update-interval)
+                                     ;; we are updating                              
+                                     (setq git-modeline
+                                           (if (not (in-git-p))
+                                               ""                                   
+                                             (setq  git-modeline-last-update (float-time))
+                                             (concat 
+                                              (git-remote-status)
+                                              (git-parse-status))))
+                                   git-modeline)
+                                )))))
+(defun update-git-diff ()
+  (interactive)
+  (setq git-modeline (concat
+         (git-remote-status)
+         (git-parse-status)
+    )
+  ))
+(add-hook 'after-save-hook 'update-git-diff)
+(add-hook 'after-revert-hook 'update-git-diff)
+(add-hook 'before-revert-hook 'update-git-diff)
+(add-hook 'buffer-list-update-hook 'update-git-diff)

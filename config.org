@@ -63,6 +63,7 @@
 - [[#org-roam-ui][org roam ui]]
 - [[#org-timeblock][org-timeblock]]
 - [[#default-compilation-for-python][default compilation for python]]
+- [[#git-diff][git-diff]]
 
 * Important to load first
 
@@ -589,82 +590,7 @@ The junk in the beginning is a more detailed vcs module that tracks changed line
 I also customized the evil mode indicator to be more noticable.
 #+begin_src emacs-lisp
 
-                   (defun in-git-p ()
-                     (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
-                   (defun git-parse-status ()
-                     (interactive)
-                     (concat 
-                   " ["
-                   (let ((plus-minus (vc-git--run-command-string
-                              buffer-file-name "diff" "--numstat" "--")))
-                     (if (and plus-minus
-                          (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
-                          (concat
-                       (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-                       (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
-                       (propertize "✔" 'face '(:foreground "green3" :weight bold))))
-                   "]"))
-
-                (defun git-remote-status ()
-                 (interactive)
-                 (let* (;; get the branch we are on.
-                        (branch (s-trim
-                                 (shell-command-to-string
-                                  "git rev-parse --abbrev-ref HEAD")))
-                        ;; get the remote the branch points to.
-                        (remote (s-trim
-                                 (shell-command-to-string
-                                  (format "git config branch.%s.remote" branch))))
-                        (remote-branch (s-trim
-                                        (shell-command-to-string
-                                         "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
-                        (commits (split-string
-                                  (s-trim
-                                   (shell-command-to-string
-                                    (format
-                                     "git rev-list --count --left-right HEAD...%s"
-                                     remote-branch)))))
-                        (local (nth 0 commits))
-                        (remotes (nth 1 commits)))
-                   (concat
-                    (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
-                    (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
-                    "["
-                    (propertize (format "↑%s" local) 'face 'warning)
-                    "|"
-                    (propertize (format "↓%s" remotes) 'face 'warning)
-                    "]"
-                    )))
-    (setq git-modeline-last-update (float-time))
-       (setq git-modeline-update-interval 5 )
-       (defun git-mode ()
-         (interactive)
-         "minor mode to put git repo status in modeline"
-         (let ((git-modeline '(:eval (if
-                                         (> (- (float-time) git-modeline-last-update)
-                                            git-modeline-update-interval)
-                                         ;; we are updating                              
-                                         (setq git-modeline
-                                               (if (not (in-git-p))
-                                                   ""                                   
-                                                 (setq  git-modeline-last-update (float-time))
-                                                 (concat 
-                                                  (git-remote-status)
-                                                  (git-parse-status))))
-                                       git-modeline)
-                                    )))))
-    (defun update-git-diff ()
-      (interactive)
-      (setq git-modeline (concat
-             (git-remote-status)
-             (git-parse-status)
-        )
-      ))
-    (add-hook 'after-save-hook 'update-git-diff)
-    (add-hook 'after-revert-hook 'update-git-diff)
-    (add-hook 'before-revert-hook 'update-git-diff)
-    (add-hook 'buffer-list-update-hook 'update-git-diff)
-       ;; (setq git-modeline 'update-git-diff)
+       (setq git-modeline "")
 
                        (use-package doom-modeline
                          :custom
@@ -895,6 +821,8 @@ I like it more than eglot.
     (setq lsp-ui-sideline-show-hover nil)
     (setq lsp-ui-sideline-enable t)
     (setq lsp-ui-sideline-show-diagnostics t)
+
+    (setq lsp-idle-delay 0.01)
 
 #+end_src
 
@@ -1401,8 +1329,9 @@ Notes:
       (corfu-auto t)                 ;; Enable auto completion
       (corfu-auto-prefix 2)          ;; Minimum length of prefix for auto completion.
       (corfu-popupinfo-mode t)       ;; Enable popup information
-      (corfu-popupinfo-delay 0.5)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
+      (corfu-popupinfo-delay 2)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
       (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
+      (corfu-auto-delay 0.05)
       ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
       ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
       ;; (corfu-preview-current nil)    ;; Disable current candidate preview
@@ -2893,3 +2822,81 @@ https://www.youtube.com/watch?v=6oeE52bIFyE
     (add-hook 'python-mode-hook 'my/compile-python)
 #+end_src
 
+* git-diff
+#+begin_src emacs-lisp
+                   (defun in-git-p ()
+                     (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
+                   (defun git-parse-status ()
+                     (interactive)
+                     (concat 
+                   " ["
+                   (let ((plus-minus (vc-git--run-command-string
+                              buffer-file-name "diff" "--numstat" "--")))
+                     (if (and plus-minus
+                          (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
+                          (concat
+                       (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
+                       (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
+                       (propertize "✔" 'face '(:foreground "green3" :weight bold))))
+                   "]"))
+
+                (defun git-remote-status ()
+                 (interactive)
+                 (let* (;; get the branch we are on.
+                        (branch (s-trim
+                                 (shell-command-to-string
+                                  "git rev-parse --abbrev-ref HEAD")))
+                        ;; get the remote the branch points to.
+                        (remote (s-trim
+                                 (shell-command-to-string
+                                  (format "git config branch.%s.remote" branch))))
+                        (remote-branch (s-trim
+                                        (shell-command-to-string
+                                         "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
+                        (commits (split-string
+                                  (s-trim
+                                   (shell-command-to-string
+                                    (format
+                                     "git rev-list --count --left-right HEAD...%s"
+                                     remote-branch)))))
+                        (local (nth 0 commits))
+                        (remotes (nth 1 commits)))
+                   (concat
+                    (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
+                    (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
+                    "["
+                    (propertize (format "↑%s" local) 'face 'warning)
+                    "|"
+                    (propertize (format "↓%s" remotes) 'face 'warning)
+                    "]"
+                    )))
+    (setq git-modeline-last-update (float-time))
+       (setq git-modeline-update-interval 5 )
+       (defun git-mode ()
+         (interactive)
+         "minor mode to put git repo status in modeline"
+         (let ((git-modeline '(:eval (if
+                                         (> (- (float-time) git-modeline-last-update)
+                                            git-modeline-update-interval)
+                                         ;; we are updating                              
+                                         (setq git-modeline
+                                               (if (not (in-git-p))
+                                                   ""                                   
+                                                 (setq  git-modeline-last-update (float-time))
+                                                 (concat 
+                                                  (git-remote-status)
+                                                  (git-parse-status))))
+                                       git-modeline)
+                                    )))))
+    (defun update-git-diff ()
+      (interactive)
+      (setq git-modeline (concat
+             (git-remote-status)
+             (git-parse-status)
+        )
+      ))
+    (add-hook 'after-save-hook 'update-git-diff)
+    (add-hook 'after-revert-hook 'update-git-diff)
+    (add-hook 'before-revert-hook 'update-git-diff)
+    (add-hook 'buffer-list-update-hook 'update-git-diff)
+#+end_src

@@ -1,4 +1,4 @@
-- [ ] Git Module nicht 1000 mal die Sekunde aufrufen.
+- [X] Git Module nicht 1000 mal die Sekunde aufrufen.
 - [ ] darkroom aufsetzen für org mode
 - [ ] long line mode für orgmode (only)
 - [ ] start 1 proper workspace on startup
