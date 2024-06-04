@@ -505,6 +505,7 @@ If on a:
 (add-hook 'after-save-hook 'update-git-diff)
 (add-hook 'after-revert-hook 'update-git-diff)
 (add-hook 'before-revert-hook 'update-git-diff)
+(add-hook 'buffer-list-update-hook 'update-git-diff)
    ;; (setq git-modeline 'update-git-diff)
 
                    (use-package doom-modeline
@@ -520,8 +521,8 @@ If on a:
                      ;; (doom-modeline-vcs-max-length 0)
                      :config
                      (doom-modeline-def-segment my-vcs
-                       (concat (propertize git-modeline))
-                        )
+                       (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
+                        ))
 
                (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
                ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
