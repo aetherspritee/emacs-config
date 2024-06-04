@@ -661,6 +661,8 @@ I also customized the evil mode indicator to be more noticable.
         )
       ))
     (add-hook 'after-save-hook 'update-git-diff)
+    (add-hook 'after-revert-hook 'update-git-diff)
+    (add-hook 'before-revert-hook 'update-git-diff)
        ;; (setq git-modeline 'update-git-diff)
 
                        (use-package doom-modeline
@@ -2890,4 +2892,3 @@ https://www.youtube.com/watch?v=6oeE52bIFyE
     (add-hook 'python-mode-hook 'my/compile-python)
 #+end_src
 
-sadfsdfsdfsdf

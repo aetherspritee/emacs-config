@@ -503,6 +503,8 @@ If on a:
     )
   ))
 (add-hook 'after-save-hook 'update-git-diff)
+(add-hook 'after-revert-hook 'update-git-diff)
+(add-hook 'before-revert-hook 'update-git-diff)
    ;; (setq git-modeline 'update-git-diff)
 
                    (use-package doom-modeline
