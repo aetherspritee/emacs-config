@@ -1,6 +1,7 @@
 - [X] Git Module nicht 1000 mal die Sekunde aufrufen
 - [X] faster completion
 - [ ] snippets support for autocompletion
+- [ ] fix git-diff "not a git directory" bug
 - [ ] darkroom aufsetzen für org mode
 - [ ] long line mode für orgmode (only)
 - [ ] start 1 proper workspace on startup
