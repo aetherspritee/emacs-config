@@ -439,11 +439,13 @@ If on a:
   ("<C-wheel-up>" . text-scale-increase)
   ("<C-wheel-down>" . text-scale-decrease))
 
-(setq git-modeline "")
+(set-face-attribute 'mode-line nil
+                 :box '(:line-width 1 :color "gray20"))
+     (setq git-modeline "")
 
                 (use-package doom-modeline
                   :custom
-                  (doom-modeline-height 25)     ;; Sets modeline height
+                  (doom-modeline-height 30)     ;; Sets modeline height
                   (doom-modeline-bar-width 5)   ;; Sets right bar width
                   (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
                   (lsp-modeline-diagnostics-enable nil)
@@ -475,12 +477,12 @@ If on a:
           evil-operator-state-tag (propertize " Operator "))
 
     (defun setup-doom-modeline-evil-states () ;; setting up colors
-      (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "green3"  :foreground "black")
-      (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange3" :foreground "black")
-      (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "red3"    :foreground "white")
-      (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "blue3"   :foreground "white")
-      (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "pink3" :foreground "black")
-      (set-face-attribute 'doom-modeline-evil-operator-state nil :background "purple3"))
+      (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "yellow green"  :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "medium aquamarine"    :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "deep sky blue"   :foreground "white")
+      (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "orchid" :foreground "black")
+      (set-face-attribute 'doom-modeline-evil-operator-state nil :background "firebrick" :foreground "white"))
 
     :hook
     (after-init . doom-modeline-mode)
@@ -615,7 +617,8 @@ If on a:
   (projectile-project-search-path '("~/projects/" "~/work/" ("~/github" . 1)))) ;; . 1 means only search the first subdirectory level for projects
 ;; Use Bookmarks for smaller, not standard projects
 
-(use-package lsp-ui :commands lsp-ui-mode)
+(setq lsp-use-plists t)
+    (use-package lsp-ui :commands lsp-ui-mode)
     (use-package lsp-mode
       :commands (lsp lsp-deferred)
     :init
@@ -654,18 +657,18 @@ If on a:
 
 (setq lsp-idle-delay 0.01)
 
-(require 'dap-python)
-;; if you installed debugpy, you need to set this
-;; https://github.com/emacs-lsp/dap-mode/issues/306
-(setq dap-python-debugger 'debugpy)
-(dap-register-debug-template "My App"
-  (list :type "python"
-        :args "-i"
-        :cwd nil
-        :env '(("DEBUG" . "1"))
-        :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
-        :request "launch"
-        :name "My App"))
+;; (require 'dap-python)
+;; ;; if you installed debugpy, you need to set this
+;; ;; https://github.com/emacs-lsp/dap-mode/issues/306
+;; (setq dap-python-debugger 'debugpy)
+;; (dap-register-debug-template "My App"
+;;   (list :type "python"
+;;         :args "-i"
+;;         :cwd nil
+;;         :env '(("DEBUG" . "1"))
+;;         :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
+;;         :request "launch"
+;;         :name "My App"))
 
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
@@ -1034,9 +1037,10 @@ If on a:
   (corfu-auto t)                 ;; Enable auto completion
   (corfu-auto-prefix 2)          ;; Minimum length of prefix for auto completion.
   (corfu-popupinfo-mode t)       ;; Enable popup information
-  (corfu-popupinfo-delay 2)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
+  (corfu-popupinfo-delay 0.5)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
   (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
-  (corfu-auto-delay 0.05)
+  (corfu-auto-delay 0.1)
+  (completion-styles '(basic))
   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
   ;; (corfu-preview-current nil)    ;; Disable current candidate preview
@@ -1048,11 +1052,17 @@ If on a:
   ;; `completion-at-point' is often bound to M-TAB.
   (tab-always-indent 'complete)
   (corfu-preview-current nil) ;; Don't insert completion without confirmation
+
+  (corfu-history-mode 1)
+  (savehist-mode 1)
+  (add-to-list 'savehist-additional-variables 'corfu-history)
   ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
   ;; be used globally (M-/).  See also the customization variable
   ;; `global-corfu-modes' to exclude certain modes.
   :init
   (global-corfu-mode))
+
+
 
 (use-package nerd-icons-corfu
   :after corfu
@@ -2345,7 +2355,7 @@ stored in `persp-save-dir'.")
     ;;   :ensure t
     ;;   :config (treemacs-set-scope-type 'Tabs))
 
-(lsp-treemacs-sync-mode 1)
+;; (lsp-treemacs-sync-mode 1)
 
 (use-package visual-regexp-steroids)
 
@@ -2411,19 +2421,21 @@ stored in `persp-save-dir'.")
 
 (defun in-git-p ()
                  (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
-               (defun git-parse-status ()
-                 (interactive)
-                 (concat 
-               " ["
-               (let ((plus-minus (vc-git--run-command-string
-                          buffer-file-name "diff" "--numstat" "--")))
-                 (if (and plus-minus
-                      (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
-                      (concat
-                   (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-                   (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
-                   (propertize "✔" 'face '(:foreground "green3" :weight bold))))
-               "]"))
+		(defun git-parse-status ()
+			(interactive)
+			(concat 
+		" ["
+		;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
+		(let ((plus-minus (shell-command-to-string "~/Scripts/git-diff.sh")))
+			(if (and plus-minus
+				;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
+				(string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
+				(concat
+			(propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
+			(propertize (format "~%s " (match-string 2 plus-minus)) 'face 'nerd-icons-cyan)
+			(propertize (format "~%s" (match-string 3 plus-minus)) 'face 'error))
+			(propertize "✔" 'face '(:foreground "green3" :weight bold))))
+		"]"))
 
             (defun git-remote-status ()
              (interactive)
@@ -2484,3 +2496,5 @@ stored in `persp-save-dir'.")
 (add-hook 'after-revert-hook 'update-git-diff)
 (add-hook 'before-revert-hook 'update-git-diff)
 (add-hook 'buffer-list-update-hook 'update-git-diff)
+
+(setq warning-minimum-level :emergency)
