@@ -63,7 +63,7 @@
 - [[#org-roam-ui][org roam ui]]
 - [[#org-timeblock][org-timeblock]]
 - [[#default-compilation-for-python][default compilation for python]]
-- [[#git-diff][git-diff]]
+- [[#modeline-git-diff][modeline git-diff]]
 
 * Important to load first
 
@@ -365,6 +365,14 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
               (start/leader-keys
                 "d" '(lsp-ui-doc-show :wk "show doc"))
 
+              (start/leader-keys
+                "D b" '(dap-breakpoint-toggle :wk "toogle breakpoint")
+                "D c" '(dap-continue :wk "dap continue")
+                "D n" '(dap-next :wk "dap next")
+                "D s"'(dap-debug :wk "Start debugger")
+                "D q"'(dap-disconnect :wk "Exit debugger")
+                "D d"'(dap-hydra :wk "DAP hydra")
+                )
               (start/leader-keys
                 ;; "H" '(enlight-open :wk "show dashboard"))
                 "H" '(dashboard-open :wk "show dashboard"))
@@ -823,6 +831,23 @@ I like it more than eglot.
     (setq lsp-ui-sideline-show-diagnostics t)
 
     (setq lsp-idle-delay 0.01)
+
+#+end_src
+*** DAP Mode
+I never use it but i should.
+#+begin_src emacs-lisp
+(require 'dap-python)
+;; if you installed debugpy, you need to set this
+;; https://github.com/emacs-lsp/dap-mode/issues/306
+(setq dap-python-debugger 'debugpy)
+(dap-register-debug-template "My App"
+  (list :type "python"
+        :args "-i"
+        :cwd nil
+        :env '(("DEBUG" . "1"))
+        :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
+        :request "launch"
+        :name "My App"))
 
 #+end_src
 
@@ -2822,7 +2847,8 @@ https://www.youtube.com/watch?v=6oeE52bIFyE
     (add-hook 'python-mode-hook 'my/compile-python)
 #+end_src
 
-* git-diff
+* modeline git-diff
+Custom git module for doom modeline. Still full of bugs, but does its job fundamentally.
 #+begin_src emacs-lisp
                    (defun in-git-p ()
                      (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))

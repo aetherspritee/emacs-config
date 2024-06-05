@@ -240,6 +240,14 @@ If on a:
             "d" '(lsp-ui-doc-show :wk "show doc"))
 
           (start/leader-keys
+            "D b" '(dap-breakpoint-toggle :wk "toogle breakpoint")
+            "D c" '(dap-continue :wk "dap continue")
+            "D n" '(dap-next :wk "dap next")
+            "D s"'(dap-debug :wk "Start debugger")
+            "D q"'(dap-disconnect :wk "Exit debugger")
+            "D d"'(dap-hydra :wk "DAP hydra")
+            )
+          (start/leader-keys
             ;; "H" '(enlight-open :wk "show dashboard"))
             "H" '(dashboard-open :wk "show dashboard"))
 
@@ -645,6 +653,19 @@ If on a:
 (setq lsp-ui-sideline-show-diagnostics t)
 
 (setq lsp-idle-delay 0.01)
+
+(require 'dap-python)
+;; if you installed debugpy, you need to set this
+;; https://github.com/emacs-lsp/dap-mode/issues/306
+(setq dap-python-debugger 'debugpy)
+(dap-register-debug-template "My App"
+  (list :type "python"
+        :args "-i"
+        :cwd nil
+        :env '(("DEBUG" . "1"))
+        :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
+        :request "launch"
+        :name "My App"))
 
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
