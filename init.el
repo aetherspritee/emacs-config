@@ -2432,8 +2432,8 @@ stored in `persp-save-dir'.")
 				(string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
 				(concat
 			(propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-			(propertize (format "~%s " (match-string 2 plus-minus)) 'face 'nerd-icons-cyan)
-			(propertize (format "~%s" (match-string 3 plus-minus)) 'face 'error))
+			(propertize (format "~%s " (match-string 3 plus-minus)) 'face 'nerd-icons-cyan)
+			(propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
 			(propertize "✔" 'face '(:foreground "green3" :weight bold))))
 		"]"))
 
