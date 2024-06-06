@@ -425,15 +425,17 @@ If on a:
 (add-to-list 'default-frame-alist '(alpha-background . 100)) ;; For all new frames henceforth
 
 (set-face-attribute 'default nil
-                    :font "CaskaydiaCove Nerd Font" ;; Set your favorite type of font or download JetBrains Mono
-                    :height 120
-                    :weight 'medium)
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right unless I also add this method of setting the default font.
-
-;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
-(setq-default line-spacing 0.12)
+                     :font "CaskaydiaCove Nerd Font" ;; Set your favorite type of font or download JetBrains Mono
+                     :height 120
+                     :weight 'medium)
+ ;; This sets the default font on all graphical frames created after restarting Emacs.
+ ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+ ;; are not right unless I also add this method of setting the default font.
+;;  (custom-theme-set-faces 'user
+;; '(variable-pitch ((t (:family "ETBembo" :height 180 :weight thin))))
+;; '(fixed-pitch ((t ( :family "Fira Code Retina" :height 160)))))
+;;  ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
+ (setq-default line-spacing 0.12)
 
 (use-package emacs
   :bind
@@ -441,6 +443,11 @@ If on a:
   ("C--" . text-scale-decrease)
   ("<C-wheel-up>" . text-scale-increase)
   ("<C-wheel-down>" . text-scale-decrease))
+
+(use-package mixed-pitch
+  :hook
+  ;; If you want it in all text modes:
+  (text-mode . mixed-pitch-mode))
 
 (set-face-attribute 'mode-line nil
                  :box '(:line-width 1 :color "gray20"))

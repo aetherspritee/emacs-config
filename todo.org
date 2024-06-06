@@ -1,7 +1,7 @@
 - [X] Git Module nicht 1000 mal die Sekunde aufrufen
 - [X] faster completion
 - [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
-- [ ] darkroom aufsetzen für org mode
+- [ ] org-mode ricing (? i guess?) (includes some latex improvements)
 - [X] better keybinds for workspace and buffer switching
 - [ ] start 1 proper workspace on startup
 - [ ] integrate consult with persp-mode if possible (nicer buffer list)
