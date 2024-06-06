@@ -267,12 +267,6 @@ If on a:
             "TAB n" '(+workspace/swap-right :wk "Next workspace")
             "TAB p" '(+workspace/swap-left :wk "Previous workspace")
             "TAB d" '(+workspace/delete :wk "Delete workspace")
-            "1" '((lambda () (interactive) (+workspace/switch-to 0)) :wk "Switch to workspace 0")
-            "2" '((lambda () (interactive) (+workspace/switch-to 1)) :wk "Switch to workspace 1")
-            "3" '((lambda () (interactive) (+workspace/switch-to 2)) :wk "Switch to workspace 2")
-            "4" '((lambda () (interactive) (+workspace/switch-to 3)) :wk "Switch to workspace 3")
-            "5" '((lambda () (interactive) (+workspace/switch-to 4)) :wk "Switch to workspace 4")
-            "6" '((lambda () (interactive) (+workspace/switch-to 5)) :wk "Switch to workspace 5")
             "TAB TAB" '(+workspace/new :wk "New persp"))
 
           (start/leader-keys
@@ -354,6 +348,14 @@ If on a:
                    `(lambda (c)
                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
+(define-key evil-normal-state-map (kbd "C-b") 'previous-buffer)
+(define-key evil-normal-state-map (kbd "C-n") 'next-buffer)
+(define-key evil-normal-state-map (kbd "M-1") '(lambda () (interactive) (+workspace/switch-to 0)))
+(define-key evil-normal-state-map (kbd "M-2") '(lambda () (interactive) (+workspace/switch-to 1)))
+(define-key evil-normal-state-map (kbd "M-3") '(lambda () (interactive) (+workspace/switch-to 2)))
+(define-key evil-normal-state-map (kbd "M-4") '(lambda () (interactive) (+workspace/switch-to 3)))
+(define-key evil-normal-state-map (kbd "M-5") '(lambda () (interactive) (+workspace/switch-to 4)))
+(define-key evil-normal-state-map (kbd "M-6") '(lambda () (interactive) (+workspace/switch-to 5)))
 (setq initial-frame-alist (append initial-frame-alist '((left . 75) (top . 75) (width . 240) (height . 73 ))))
 
 (use-package emacs
