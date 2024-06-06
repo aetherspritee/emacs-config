@@ -1,13 +1,12 @@
 - [X] Git Module nicht 1000 mal die Sekunde aufrufen
 - [X] faster completion
-- [ ] snippets support for autocompletion
 - [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
 - [ ] darkroom aufsetzen für org mode
-- [ ] long line mode für orgmode (only)
-- [ ] better keybinds for workspace and buffer switching
+- [X] better keybinds for workspace and buffer switching
 - [ ] start 1 proper workspace on startup
 - [ ] integrate consult with persp-mode if possible (nicer buffer list)
 - [ ] popup support for terminal
+- [ ] org template for random thoughts
 - [X] org roam ui
 - [X] org timeblock
 - [X] magit todos
@@ -53,6 +52,11 @@
 - [-] latex
   + [ ] Overall
   + [X] In Org Mode
+- [-] snippets
+  - [X] tempel as framework
+  - [ ] automatically add to autocompletion maybe??
+  - [ ] check latex templates
+  - [ ] write own templates
 - [X] treemacs
   + [X] lsp integration
   + [X] themes
