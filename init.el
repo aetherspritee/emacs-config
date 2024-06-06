@@ -619,58 +619,86 @@ If on a:
   (projectile-project-search-path '("~/projects/" "~/work/" ("~/github" . 1)))) ;; . 1 means only search the first subdirectory level for projects
 ;; Use Bookmarks for smaller, not standard projects
 
-(setq lsp-use-plists t)
-    (use-package lsp-ui :commands lsp-ui-mode)
-    (use-package lsp-mode
-      :commands (lsp lsp-deferred)
-    :init
-    (defun my/update-completions-list ()
-        (progn
-            (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
-            (setq completion-at-point-functions
-                '(non-greedy-lsp cape-file cape-dabbrev))))
+(setq lsp-use-plists nil)
+        (use-package lsp-ui :commands lsp-ui-mode)
+        (use-package lsp-mode
+          :commands (lsp lsp-deferred)
+        :init
+        (defun my/update-completions-list ()
+            (progn
+                (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
+                (setq completion-at-point-functions
+                    '(non-greedy-lsp cape-file cape-dabbrev))))
 
-      (setq lsp-keymap-prefix "C-c l")
+          (setq lsp-keymap-prefix "C-c l")
 
-      :hook (
-             (python-mode . lsp)
-             (c-mode . lsp)
-             (f90-mode . lsp)
-             (julia-mode . lsp)
-             (go-mode . lsp)
-             (lsp-mode . lsp-enable-which-key-integration)
-             (lsp-mode . lsp-ui-mode)
-             (lsp-completion-mode . my/update-completions-list)
-            )
-      :custom
-        (lsp-completion-provider :none)) ;; we use Corfu!
+          :hook (
+                 (python-mode . lsp)
+                 (c-mode . lsp)
+                 (f90-mode . lsp)
+                 (julia-mode . lsp)
+                 (go-mode . lsp)
+                 (lsp-mode . lsp-enable-which-key-integration)
+                 (lsp-mode . lsp-ui-mode)
+                 (lsp-completion-mode . my/update-completions-list)
+                )
+          :custom
+            (lsp-completion-provider :none)) ;; we use Corfu!
 
-    (use-package dap-mode)
-    ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-(use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
-(setq lsp-ui-doc-position 'at-point)
-(setq lsp-ui-sideline-show-hover nil)
-(setq lsp-ui-sideline-enable t)
-(setq lsp-ui-sideline-show-diagnostics t)
+        (use-package dap-mode)
+        ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+    (use-package lsp-pyright
+      :ensure t
+      :hook (python-mode . (lambda ()
+                              (require 'lsp-pyright)
+                              (lsp))))  ; or lsp-deferred
+    (setq lsp-ui-doc-position 'at-point)
+    (setq lsp-ui-sideline-show-hover nil)
+    (setq lsp-ui-sideline-enable t)
+    (setq lsp-ui-sideline-show-diagnostics t)
 
-(setq lsp-idle-delay 0.01)
+    (setq lsp-idle-delay 0.01)
+;;     (defun lsp-booster--advice-json-parse (old-fn &rest args)
+;;   "Try to parse bytecode instead of json."
+;;   (or
+;;    (when (equal (following-char) ?#)
+;;      (let ((bytecode (read (current-buffer))))
+;;        (when (byte-code-function-p bytecode)
+;;          (funcall bytecode))))
+;;    (apply old-fn args)))
+;; (advice-add (if (progn (require 'json)
+;;                        (fboundp 'json-parse-buffer))
+;;                 'json-parse-buffer
+;;               'json-read)
+;;             :around
+;;             #'lsp-booster--advice-json-parse)
 
-;; (require 'dap-python)
-;; ;; if you installed debugpy, you need to set this
-;; ;; https://github.com/emacs-lsp/dap-mode/issues/306
-;; (setq dap-python-debugger 'debugpy)
-;; (dap-register-debug-template "My App"
-;;   (list :type "python"
-;;         :args "-i"
-;;         :cwd nil
-;;         :env '(("DEBUG" . "1"))
-;;         :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
-;;         :request "launch"
-;;         :name "My App"))
+;; (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+;;   "Prepend emacs-lsp-booster command to lsp CMD."
+;;   (let ((orig-result (funcall old-fn cmd test?)))
+;;     (if (and (not test?)                             ;; for check lsp-server-present?
+;;              (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+;;              lsp-use-plists
+;;              (not (functionp 'json-rpc-connection))  ;; native json-rpc
+;;              (executable-find "emacs-lsp-booster"))
+;;         (progn
+;;           (message "Using emacs-lsp-booster for %s!" orig-result)
+;;           (cons "emacs-lsp-booster" orig-result))
+;;       orig-result)))
+;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+
+(require 'dap-python)
+;; if you installed debugpy, you need to set this
+;; https://github.com/emacs-lsp/dap-mode/issues/306
+(setq dap-python-debugger 'debugpy)
+(dap-register-debug-template "My App"
+  (list :type "python"
+        :args "-i"
+        :cwd nil
+        :env '(("DEBUG" . "1"))
+        :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
+        :request "launch"
+        :name "My App"))
 
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
