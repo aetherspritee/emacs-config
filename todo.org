@@ -5,7 +5,7 @@
 - [X] better keybinds for workspace and buffer switching
 - [ ] start 1 proper workspace on startup
 - [ ] integrate consult with persp-mode if possible (nicer buffer list)
-- [ ] popup support for terminal
+- [X] popup support for terminal
 - [ ] org template for random thoughts
 - [X] org roam ui
 - [X] org timeblock

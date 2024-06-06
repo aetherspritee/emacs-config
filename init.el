@@ -255,6 +255,7 @@ If on a:
             "o a" '(org-agenda :wk "Open agenda")
             "o n" '(treemacs :wk "Treemacs")
             "o b" '(org-timeblock :wk "Org timeblock")
+            "o t" '(vterm-toggle :wk "Terminal")
             )
 
         (start/leader-keys
@@ -1029,8 +1030,15 @@ If on a:
                             (wl . wl)))
                           )
 
-(use-package eat
-  :hook ('eshell-load-hook #'eat-eshell-mode))
+;; (use-package eat
+;;   :hook ('eshell-load-hook #'eat-eshell-mode))
+;; (defun visit-eat-buffer (&optional prefix) "Create or visit a eat buffer. If PREFIX is not nil, create visit in default-directory" (interactive "P") (let* ((eat-buffer-name (format "*eat<%s>" (if prefix default-directory "0")))) (with-current-buffer (eat) (eat-line-mode)) (pop-to-buffer eat-buffer-name display-comint-buffer-action)))
+
+(use-package vterm
+    :ensure t)
+(use-package vterm-toggle
+    :straight (vterm-toggle :host github
+                                :repo "jixiuf/vterm-toggle"))
 
 ;; (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 

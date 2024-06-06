@@ -382,6 +382,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
                 "o a" '(org-agenda :wk "Open agenda")
                 "o n" '(treemacs :wk "Treemacs")
                 "o b" '(org-timeblock :wk "Org timeblock")
+                "o t" '(vterm-toggle :wk "Terminal")
                 )
 
             (start/leader-keys
@@ -1291,10 +1292,20 @@ Eat(Emulate A Terminal) is a terminal emulator within Emacs.
 It's more portable and less overhead for users over like vterm or eshell.
 We setup eat with eshell, if you want to use bash, zsh etc., check out their git [[https://codeberg.org/akib/emacs-eat][repository]] how to do it.
 #+begin_src emacs-lisp
-    (use-package eat
-      :hook ('eshell-load-hook #'eat-eshell-mode))
+    ;; (use-package eat
+    ;;   :hook ('eshell-load-hook #'eat-eshell-mode))
+    ;; (defun visit-eat-buffer (&optional prefix) "Create or visit a eat buffer. If PREFIX is not nil, create visit in default-directory" (interactive "P") (let* ((eat-buffer-name (format "*eat<%s>" (if prefix default-directory "0")))) (with-current-buffer (eat) (eat-line-mode)) (pop-to-buffer eat-buffer-name display-comint-buffer-action)))
 #+end_src
 
+*** vterm
+ol' reliable
+#+begin_src emacs-lisp
+    (use-package vterm
+        :ensure t)
+    (use-package vterm-toggle
+        :straight (vterm-toggle :host github
+                                    :repo "jixiuf/vterm-toggle"))
+#+end_src
 * Multi File Example
 
 ** Adding the lisp directory to load-path
