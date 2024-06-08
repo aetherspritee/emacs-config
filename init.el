@@ -105,7 +105,7 @@ If on a:
                 (image-overlays
                  (cl-find-if (lambda (o) (overlay-get o 'org-image-overlay))
                              overlays)))
-           (+org--toggle-inline-images-in-subtree beg end)
+           (org-toggle-inline-images beg end)
            (if (or image-overlays latex-overlays)
                (org-clear-latex-preview beg end)
              (org--latex-preview-region beg end))))
@@ -153,7 +153,7 @@ If on a:
                 (path (org-element-property :path lineage)))
            (if (or (equal (org-element-property :type lineage) "img")
                    (and path (image-type-from-file-name path)))
-               (+org--toggle-inline-images-in-subtree
+               (org-toggle-inline-images
                 (org-element-property :begin lineage)
                 (org-element-property :end lineage))
              (org-open-at-point arg))))
@@ -162,14 +162,14 @@ If on a:
          (org-toggle-checkbox))
 
         (`paragraph
-         (+org--toggle-inline-images-in-subtree))
+         (org-toggle-inline-images))
 
         (_
          (if (or (org-in-regexp org-ts-regexp-both nil t)
                  (org-in-regexp org-tsr-regexp-both nil  t)
                  (org-in-regexp org-link-any-re nil t))
              (call-interactively #'org-open-at-point)
-           (+org--toggle-inline-images-in-subtree
+           (org-toggle-inline-images
             (org-element-property :begin context)
             (org-element-property :end context))))))))
 
@@ -177,43 +177,57 @@ If on a:
     ;; (define-key org-mode-map (kbd "RET") #'+org/dwim-at-point)
 
 (use-package evil
-          :init ;; Execute code Before a package is loaded
-          (evil-mode)
-          :config ;; Execute code After a package is loaded
-          (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
-          :custom ;; Customization of package custom variables
-          (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
-          (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
-          (evil-want-C-i-jump nil)      ;; Disables C-i jump
-          (evil-undo-system 'undo-redo) ;; C-r to redo
-          (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
-          ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
-          :bind (:map evil-motion-state-map
-                      ("SPC" . nil)
-                      ("RET" . nil)
-                      ;; ("RET" . org-todo)
-                      ("TAB" . nil)))
-        (use-package evil-collection
-          :after evil
-          :config
-          ;; Setting where to use evil-collection
-          ;; (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult lsp-ui-imenu))
-          (evil-set-initial-state 'package-menu-mode 'motion)
-          (evil-collection-init)
-        (setq evil-collection-want-find-usages-bindings t)
-)
-        (use-package evil-commentary
-          :after evil
-          :config
-          (evil-commentary-mode)
-          )
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)
-      (define-key evil-motion-state-map (kbd "g r") 'lsp-find-references))
-    ;; Setting RETURN key in org-mode to follow links
-      (setq org-return-follows-link  t)
+              :init ;; Execute code Before a package is loaded
+              (evil-mode)
+              :config ;; Execute code After a package is loaded
+              (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
+              :custom ;; Customization of package custom variables
+              (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
+              (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
+              (evil-want-C-i-jump nil)      ;; Disables C-i jump
+              (evil-undo-system 'undo-redo) ;; C-r to redo
+              (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
+              ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
+              :bind (:map evil-motion-state-map
+                          ("SPC" . nil)
+                          ("RET" . nil)
+                          ;; ("RET" . org-todo)
+                          ("TAB" . nil)))
+            (use-package evil-collection
+              :after evil
+              :config
+              ;; Setting where to use evil-collection
+              ;; (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult lsp-ui-imenu))
+              (evil-set-initial-state 'package-menu-mode 'motion)
+              (evil-collection-init)
+            (setq evil-collection-want-find-usages-bindings t)
+    )
+            (use-package evil-commentary
+              :after evil
+              :config
+              (evil-commentary-mode)
+              )
+   (defun my/evil-shift-right ()
+  (interactive)
+  (evil-shift-right evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+
+(defun my/evil-shift-left ()
+  (interactive)
+  (evil-shift-left evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+(evil-define-key 'visual global-map (kbd ">") 'my/evil-shift-right)
+(evil-define-key 'visual global-map (kbd "<") 'my/evil-shift-left)
+
+        (with-eval-after-load 'evil-maps
+          (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
+          (define-key evil-motion-state-map (kbd "RET") nil)
+          (define-key evil-motion-state-map (kbd "TAB") nil)
+          (define-key evil-motion-state-map (kbd "g r") 'lsp-find-references))
+        ;; Setting RETURN key in org-mode to follow links
+          (setq org-return-follows-link  t)
 
 (use-package general
           :config
@@ -431,9 +445,9 @@ If on a:
  ;; This sets the default font on all graphical frames created after restarting Emacs.
  ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
  ;; are not right unless I also add this method of setting the default font.
-;;  (custom-theme-set-faces 'user
-;; '(variable-pitch ((t (:family "ETBembo" :height 180 :weight thin))))
-;; '(fixed-pitch ((t ( :family "Fira Code Retina" :height 160)))))
+ (custom-theme-set-faces 'user
+;; '(variable-pitch ((t (:family "Source Code Pro" :height 140 :weight thin))))
+'(fixed-pitch ((t ( :family "CaskaydiaCove Nerd Font" :height 120 :weight medium)))))
 ;;  ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
  (setq-default line-spacing 0.12)
 
@@ -745,106 +759,120 @@ If on a:
 (use-package julia-mode)
 
 (use-package org
-  :ensure nil
-  :custom
-  (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
+      :ensure nil
+      :custom
+      (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
 
-  :hook
-  (org-mode . org-indent-mode) ;; Indent text
+      :hook
+      (org-mode . org-indent-mode) ;; Indent text
 
-  ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
-  ;; Otherwise, org-tempo is broken when you try to <s TAB...
-  ;;(org-mode . (lambda ()
-  ;;              (setq-local electric-pair-inhibit-predicate
-  ;;                          `(lambda (c)
-  ;;                             (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
-  )
-  (setq org-hide-emphasis-markers t)
-(with-no-warnings
-(custom-declare-face '+org-todo-active  '((t (:inherit (bold font-lock-constant-face org-todo)))) "")
-(custom-declare-face '+org-todo-project '((t (:inherit (bold font-lock-doc-face org-todo)))) "")
-(custom-declare-face '+org-todo-onhold  '((t (:inherit (bold warning org-todo)))) "")
-(custom-declare-face '+org-todo-cancel  '((t (:inherit (bold error org-todo)))) ""))
-    (setq org-todo-keywords
-            '((sequence
-            "TODO(t)"
-            "CURR(c)"                             ; A task that needs doing & is ready to do
-            "PROJ(p)"  ; A project, which usually contains other tasks
-            "WORK(u)"
-            "PRCS(v)"                             ; A recurring task
-            "STRT(s)"
-            "THNK(n)"                             ; A task that is in progress
-            "WAIT(w)"  ; Something external is holding up this task
-            "HOLD(h)"  ; This task is paused/on hold because of me
-            "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-            "|"
-            "DONE(d)"  ; Task successfully completed
-            "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
-            (sequence
-            "[ ](T)"   ; A task that needs doing
-            "[-](S)"   ; Task is in progress
-            "[?](W)"   ; Task is being held up or paused
-            "|"
-            "[X](D)")  ; Task was completed
-            (sequence
-            "|"
-            "OKAY(o)"
-            "YES(y)"
-            "NO(n)"))
-            org-todo-keyword-faces
-            '(("[-]"  . +org-todo-active)
-            ("STRT" . +org-todo-active)
-            ("[?]"  . +org-todo-onhold)
-            ("WAIT" . +org-todo-onhold)
-            ("HOLD" . +org-todo-onhold)
-            ("PROJ" . +org-todo-project)
-            ("NO"   . +org-todo-cancel)
-            ("KILL" . +org-todo-cancel)))
+      ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+      ;; Otherwise, org-tempo is broken when you try to <s TAB...
+      ;;(org-mode . (lambda ()
+      ;;              (setq-local electric-pair-inhibit-predicate
+      ;;                          `(lambda (c)
+      ;;                             (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+      )
+      (setq org-hide-emphasis-markers t)
+    (with-no-warnings
+    (custom-declare-face '+org-todo-active  '((t (:inherit (bold font-lock-constant-face org-todo)))) "")
+    (custom-declare-face '+org-todo-project '((t (:inherit (bold font-lock-doc-face org-todo)))) "")
+    (custom-declare-face '+org-todo-onhold  '((t (:inherit (bold warning org-todo)))) "")
+    (custom-declare-face '+org-todo-cancel  '((t (:inherit (bold error org-todo)))) ""))
+        (setq org-todo-keywords
+                '((sequence
+                "TODO(t)"
+                "CURR(c)"                             ; A task that needs doing & is ready to do
+                "PROJ(p)"  ; A project, which usually contains other tasks
+                "WORK(u)"
+                "PRCS(v)"                             ; A recurring task
+                "STRT(s)"
+                "THNK(n)"                             ; A task that is in progress
+                "WAIT(w)"  ; Something external is holding up this task
+                "HOLD(h)"  ; This task is paused/on hold because of me
+                "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+                "|"
+                "DONE(d)"  ; Task successfully completed
+                "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+                (sequence
+                "[ ](T)"   ; A task that needs doing
+                "[-](S)"   ; Task is in progress
+                "[?](W)"   ; Task is being held up or paused
+                "|"
+                "[X](D)")  ; Task was completed
+                (sequence
+                "|"
+                "OKAY(o)"
+                "YES(y)"
+                "NO(n)"))
+                org-todo-keyword-faces
+                '(("[-]"  . +org-todo-active)
+                ("STRT" . +org-todo-active)
+                ("[?]"  . +org-todo-onhold)
+                ("WAIT" . +org-todo-onhold)
+                ("HOLD" . +org-todo-onhold)
+                ("PROJ" . +org-todo-project)
+                ("NO"   . +org-todo-cancel)
+                ("KILL" . +org-todo-cancel)))
 
-(setq org-agenda-files '("~/Dropbox/Orga/"))
-(setq org-agenda-window-setup 'only-window)
-(setq org-agenda-custom-commands
-    '(
-        ("D" "Meine Agenda"
-        ((todo "THNK|HOLD"
-                (
-                (org-agenda-overriding-header " REMINDER\n")
-                ))
-        (agenda " "
-                (
-                (org-agenda-overriding-header " SOOOON\n")
-                (org-agenda-span 30)
-                (org-agenda-start-day "+0d")
-                (org-agenda-show-all-dates nil)
-                (org-agenda-entry-types '(:deadline))
-                (org-deadline-warning-days 0)
-                ))
-        (agenda " "
-                (
-                (org-agenda-overriding-header " Day\n")
-                (org-agenda-span 1)
-                (org-agenda-start-day "+0d")
-                (org-deadline-warning-days 0)
-                (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
-                ))
-        (agenda " "
-                ((org-agenda-overriding-header "󰎕 Tomorrow\n")
-                (org-agenda-start-day "+1d")
-                (org-agenda-span 1)
-                (org-agenda-show-all-dates nil)
-                ))
-        (todo "PROJ"
-                ((org-agenda-overriding-header "󰀸 Projects i want to do :]\n")))
-        (agenda " "
-                ((org-agenda-overriding-header " ÜBERMORGEN\n")
-                (org-agenda-start-day "+2d")
-                (org-agenda-span 1)
-                (org-agenda-show-all-dates nil)
-                ))
-        (todo "CURR"
-                ((org-agenda-overriding-header " Current projects\n")))
-        ))
-        ))
+    (setq org-agenda-files '("~/Dropbox/Orga/"))
+    (setq org-agenda-window-setup 'only-window)
+    (setq org-agenda-custom-commands
+        '(
+            ("D" "Meine Agenda"
+            ((todo "THNK|HOLD"
+                    (
+                    (org-agenda-overriding-header " REMINDER\n")
+                    ))
+            (agenda " "
+                    (
+                    (org-agenda-overriding-header " SOOOON\n")
+                    (org-agenda-span 30)
+                    (org-agenda-start-day "+0d")
+                    (org-agenda-show-all-dates nil)
+                    (org-agenda-entry-types '(:deadline))
+                    (org-deadline-warning-days 0)
+                    ))
+            (agenda " "
+                    (
+                    (org-agenda-overriding-header " Day\n")
+                    (org-agenda-span 1)
+                    (org-agenda-start-day "+0d")
+                    (org-deadline-warning-days 0)
+                    (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                    ))
+            (agenda " "
+                    ((org-agenda-overriding-header "󰎕 Tomorrow\n")
+                    (org-agenda-start-day "+1d")
+                    (org-agenda-span 1)
+                    (org-agenda-show-all-dates nil)
+                    ))
+            (todo "PROJ"
+                    ((org-agenda-overriding-header "󰀸 Projects i want to do :]\n")))
+            (agenda " "
+                    ((org-agenda-overriding-header " ÜBERMORGEN\n")
+                    (org-agenda-start-day "+2d")
+                    (org-agenda-span 1)
+                    (org-agenda-show-all-dates nil)
+                    ))
+            (todo "CURR"
+                    ((org-agenda-overriding-header " Current projects\n")))
+            ))
+            ))
+ 
+
+    ;; Improve org mode looks
+    (setq-default org-startup-indented t
+                  org-use-sub-superscripts "{}"
+                  org-hide-emphasis-markers t
+                  org-startup-with-inline-images t
+                  org-image-actual-width '(300))
+(setq org-latex-create-formula-image-program 'dvisvgm)
+
+(use-package org-roam-ui)
+
+(use-package org-timeblock)
+(setq org-timeblock-span 1)
 
 (use-package toc-org
   :commands toc-org-enable
@@ -1036,6 +1064,18 @@ If on a:
                             (file . find-file)
                             (wl . wl)))
                           )
+
+(use-package org-fragtog
+  :after org
+  :custom
+  (org-startup-with-latex-preview t)
+  :hook
+  (org-mode . org-fragtog-mode)
+  :custom
+  (org-format-latex-options
+   (plist-put org-format-latex-options :scale 2)
+   (plist-put org-format-latex-options :foreground 'auto)
+   (plist-put org-format-latex-options :background 'auto)))
 
 ;; (use-package eat
 ;;   :hook ('eshell-load-hook #'eat-eshell-mode))
@@ -2489,11 +2529,6 @@ stored in `persp-save-dir'.")
 
 (setq load-prefer-newer t)
 
-(use-package org-roam-ui)
-
-(use-package org-timeblock)
-(setq org-timeblock-span 1)
-
 (defun my/compile-python ()
       "bruh"
     (setq-local compile-command
@@ -2580,3 +2615,26 @@ stored in `persp-save-dir'.")
 (add-hook 'buffer-list-update-hook 'update-git-diff)
 
 (setq warning-minimum-level :emergency)
+
+;; Distraction-free writing
+    (defun ews-distraction-free ()
+      "Distraction-free writing environment using Olivetti package."
+      (interactive)
+      (if (equal olivetti-mode nil)
+          (progn
+            (window-configuration-to-register 1)
+            (delete-other-windows)
+            (olivetti-set-width 180)
+            (text-scale-set 2)
+            (olivetti-mode t))
+        (progn
+          (if (eq (length (window-list)) 1)
+              (jump-to-register 1))
+          (olivetti-mode 0)
+          (text-scale-set 0))))
+
+    (use-package olivetti
+      :demand t
+      :bind
+      (("<f9>" . ews-distraction-free)))
+(add-hook 'olivetti-mode-hook '(lambda () (display-line-numbers-mode -1)))

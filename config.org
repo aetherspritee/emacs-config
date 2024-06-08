@@ -60,12 +60,10 @@
 - [[#flycheck][flycheck]]
 - [[#promote-popup-buffer-to-full-buffer][Promote popup buffer to full buffer]]
 - [[#use-new-compiled-package-versions][use new compiled package versions]]
-- [[#org-roam-ui][org roam ui]]
-- [[#org-timeblock][org-timeblock]]
 - [[#default-compilation-for-python][default compilation for python]]
 - [[#modeline-git-diff][modeline git-diff]]
 - [[#no-focking-warnings-man][no FOCKING warnings man]]
-- [[#zen][zen]]
+- [[#olivetti-mode][olivetti mode]]
 
 * Important to load first
 
@@ -223,7 +221,7 @@ If you don't want to use evil-mode don't forget to remove:
                     (image-overlays
                      (cl-find-if (lambda (o) (overlay-get o 'org-image-overlay))
                                  overlays)))
-               (+org--toggle-inline-images-in-subtree beg end)
+               (org-toggle-inline-images beg end)
                (if (or image-overlays latex-overlays)
                    (org-clear-latex-preview beg end)
                  (org--latex-preview-region beg end))))
@@ -271,7 +269,7 @@ If you don't want to use evil-mode don't forget to remove:
                     (path (org-element-property :path lineage)))
                (if (or (equal (org-element-property :type lineage) "img")
                        (and path (image-type-from-file-name path)))
-                   (+org--toggle-inline-images-in-subtree
+                   (org-toggle-inline-images
                     (org-element-property :begin lineage)
                     (org-element-property :end lineage))
                  (org-open-at-point arg))))
@@ -280,21 +278,21 @@ If you don't want to use evil-mode don't forget to remove:
              (org-toggle-checkbox))
 
             (`paragraph
-             (+org--toggle-inline-images-in-subtree))
+             (org-toggle-inline-images))
 
             (_
              (if (or (org-in-regexp org-ts-regexp-both nil t)
                      (org-in-regexp org-tsr-regexp-both nil  t)
                      (org-in-regexp org-link-any-re nil t))
                  (call-interactively #'org-open-at-point)
-               (+org--toggle-inline-images-in-subtree
+               (org-toggle-inline-images
                 (org-element-property :begin context)
                 (org-element-property :end context))))))))
 
         ;; (evil-define-key 'normal 'evil-org-mode "RET" #'+org/dwim-at-point)
         ;; (define-key org-mode-map (kbd "RET") #'+org/dwim-at-point)
 #+end_src
-  
+*** Actual evil setup xd
 #+begin_src emacs-lisp
             (use-package evil
               :init ;; Execute code Before a package is loaded
@@ -327,6 +325,20 @@ If you don't want to use evil-mode don't forget to remove:
               :config
               (evil-commentary-mode)
               )
+   (defun my/evil-shift-right ()
+  (interactive)
+  (evil-shift-right evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+
+(defun my/evil-shift-left ()
+  (interactive)
+  (evil-shift-left evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+(evil-define-key 'visual global-map (kbd ">") 'my/evil-shift-right)
+(evil-define-key 'visual global-map (kbd "<") 'my/evil-shift-left)
+
         (with-eval-after-load 'evil-maps
           (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
           (define-key evil-motion-state-map (kbd "RET") nil)
@@ -579,9 +591,9 @@ With Emacs version 29, true transparency has been added.
      ;; This sets the default font on all graphical frames created after restarting Emacs.
      ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
      ;; are not right unless I also add this method of setting the default font.
-    ;;  (custom-theme-set-faces 'user
-    ;; '(variable-pitch ((t (:family "ETBembo" :height 180 :weight thin))))
-    ;; '(fixed-pitch ((t ( :family "Fira Code Retina" :height 160)))))
+     (custom-theme-set-faces 'user
+    ;; '(variable-pitch ((t (:family "Source Code Pro" :height 140 :weight thin))))
+    '(fixed-pitch ((t ( :family "CaskaydiaCove Nerd Font" :height 120 :weight medium)))))
     ;;  ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
      (setq-default line-spacing 0.12)
 #+end_src
@@ -1067,6 +1079,27 @@ much like the literate programming ideas that Donald Knuth made famous.
                     ((org-agenda-overriding-header " Current projects\n")))
             ))
             ))
+ 
+
+    ;; Improve org mode looks
+    (setq-default org-startup-indented t
+                  org-use-sub-superscripts "{}"
+                  org-hide-emphasis-markers t
+                  org-startup-with-inline-images t
+                  org-image-actual-width '(300))
+(setq org-latex-create-formula-image-program 'dvisvgm)
+
+#+end_src
+
+**** org roam ui
+#+begin_src emacs-lisp
+(use-package org-roam-ui)
+#+end_src
+
+**** org-timeblock
+#+begin_src emacs-lisp
+(use-package org-timeblock)
+(setq org-timeblock-span 1)
 #+end_src
 
 **** Table of Contents
@@ -1076,14 +1109,6 @@ much like the literate programming ideas that Donald Knuth made famous.
       :commands toc-org-enable
       :hook (org-mode . toc-org-mode))
 #+end_src
-
-# **** Org Superstar
-# Prettify headings and plain lists in Org mode. Modern version of org-bullets.
-# #+begin_src emacs-lisp
-#     (use-package org-superstar
-#       :after org
-#       :hook (org-mode . org-superstar-mode))
-# #+end_src
 
 **** org-modern
 
@@ -1293,6 +1318,21 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
                               )
 #+end_src
 
+
+**** org fragtog
+#+begin_src emacs-lisp
+  (use-package org-fragtog
+    :after org
+    :custom
+    (org-startup-with-latex-preview t)
+    :hook
+    (org-mode . org-fragtog-mode)
+    :custom
+    (org-format-latex-options
+     (plist-put org-format-latex-options :scale 2)
+     (plist-put org-format-latex-options :foreground 'auto)
+     (plist-put org-format-latex-options :background 'auto)))
+#+end_src
 
 ** Terminal
 
@@ -2926,17 +2966,6 @@ Required for lsp-ui
 (setq load-prefer-newer t)
 #+end_src
 
-* org roam ui
-#+begin_src emacs-lisp
-(use-package org-roam-ui)
-#+end_src
-
-* org-timeblock
-#+begin_src emacs-lisp
-(use-package org-timeblock)
-(setq org-timeblock-span 1)
-#+end_src
-
 * default compilation for python
 https://www.youtube.com/watch?v=6oeE52bIFyE
 #+begin_src emacs-lisp
@@ -3035,17 +3064,29 @@ Custom git module for doom modeline. Still full of bugs, but does its job fundam
 (setq warning-minimum-level :emergency)
 #+end_src
 
-* zen
-i dont really like the setup below, i want something more akin to https://lucidmanager.org/productivity/ricing-org-mode/.
-# ** writeroom mode
-# #+begin_src emacs-lisp
-#     (use-package writeroom-mode)
-#     (add-hook 'org-mode-hook 'writeroom-mode)
-# #+end_src
-# ** darkroom
-# #+begin_src emacs-lisp
-#     (use-package darkroom)
-#     (add-hook 'org-mode-hook 'darkroom-mode)
-#     (add-hook 'org-mode-hook '(lambda () (display-line-numbers-mode -1)))
-#     (add-hook 'org-mode-hook 'visual-line-mode)
-# #+end_src
+* olivetti mode
+#+begin_src emacs-lisp
+
+        ;; Distraction-free writing
+        (defun ews-distraction-free ()
+          "Distraction-free writing environment using Olivetti package."
+          (interactive)
+          (if (equal olivetti-mode nil)
+              (progn
+                (window-configuration-to-register 1)
+                (delete-other-windows)
+                (olivetti-set-width 180)
+                (text-scale-set 2)
+                (olivetti-mode t))
+            (progn
+              (if (eq (length (window-list)) 1)
+                  (jump-to-register 1))
+              (olivetti-mode 0)
+              (text-scale-set 0))))
+
+        (use-package olivetti
+          :demand t
+          :bind
+          (("<f9>" . ews-distraction-free)))
+    (add-hook 'olivetti-mode-hook '(lambda () (display-line-numbers-mode -1)))
+#+end_src

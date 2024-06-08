@@ -1,7 +1,15 @@
 - [X] Git Module nicht 1000 mal die Sekunde aufrufen
 - [X] faster completion
 - [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
-- [ ] org-mode ricing (? i guess?) (includes some latex improvements)
+- [ ] change fonts, make them work with emacsclient
+- [X] keep visual selection after indenting in evil
+- [-] org-mode ricing 
+  - [X] mixed fonts
+  - [X] sharper latex
+  - [ ] snippets for latex
+  - [ ] better latex highlighting
+  - [X] fragtog
+  - [ ] better handling of image inline toggling
 - [X] better keybinds for workspace and buffer switching
 - [ ] start 1 proper workspace on startup
 - [ ] integrate consult with persp-mode if possible (nicer buffer list)
@@ -20,7 +28,7 @@
 - [-] org roam
   + [X] keybinds
   + [X] cite ref function using cite: syntax
-  + [ ] automatically start org-roam-bibtex-mode
+  + [ ] properly start org-roam-bibtex-mode
   + [X] get bibtex integration
 - [X] workspaces
   + [X] fix keybinds and errors
