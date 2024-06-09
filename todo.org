@@ -77,4 +77,4 @@
   - [X] autoload contexts
   - [ ] get uni acc to work
   - [ ] prettify mu4e
-  - [ ] get mu4e in modeline to work
+  - [X] get mu4e in modeline to work

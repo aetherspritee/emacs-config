@@ -2645,7 +2645,7 @@ stored in `persp-save-dir'.")
 (require 'smtpmail)
     (setq send-mail-function 'smtpmail-send-it)
     (setq message-send-mail-function 'smtpmail-send-it)
-    
+
             (use-package mu4e
               :ensure nil
               :load-path "/usr/share/emacs/site-lisp/mu4e/"
@@ -2711,3 +2711,6 @@ stored in `persp-save-dir'.")
                 (when msg
                   (string-prefix-p "/Fastmail" (mu4e-message-field msg :maildir))))
             :vars '())))
+(mu4e-alert-set-default-style 'libnotify)
+(add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+(add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
