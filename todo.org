@@ -74,6 +74,7 @@
 - [X] delete word with backspace ONLY in find file
 - [-] email
   - [X] get gmail to work
-  - [ ] autoload contexts
+  - [X] autoload contexts
   - [ ] get uni acc to work
   - [ ] prettify mu4e
+  - [ ] get mu4e in modeline to work
