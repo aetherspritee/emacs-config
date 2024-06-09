@@ -225,6 +225,7 @@ If on a:
           (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
           (define-key evil-motion-state-map (kbd "RET") nil)
           (define-key evil-motion-state-map (kbd "TAB") nil)
+          (define-key evil-motion-state-map (kbd "K") nil)
           (define-key evil-motion-state-map (kbd "g r") 'lsp-find-references))
         ;; Setting RETURN key in org-mode to follow links
           (setq org-return-follows-link  t)
@@ -267,6 +268,7 @@ If on a:
 
           (start/leader-keys
             "o a" '(org-agenda :wk "Open agenda")
+            "o m" '(org-agenda :wk "Open mu4e")
             "o n" '(treemacs :wk "Treemacs")
             "o b" '(org-timeblock :wk "Org timeblock")
             "o t" '(vterm-toggle :wk "Terminal")
@@ -276,6 +278,7 @@ If on a:
             "c c" '(compile :wk "compile")
             "c k" '(kill-compilation :wk "kill compilation")
             "c C" '(recompile :wk "kill compilation")
+            "c r" '(lsp-rename :wk "rename symbol")
             "c s" '(lsp-treemacs-symbols :wk "treemacs symbols"))
 
           (start/leader-keys
@@ -352,6 +355,7 @@ If on a:
           (start/leader-keys
             "t" '(:ignore t :wk "Toggle")
             "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+            "t i" '(org-toggle-inline-images :wk "Toggle org inline image")
             "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 
     ;; (add-hook prog-mode-hook
@@ -463,54 +467,57 @@ If on a:
   ;; If you want it in all text modes:
   (text-mode . mixed-pitch-mode))
 
-(set-face-attribute 'mode-line nil
-                 :box '(:line-width 1 :color "gray20"))
-     (setq git-modeline "")
+(use-package mu4e-alert)
+     (set-face-attribute 'mode-line nil
+                     :box '(:line-width 1 :color "gray20"))
+         (setq git-modeline "")
 
-                (use-package doom-modeline
-                  :custom
-                  (doom-modeline-height 30)     ;; Sets modeline height
-                  (doom-modeline-bar-width 5)   ;; Sets right bar width
-                  (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
-                  (lsp-modeline-diagnostics-enable nil)
-                  (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
-                  (doom-modeline-env-enable-python t)
-                  (doom-modeline-modal-icon nil)
-                  (doom-modeline-buffer-file-name-style 'relative-from-project)
-                  ;; (doom-modeline-vcs-max-length 0)
-                  :config
-                  (doom-modeline-def-segment my-vcs
-                    (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
-                     ))
+                    (use-package doom-modeline
+                      :custom
+                      (doom-modeline-height 30)     ;; Sets modeline height
+                      (doom-modeline-bar-width 5)   ;; Sets right bar width
+                      (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+                      (lsp-modeline-diagnostics-enable nil)
+                      (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+                      (doom-modeline-mu4e t) 
+                      (mu4e-alert-enable-mode-line-display)
+                      (doom-modeline-env-enable-python t)
+                      (doom-modeline-modal-icon nil)
+                      (doom-modeline-buffer-file-name-style 'relative-from-project)
+                      ;; (doom-modeline-vcs-max-length 0)
+                      :config
+                      (doom-modeline-def-segment my-vcs
+                        (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
+                         ))
 
-            (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-            ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-            (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
-            (doom-modeline-def-modeline 'my-simple-line
-              '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
-              '(my-vcs misc-info minor-modes major-mode process check))
-            (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-            ;; Set default mode-line
+                (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
+                (doom-modeline-def-modeline 'my-simple-line
+                  '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
+                  '(mu4e my-vcs misc-info minor-modes major-mode process check))
+                (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                ;; Set default mode-line
 
-    (setq doom-modeline-modal-icon nil
-          evil-normal-state-tag   (propertize " Normal ")
-          evil-emacs-state-tag    (propertize " Emacs " )
-          evil-insert-state-tag   (propertize " Insert ")
-          evil-motion-state-tag   (propertize " Motion ")
-          evil-visual-state-tag   (propertize " Visual ")
-          evil-operator-state-tag (propertize " Operator "))
+        (setq doom-modeline-modal-icon nil
+              evil-normal-state-tag   (propertize " Normal ")
+              evil-emacs-state-tag    (propertize " Emacs " )
+              evil-insert-state-tag   (propertize " Insert ")
+              evil-motion-state-tag   (propertize " Motion ")
+              evil-visual-state-tag   (propertize " Visual ")
+              evil-operator-state-tag (propertize " Operator "))
 
-    (defun setup-doom-modeline-evil-states () ;; setting up colors
-      (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "yellow green"  :foreground "black")
-      (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange" :foreground "black")
-      (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "medium aquamarine"    :foreground "white")
-      (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "deep sky blue"   :foreground "white")
-      (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "orchid" :foreground "black")
-      (set-face-attribute 'doom-modeline-evil-operator-state nil :background "firebrick" :foreground "white"))
+        (defun setup-doom-modeline-evil-states () ;; setting up colors
+          (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "yellow green"  :foreground "black")
+          (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange" :foreground "black")
+          (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "medium aquamarine"    :foreground "white")
+          (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "deep sky blue"   :foreground "white")
+          (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "orchid" :foreground "black")
+          (set-face-attribute 'doom-modeline-evil-operator-state nil :background "firebrick" :foreground "white"))
 
-    :hook
-    (after-init . doom-modeline-mode)
-)
+        :hook
+        (after-init . doom-modeline-mode)
+    )
 
 (defun my/doom-dashboard-insert-recents-shortmenu (&rest _)
       "Insert recent files short menu widget."
@@ -2171,18 +2178,15 @@ stored in `persp-save-dir'.")
 
 
   ;;;; Create main workspace
-  ;; The default perspective persp-mode creates is special and doesn't represent
-  ;; a real persp object, so buffers can't really be assigned to it, among other
-  ;; quirks, so I replace it with a "main" perspective.
-  ;; (add-hook '(persp-mode-hook persp-after-load-state-functions)
-  ;;   (defun +workspaces-ensure-no-nil-workspaces-h (&rest _)
-  ;;     (when persp-mode
-  ;;       (dolist (frame (frame-list))
-  ;;         (when (string= (safe-persp-name (get-current-persp frame)) persp-nil-name)
-  ;;           ;; Take extra steps to ensure no frame ends up in the nil perspective
-  ;;           (persp-frame-switch (or (cadr (hash-table-keys *persp-hash*))
-  ;;                                   +workspaces-main)
-  ;;                               frame))))))
+  (add-hook '(persp-mode-hook persp-after-load-state-functions)
+    (defun +workspaces-ensure-no-nil-workspaces-h (&rest _)
+      (when persp-mode
+        (dolist (frame (frame-list))
+          (when (string= (safe-persp-name (get-current-persp frame)) persp-nil-name)
+            ;; Take extra steps to ensure no frame ends up in the nil perspective
+            (persp-frame-switch (or (cadr (hash-table-keys *persp-hash*))
+                                    +workspaces-main)
+                                frame))))))
 
   (add-hook 'persp-mode-hook
     (defun +workspaces-init-first-workspace-h (&rest _)
@@ -2538,24 +2542,23 @@ stored in `persp-save-dir'.")
 
 (defun in-git-p ()
                  (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
-		(defun git-parse-status ()
-			(interactive)
-			(concat 
-		" ["
-		;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
-		(let ((plus-minus (shell-command-to-string "~/Scripts/git-diff.sh")))
-			(if (and plus-minus
-				;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
-				(string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
-				(concat
-			(propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-			(propertize (format "~%s " (match-string 3 plus-minus)) 'face 'nerd-icons-cyan)
-			(propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
-			(propertize "✔" 'face '(:foreground "green3" :weight bold))))
-		"]"))
+        (defun git-parse-status ()
+            (interactive)
+            (concat 
+        " ["
+        ;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
+        (let ((plus-minus (shell-command-to-string (concat "~/Scripts/git-diff/diff " buffer-file-name))))
+            (if (and plus-minus
+                ;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
+                (string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
+                (concat
+            (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
+            (propertize (format "~%s " (match-string 3 plus-minus)) 'face 'nerd-icons-cyan)
+            (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
+            (propertize "✔" 'face '(:foreground "green3" :weight bold))))
+        "]"))
 
             (defun git-remote-status ()
-             (interactive)
              (let* (;; get the branch we are on.
                     (branch (s-trim
                              (shell-command-to-string
@@ -2638,3 +2641,73 @@ stored in `persp-save-dir'.")
       :bind
       (("<f9>" . ews-distraction-free)))
 (add-hook 'olivetti-mode-hook '(lambda () (display-line-numbers-mode -1)))
+
+(require 'smtpmail)
+    (setq send-mail-function 'smtpmail-send-it)
+    (setq message-send-mail-function 'smtpmail-send-it)
+    
+            (use-package mu4e
+              :ensure nil
+              :load-path "/usr/share/emacs/site-lisp/mu4e/"
+              :config
+
+              ;; This is set to 't' to avoid mail syncing issues when using mbsync
+              (setq mu4e-change-filenames-when-moving t)
+
+              ;; Refresh mail using isync every 10 minutes
+              (setq message-send-mail-function 'smtpmail-send-it)
+              (setq mu4e-update-interval (* 10 60))
+              (setq mu4e-get-mail-command "mbsync -a")
+              (setq mu4e-maildir "~/Mail/gmail")
+              (setq user-mail-address "schautendustin@gmail.com")
+              (setq smtpmail-smtp-server "smtp.gmail.com")
+              (setq smtpmail-smtp-service 465)
+              (setq smtpmail-stream-type ssl)
+              (setq mu4e-drafts-folder "/[Gmail]/Drafts")
+              (setq mu4e-sent-folder   "/[Gmail]/Sent Mail")
+              (setq mu4e-refile-folder "/[Gmail]/All Mail")
+              (setq mu4e-trash-folder  "/[Gmail]/Trash")
+
+
+              (setq mu4e-maildir-shortcuts
+                  '(("/Inbox"             . ?i)
+                    ("/[Gmail]/Sent Mail" . ?s)
+                    ("/[Gmail]/Trash"     . ?t)
+                    ("/[Gmail]/Drafts"    . ?d)
+                    ("/[Gmail]/All Mail"  . ?a)))
+)
+
+
+    (setq mu4e-contexts
+          (list
+           ;; Work account
+           (make-mu4e-context
+            :name "Work"
+            :match-func
+              (lambda (msg)
+                (when msg
+                  (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
+            :vars '((user-mail-address . "schautendustin@gmail.com")
+                    (user-full-name    . "Dustin Schauten")
+                    (send-mail-function . 'smtpmail-send-it)
+                    (starttls-use-gnutls . t)
+                    (smtpmail-starttls-credentials . '(("smtp.gmail.com" 465 nil nil)))
+                    (smtpmail-auth-credentials . '(("smtp.gmail.com" 465 "schautendustin@gmail.com" nil)))
+                    (smtpmail-default-smtp-server . "smtp.gmail.com")
+                    (smtpmail-smtp-server . "smtp.gmail.com")
+                    (smtpmail-stream-type  . ssl)
+                    (smtpmail-smtp-service . 465)
+                    (smtpmail-auth-credentials (expand-file-name "~/.authinfo.gpg"))
+                    (mu4e-drafts-folder  . "/Gmail/[Gmail]/Drafts")
+                    (mu4e-sent-folder  . "/Gmail/[Gmail]/Sent Mail")
+                    (mu4e-refile-folder  . "/Gmail/[Gmail]/All Mail")
+                    (mu4e-trash-folder  . "/Gmail/[Gmail]/Trash")))
+
+           ;; Personal account
+           (make-mu4e-context
+            :name "Personal"
+            :match-func
+              (lambda (msg)
+                (when msg
+                  (string-prefix-p "/Fastmail" (mu4e-message-field msg :maildir))))
+            :vars '())))

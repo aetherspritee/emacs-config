@@ -1,9 +1,11 @@
 - [X] Git Module nicht 1000 mal die Sekunde aufrufen
 - [X] faster completion
 - [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
+- [ ] fix git-diff to not run in minibuffer
 - [ ] change fonts, make them work with emacsclient
+- [X] unbind Shift k
 - [X] keep visual selection after indenting in evil
-- [-] org-mode ricing 
+- [-] org-mode ricin 
   - [X] mixed fonts
   - [X] sharper latex
   - [ ] snippets for latex
@@ -70,3 +72,8 @@
   + [X] themes
 - [X] use C-J and C-K to scroll through lists
 - [X] delete word with backspace ONLY in find file
+- [-] email
+  - [X] get gmail to work
+  - [ ] autoload contexts
+  - [ ] get uni acc to work
+  - [ ] prettify mu4e
