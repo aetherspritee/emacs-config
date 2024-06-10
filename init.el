@@ -268,12 +268,15 @@ If on a:
 
           (start/leader-keys
             "o a" '(org-agenda :wk "Open agenda")
-            "o m" '(org-agenda :wk "Open mu4e")
+            "o m" '(mu4e :wk "Open mu4e")
             "o n" '(treemacs :wk "Treemacs")
             "o b" '(org-timeblock :wk "Org timeblock")
             "o t" '(vterm-toggle :wk "Terminal")
             )
 
+          (start/leader-keys
+            "m p" '(mu4e-update-mail-and-index :wk "pull mail")
+            )
         (start/leader-keys
             "c c" '(compile :wk "compile")
             "c k" '(kill-compilation :wk "kill compilation")
@@ -339,18 +342,11 @@ If on a:
             "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
             "N c" '(org-cite-insert :wk "insert orb link"
     ))
-          ;; (start/leader-keys
-          ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-          ;;   "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon"))
 
           (start/leader-keys
             "r r" '((lambda () (interactive)
                       (load-file "~/.config/emacs/init.el"))
                     :wk "Reload Emacs config"))
-
-          ;; (start/leader-keys
-          ;;   "s" '(:ignore t :wk "Show")
-          ;;   "s e" '(eat :wk "Eat terminal"))
 
           (start/leader-keys
             "t" '(:ignore t :wk "Toggle")
@@ -358,9 +354,6 @@ If on a:
             "t i" '(org-toggle-inline-images :wk "Toggle org inline image")
             "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 
-    ;; (add-hook prog-mode-hook
-    ;; (lambda ()
-    ;; (local-set-key "g r" 'lsp-find-references)))
 
     (add-hook 'org-mode-hook (lambda ()
            (setq-local electric-pair-inhibit-predicate
@@ -467,57 +460,67 @@ If on a:
   ;; If you want it in all text modes:
   (text-mode . mixed-pitch-mode))
 
-(use-package mu4e-alert)
-     (set-face-attribute 'mode-line nil
-                     :box '(:line-width 1 :color "gray20"))
-         (setq git-modeline "")
-
-                    (use-package doom-modeline
-                      :custom
-                      (doom-modeline-height 30)     ;; Sets modeline height
-                      (doom-modeline-bar-width 5)   ;; Sets right bar width
-                      (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
-                      (lsp-modeline-diagnostics-enable nil)
-                      (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
-                      (doom-modeline-mu4e t) 
-                      (mu4e-alert-enable-mode-line-display)
-                      (doom-modeline-env-enable-python t)
-                      (doom-modeline-modal-icon nil)
-                      (doom-modeline-buffer-file-name-style 'relative-from-project)
-                      ;; (doom-modeline-vcs-max-length 0)
-                      :config
-                      (doom-modeline-def-segment my-vcs
-                        (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
-                         ))
-
-                (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-                ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-                (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
-                (doom-modeline-def-modeline 'my-simple-line
-                  '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
-                  '(mu4e my-vcs misc-info minor-modes major-mode process check))
-                (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
-                ;; Set default mode-line
-
-        (setq doom-modeline-modal-icon nil
-              evil-normal-state-tag   (propertize " Normal ")
-              evil-emacs-state-tag    (propertize " Emacs " )
-              evil-insert-state-tag   (propertize " Insert ")
-              evil-motion-state-tag   (propertize " Motion ")
-              evil-visual-state-tag   (propertize " Visual ")
-              evil-operator-state-tag (propertize " Operator "))
-
-        (defun setup-doom-modeline-evil-states () ;; setting up colors
-          (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "yellow green"  :foreground "black")
-          (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange" :foreground "black")
-          (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "medium aquamarine"    :foreground "white")
-          (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "deep sky blue"   :foreground "white")
-          (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "orchid" :foreground "black")
-          (set-face-attribute 'doom-modeline-evil-operator-state nil :background "firebrick" :foreground "white"))
-
-        :hook
-        (after-init . doom-modeline-mode)
+(use-package mu4e-alert
+    :after mu4e
+    :init
+    (mu4e-alert-enable-mode-line-display)
+    (defun gjstein-refresh-mu4e-alert-mode-line ()
+  (interactive)
+  (mu4e-alert-enable-mode-line-display)
+  )
+(run-with-timer 0 60 'gjstein-refresh-mu4e-alert-mode-line)
     )
+       (set-face-attribute 'mode-line nil
+                       :box '(:line-width 1 :color "gray20"))
+           (setq git-modeline "")
+
+                      (use-package doom-modeline
+                        :custom
+                        (doom-modeline-height 30)     ;; Sets modeline height
+                        (doom-modeline-bar-width 5)   ;; Sets right bar width
+                        (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+                        (lsp-modeline-diagnostics-enable nil)
+                        (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+                        (doom-modeline-mu4e t) 
+                        (mu4e-alert-enable-mode-line-display)
+                        (doom-modeline-env-enable-python t)
+                        (doom-modeline-modal-icon nil)
+                        (doom-modeline-always-visible-segments '(mu4e))
+                        (doom-modeline-buffer-file-name-style 'relative-from-project)
+                        ;; (doom-modeline-vcs-max-length 0)
+                        :config
+                        (doom-modeline-def-segment my-vcs
+                          (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
+                           ))
+
+                  (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                  ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                  (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
+                  (doom-modeline-def-modeline 'my-simple-line
+                    '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
+                    '(mu4e my-vcs misc-info minor-modes major-mode process check))
+                  (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                  ;; Set default mode-line
+
+          (setq doom-modeline-modal-icon nil
+                evil-normal-state-tag   (propertize " Normal ")
+                evil-emacs-state-tag    (propertize " Emacs " )
+                evil-insert-state-tag   (propertize " Insert ")
+                evil-motion-state-tag   (propertize " Motion ")
+                evil-visual-state-tag   (propertize " Visual ")
+                evil-operator-state-tag (propertize " Operator "))
+
+          (defun setup-doom-modeline-evil-states () ;; setting up colors
+            (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "yellow green"  :foreground "black")
+            (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange" :foreground "black")
+            (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "medium aquamarine"    :foreground "white")
+            (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "deep sky blue"   :foreground "white")
+            (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "orchid" :foreground "black")
+            (set-face-attribute 'doom-modeline-evil-operator-state nil :background "firebrick" :foreground "white"))
+
+          :hook
+          (after-init . doom-modeline-mode)
+      )
 
 (defun my/doom-dashboard-insert-recents-shortmenu (&rest _)
       "Insert recent files short menu widget."
@@ -2713,4 +2716,4 @@ stored in `persp-save-dir'.")
             :vars '())))
 (mu4e-alert-set-default-style 'libnotify)
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
-(add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
+;; (add-hook 'after-init-hook #'(mu4e-alert-enable-mode-line-display))

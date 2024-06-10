@@ -1,10 +1,7 @@
-- [X] Git Module nicht 1000 mal die Sekunde aufrufen
-- [X] faster completion
-- [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
-- [ ] fix git-diff to not run in minibuffer
+- [ ] git-diff modeline segment
+  - [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
+  - [ ] fix git-diff to not run in minibuffer
 - [ ] change fonts, make them work with emacsclient
-- [X] unbind Shift k
-- [X] keep visual selection after indenting in evil
 - [-] org-mode ricin 
   - [X] mixed fonts
   - [X] sharper latex
@@ -12,51 +9,15 @@
   - [ ] better latex highlighting
   - [X] fragtog
   - [ ] better handling of image inline toggling
-- [X] better keybinds for workspace and buffer switching
 - [ ] start 1 proper workspace on startup
 - [ ] integrate consult with persp-mode if possible (nicer buffer list)
-- [X] popup support for terminal
 - [ ] org template for random thoughts
-- [X] org roam ui
-- [X] org timeblock
-- [X] magit todos
-- [X] relative lines!!
-- [X] vr/replace!!!
-- [X] return to automatically insert new org item
-- [X] proper keybinds
-  + [X] switch windows
-  + [X] switch buffer
-  + [X] comments
 - [-] org roam
   + [X] keybinds
   + [X] cite ref function using cite: syntax
   + [ ] properly start org-roam-bibtex-mode
   + [X] get bibtex integration
-- [X] workspaces
-  + [X] fix keybinds and errors
-- [X] treesitter
-  - [X] different modes
-  - [X] movement keybinds
-- [X] search project
-- [X] swiper integration
-- [X] org agenda
-  + [X] evil
-  + [X] my agenda view
-  + [X] use correct files
-- [X] prettify org mode
-- [-] lsp
-  - [-] languages and servers
-    * [X] c
-    * [X] fortran (f90)
-    * [X] go
-    * [X] julia
-    * [X] python
-    * [ ] more?
-  - [X] autocompletion
-  - [X] fix sideline diagnostics!!
-  - [X] use cape file completion in lsp
-  - [X] goto references keybinds
-- [ ] dashboard
+- [ ] enlight + grid.el
   - [ ] use enlight and grid.el and make smth cool looking
   - [ ] convert termine into diary file, mark in dashboard calendar
 - [-] latex
@@ -70,11 +31,57 @@
 - [X] treemacs
   + [X] lsp integration
   + [X] themes
-- [X] use C-J and C-K to scroll through lists
-- [X] delete word with backspace ONLY in find file
 - [-] email
   - [X] get gmail to work
   - [X] autoload contexts
   - [ ] get uni acc to work
   - [ ] prettify mu4e
   - [X] get mu4e in modeline to work
+- [ ] try svg-tags again
+  - [ ] custom tags (from old config)
+  - [ ] new ones for date/timestamp
+  - [ ] hook for org-agenda
+    
+* Done
+- [X] unbind Shift k
+- [X] keep visual selection after indenting in evil
+- [X] use C-J and C-K to scroll through lists
+- [X] delete word with backspace ONLY in find file
+- [X] better keybinds for workspace and buffer switching
+- [X] lsp
+  - [X] languages and servers
+    * [X] c
+    * [X] fortran (f90)
+    * [X] go
+    * [X] julia
+    * [X] python
+  - [X] autocompletion
+  - [X] fix sideline diagnostics!!
+  - [X] use cape file completion in lsp
+  - [X] goto references keybinds
+- [X] workspaces
+  + [X] fix keybinds and errors
+- [X] treesitter
+  - [X] different modes
+  - [X] movement keybinds
+- [X] search project
+- [X] swiper integration
+- [X] org agenda
+  + [X] evil
+  + [X] my agenda view
+  + [X] use correct files
+- [X] prettify org mode
+- [X] org roam ui
+- [X] org timeblock
+- [X] magit todos
+- [X] relative lines!!
+- [X] vr/replace!!!
+- [X] return to automatically insert new org item
+- [X] proper keybinds
+  + [X] switch windows
+  + [X] switch buffer
+  + [X] comments
+- [X] popup support for terminal
+- [X] Git Module nicht 1000 mal die Sekunde aufrufen
+- [X] faster completion
+  
