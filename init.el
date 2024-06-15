@@ -445,7 +445,7 @@ If on a:
  (custom-theme-set-faces 'user
 ;; '(variable-pitch ((t (:family "Source Code Pro" :height 140 :weight thin))))
 '(fixed-pitch ((t ( :family "CaskaydiaCove Nerd Font" :height 120 :weight medium)))))
-;;  ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
+ (add-to-list 'default-frame-alist '(font . "CaskaydiaCove Nerd Font")) ;; Set your favorite font
  (setq-default line-spacing 0.12)
 
 (use-package emacs
@@ -641,6 +641,7 @@ If on a:
                 (projects  . doom-dashboard-insert-project-shortmenu)
                 (agenda    . my/doom-dashboard-insert-org-agenda-shortmenu)))
             (dashboard-items '(agenda bookmarks recents)))
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
 (use-package projectile
   :init
@@ -1127,14 +1128,13 @@ If on a:
 
 (use-package tempel
   ;; Require trigger prefix before template name when completing.
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
+  :custom
+  (tempel-trigger-prefix "<")
 
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
          ("M-*" . tempel-insert))
 
   :init
-
   ;; Setup completion at point
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
@@ -1145,18 +1145,15 @@ If on a:
     ;; `tempel-expand' *before* the main programming mode Capf, such
     ;; that it will be tried first.
     (setq-local completion-at-point-functions
-                (cons #'tempel-expand
+                (cons #'tempel-complete
                       completion-at-point-functions)))
+)
 
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
   (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
+  (add-hook 'python-mode-hook 'tempel-setup-capf)
+  (add-hook 'lsp-mode-hook 'tempel-setup-capf)
 
 ;; Optional: Add tempel-collection.
 ;; The package is young and doesn't have comprehensive coverage.
@@ -1172,7 +1169,7 @@ If on a:
       (corfu-popupinfo-delay 0.5)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
       (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
       (corfu-auto-delay 0.05)
-      (completion-styles '(basic))
+      ;; (completion-styles '(basic))
       ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
       ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
       ;; (corfu-preview-current nil)    ;; Disable current candidate preview
@@ -2550,7 +2547,7 @@ stored in `persp-save-dir'.")
             (concat 
         " ["
         ;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
-        (let ((plus-minus (shell-command-to-string (concat "~/Scripts/git-diff/diff " buffer-file-name))))
+        (let ((plus-minus (shell-command-to-string (concat "~/git-diff/diff " buffer-file-name))))
             (if (and plus-minus
                 ;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
                 (string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
@@ -2616,9 +2613,9 @@ stored in `persp-save-dir'.")
     )
   ))
 (add-hook 'after-save-hook 'update-git-diff)
-(add-hook 'after-revert-hook 'update-git-diff)
-(add-hook 'before-revert-hook 'update-git-diff)
-(add-hook 'buffer-list-update-hook 'update-git-diff)
+;; (add-hook 'after-revert-hook 'update-git-diff)
+;; (add-hook 'before-revert-hook 'update-git-diff)
+(add-hook 'window-configuration-change-hook 'update-git-diff)
 
 (setq warning-minimum-level :emergency)
 

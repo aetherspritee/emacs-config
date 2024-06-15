@@ -1,15 +1,23 @@
+- [-] autocompletion
+  - [X] snippet support
+  - [ ] FIX THE REQUIREMENT TO RELOAD BEFORE SNIPPETS WORK
+  - [ ] expanding of completions
+  - [ ] ignore underscores when suggesting completions
+- [ ] org code blocks
+  - [ ] set up babel for useful languages
+  - [ ] lsp if possible?
+  - [ ] snippets for python to use org document as jupyter notebook
+- [ ] latex
+  + [ ] :)
+- [-] snippets
+  - [X] tempel as framework
+  - [ ] check latex templates
+  - [ ] write own templates
 - [ ] git-diff modeline segment
+  - [ ] fix git diff running all the fucking time
   - [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
   - [ ] fix git-diff to not run in minibuffer
-- [ ] change fonts, make them work with emacsclient
-- [-] org-mode ricin 
-  - [X] mixed fonts
-  - [X] sharper latex
-  - [ ] snippets for latex
-  - [ ] better latex highlighting
-  - [X] fragtog
   - [ ] better handling of image inline toggling
-- [ ] start 1 proper workspace on startup
 - [ ] integrate consult with persp-mode if possible (nicer buffer list)
 - [ ] org template for random thoughts
 - [-] org roam
@@ -20,17 +28,6 @@
 - [ ] enlight + grid.el
   - [ ] use enlight and grid.el and make smth cool looking
   - [ ] convert termine into diary file, mark in dashboard calendar
-- [-] latex
-  + [ ] Overall
-  + [X] In Org Mode
-- [-] snippets
-  - [X] tempel as framework
-  - [ ] automatically add to autocompletion maybe??
-  - [ ] check latex templates
-  - [ ] write own templates
-- [X] treemacs
-  + [X] lsp integration
-  + [X] themes
 - [-] email
   - [X] get gmail to work
   - [X] autoload contexts
@@ -41,7 +38,9 @@
   - [ ] custom tags (from old config)
   - [ ] new ones for date/timestamp
   - [ ] hook for org-agenda
-    
+
+
+
 * Done
 - [X] unbind Shift k
 - [X] keep visual selection after indenting in evil
@@ -84,4 +83,13 @@
 - [X] popup support for terminal
 - [X] Git Module nicht 1000 mal die Sekunde aufrufen
 - [X] faster completion
-  
+- [X] treemacs
+  + [X] lsp integration
+  + [X] themes
+- [X] org-mode ricin 
+  - [X] mixed fonts
+  - [X] sharper latex
+  - [X] better latex highlighting
+  - [X] fragtog
+- [X] start 1 proper workspace on startup
+- [X] change fonts, make them work with emacsclient
