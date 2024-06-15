@@ -1360,6 +1360,7 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
 
 *** vterm
 ol' reliable
+I use zsh with vim bindings: Make sure that extra keybinds like this ~bindkey "^J" push-line-or-edit~ are not used, they led to return not being accepted by vterm.
 #+begin_src emacs-lisp
     (use-package vterm
         :ensure t)
