@@ -593,7 +593,7 @@ With Emacs version 29, true transparency has been added.
      (custom-theme-set-faces 'user
     ;; '(variable-pitch ((t (:family "Source Code Pro" :height 140 :weight thin))))
     '(fixed-pitch ((t ( :family "CaskaydiaCove Nerd Font" :height 120 :weight medium)))))
-    ;;  ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
+     (add-to-list 'default-frame-alist '(font . "CaskaydiaCove Nerd Font")) ;; Set your favorite font
      (setq-default line-spacing 0.12)
 #+end_src
 
