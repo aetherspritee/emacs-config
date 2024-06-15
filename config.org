@@ -2997,7 +2997,7 @@ Custom git module for doom modeline. Still full of bugs, but does its job fundam
                 (concat 
             " ["
             ;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
-            (let ((plus-minus (shell-command-to-string (concat "~/Scripts/git-diff/diff " buffer-file-name))))
+            (let ((plus-minus (shell-command-to-string (concat "~/git-diff/diff " buffer-file-name))))
                 (if (and plus-minus
                     ;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
                     (string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
@@ -3063,9 +3063,9 @@ Custom git module for doom modeline. Still full of bugs, but does its job fundam
         )
       ))
     (add-hook 'after-save-hook 'update-git-diff)
-    (add-hook 'after-revert-hook 'update-git-diff)
-    (add-hook 'before-revert-hook 'update-git-diff)
-    (add-hook 'buffer-list-update-hook 'update-git-diff)
+    ;; (add-hook 'after-revert-hook 'update-git-diff)
+    ;; (add-hook 'before-revert-hook 'update-git-diff)
+    (add-hook 'window-configuration-change-hook 'update-git-diff)
 #+end_src
 
 * no FOCKING warnings man
