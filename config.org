@@ -65,6 +65,7 @@
 - [[#no-focking-warnings-man][no FOCKING warnings man]]
 - [[#olivetti-mode][olivetti mode]]
 - [[#mu4e][mu4e]]
+- [[#poke-line][poke-line]]
 
 * Important to load first
 
@@ -621,6 +622,9 @@ You can use the bindings C-+ C-- for zooming in/out. You can also use CTRL plus 
 Replace the default modeline with a prettier more useful.
 The junk in the beginning is a more detailed vcs module that tracks changed lines, aswell as the remote status.
 I also customized the evil mode indicator to be more noticable. Depending on the theme i like to draw an outline as well.
+
+I moded the doom-modeline source code to disable the buffer-percentage segment. Def wanna do this here instead tho.
+
 #+begin_src emacs-lisp
 
     (use-package mu4e-alert
@@ -1539,31 +1543,31 @@ Notes:
 - Take care when adding Capfs (Completion-at-point-functions) to the list since each of the Capfs adds a small runtime cost.
 Read the [[https://github.com/minad/cape#configuration][configuration section]] in Cape's readme for more information.
 #+begin_src emacs-lisp
-    (use-package cape
-      :after corfu
-      :init
-      ;; Add to the global default value of `completion-at-point-functions' which is
-      ;; used by `completion-at-point'.  The order of the functions matters, the
-      ;; first function returning a result wins.  Note that the list of buffer-local
-      ;; completion functions takes precedence over the global list.
-      ;; The functions that are added later will be the first in the list
+       (use-package cape
+         :after corfu
+         :init
+         ;; Add to the global default value of `completion-at-point-functions' which is
+         ;; used by `completion-at-point'.  The order of the functions matters, the
+         ;; first function returning a result wins.  Note that the list of buffer-local
+         ;; completion functions takes precedence over the global list.
+         ;; The functions that are added later will be the first in the list
 
-      (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
-      (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
-      (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
-      (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
-      (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
+         (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
+         (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
+         (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
+         (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
+         (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
 
-      ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
-      ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
-      ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
-      ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
-      ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
-      ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
-      ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
-      )
+         ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
+         ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
+         ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
+         ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
+         (add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
+         ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
+         ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
+         )
 
- ;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
+    ;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
 #+end_src
 
 ** Orderless
@@ -3174,3 +3178,12 @@ Custom git module for doom modeline. Still full of bugs, but does its job fundam
     ;; (add-hook 'after-init-hook #'(mu4e-alert-enable-mode-line-display))
 #+end_src
 
+* poke-line
+hell yea pokemon
+#+begin_src emacs-lisp
+(use-package poke-line
+  :ensure t
+  :config
+  (poke-line-global-mode 1)
+  (setq-default poke-line-pokemon "roserade"))
+#+end_src

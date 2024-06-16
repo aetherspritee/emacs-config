@@ -1216,7 +1216,7 @@ If on a:
      ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
      ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
      ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
-     ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
+     (add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
      ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
      ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
      )
@@ -2714,3 +2714,9 @@ stored in `persp-save-dir'.")
 (mu4e-alert-set-default-style 'libnotify)
 (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
 ;; (add-hook 'after-init-hook #'(mu4e-alert-enable-mode-line-display))
+
+(use-package poke-line
+  :ensure t
+  :config
+  (poke-line-global-mode 1)
+  (setq-default poke-line-pokemon "roserade"))

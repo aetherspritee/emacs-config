@@ -2,7 +2,8 @@
   - [X] snippet support
   - [ ] FIX THE REQUIREMENT TO RELOAD BEFORE SNIPPETS WORK
   - [ ] expanding of completions
-  - [ ] ignore underscores when suggesting completions
+  - [ ] ignore underscores when suggesting completions (orderless seperator)
+  - [ ] bibtex auto completion pfffffffffffffffff
 - [ ] org code blocks
   - [ ] set up babel for useful languages
   - [ ] lsp if possible?
@@ -38,8 +39,6 @@
   - [ ] custom tags (from old config)
   - [ ] new ones for date/timestamp
   - [ ] hook for org-agenda
-
-
 
 * Done
 - [X] unbind Shift k
@@ -93,3 +92,4 @@
   - [X] fragtog
 - [X] start 1 proper workspace on startup
 - [X] change fonts, make them work with emacsclient
+- [X] fix vterm not accepting return key
