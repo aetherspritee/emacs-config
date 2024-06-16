@@ -10,7 +10,8 @@ latex-mode
 (lb "\\left[" r> "\\right]" r>)
 (sec "\\section{"r>"}\n" r>)
 (fr "\\frac{" p "}{" q "}")
-
+(m "\\(" r> "\\)")
+($ "$$ " q " $$")
 
 (subsec "\\subsection{"r>"}\n" r>)
 (abstract "\\begin{abstract}\n" r> n> "\\end{abstract}")

@@ -1,6 +1,8 @@
 - [-] autocompletion
   - [X] snippet support
+  - [X] support for custom snippets
   - [ ] FIX THE REQUIREMENT TO RELOAD BEFORE SNIPPETS WORK
+  - [ ] DONT EXPAND THE FUCKING COMPLETION UNLESS I PRESS TAB BRUH
   - [ ] expanding of completions
   - [ ] ignore underscores when suggesting completions (orderless seperator)
   - [ ] bibtex auto completion pfffffffffffffffff
