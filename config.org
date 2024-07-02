@@ -60,7 +60,7 @@
 - [[#flycheck][flycheck]]
 - [[#promote-popup-buffer-to-full-buffer][Promote popup buffer to full buffer]]
 - [[#use-new-compiled-package-versions][use new compiled package versions]]
-- [[#default-compilation-for-python][default compilation for python]]
+- [[#default-compilation-for-different-languages][default compilation for different languages]]
 - [[#modeline-git-diff][modeline git-diff]]
 - [[#no-focking-warnings-man][no FOCKING warnings man]]
 - [[#olivetti-mode][olivetti mode]]
@@ -510,7 +510,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
       ;;(inhibit-startup-screen t)  ;; Disable welcome screen
 
       (delete-selection-mode t)   ;; Select text and delete it by typing.
-      (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
+      (electric-indent-mode t)  ;; Turn off the weird indenting that Emacs does by default.
       (electric-pair-mode t)      ;; Turns on automatic parens pairing
 
       (blink-cursor-mode nil)     ;; Don't blink cursor
@@ -548,6 +548,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
                     (evil-normalize-keymaps))))
               nil nil t)
       )
+    (setq truncate-lines nil)
 #+end_src
 
 
@@ -854,6 +855,7 @@ I like it more than eglot.
                      (f90-mode . lsp)
                      (julia-mode . lsp)
                      (go-mode . lsp)
+                     (zig-mode . lsp)
                      (lsp-mode . lsp-enable-which-key-integration)
                      (lsp-mode . lsp-ui-mode)
                      (lsp-completion-mode . my/update-completions-list)
@@ -978,6 +980,11 @@ Use SPC-tab to uncomment the lines.
                 (setq evil-shift-width 4)
     ))
 #+end_src
+*** zig mode
+#+begin_src emacs-lisp
+(use-package zig-mode)
+#+end_src
+
 *** go mode
 #+begin_src emacs-lisp
     (use-package go-mode)
@@ -1333,6 +1340,18 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
                               )
 #+end_src
 
+
+**** org babel
+
+#+begin_src emacs-lisp
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)
+       (shell . nil)))
+
+
+(setq org-confirm-babel-evaluate nil)
+#+end_src
 
 **** org fragtog
 #+begin_src emacs-lisp
@@ -2978,15 +2997,22 @@ Required for lsp-ui
 (setq load-prefer-newer t)
 #+end_src
 
-* default compilation for python
+* default compilation for different languages
 https://www.youtube.com/watch?v=6oeE52bIFyE
 #+begin_src emacs-lisp
         (defun my/compile-python ()
           "bruh"
         (setq-local compile-command
          (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
-    
+
+        (defun my/compile-go ()
+          "bruh"
+        (setq-local compile-command
+         (concat "go build " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+
     (add-hook 'python-mode-hook 'my/compile-python)
+    (add-hook go-mode-hook 'my/compile-go)
+
 #+end_src
 
 * modeline git-diff
