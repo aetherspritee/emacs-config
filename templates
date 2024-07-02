@@ -43,6 +43,17 @@ latex-mode
 
 org-mode
 
+(pysrc "#+begin_src python :session " p " :results output\n" q "\n#+end_src")
+(pyplot )
+(img_size "#+attr_html: :width " q "px")
+(lk "\\left(" r> "\\right)" r>)
+(lb "\\left[" r> "\\right]" r>)
+(sec "\\section{"r>"}\n" r>)
+(fr "\\frac{" p "}{" q "}")
+(m "\\(" r> "\\)")
+($ "$$ " q " $$")
+
+
 (caption "#+caption: ")
 (drawer ":" p ":" n r ":end:")
 (begin "#+begin_" (s name) n> r> n "#+end_" name)
