@@ -378,7 +378,7 @@ If on a:
   ;;(inhibit-startup-screen t)  ;; Disable welcome screen
 
   (delete-selection-mode t)   ;; Select text and delete it by typing.
-  (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
+  (electric-indent-mode t)  ;; Turn off the weird indenting that Emacs does by default.
   (electric-pair-mode t)      ;; Turns on automatic parens pairing
 
   (blink-cursor-mode nil)     ;; Don't blink cursor
@@ -416,6 +416,8 @@ If on a:
                 (evil-normalize-keymaps))))
           nil nil t)
   )
+(setq truncate-lines nil)
+(setq compilation-always-kill t)
 
 (use-package doom-themes
   :config
@@ -653,72 +655,46 @@ If on a:
 ;; Use Bookmarks for smaller, not standard projects
 
 (setq lsp-use-plists nil)
-        (use-package lsp-ui :commands lsp-ui-mode)
-        (use-package lsp-mode
-          :commands (lsp lsp-deferred)
-        :init
-        (defun my/update-completions-list ()
-            (progn
-                (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
-                (setq completion-at-point-functions
-                    '(non-greedy-lsp cape-file cape-dabbrev))))
+    (use-package lsp-ui :commands lsp-ui-mode)
+    (use-package lsp-mode
+      :commands (lsp lsp-deferred)
+    :init
+    (defun my/update-completions-list ()
+        (progn
+            (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
+            (setq completion-at-point-functions
+                '(non-greedy-lsp cape-file cape-dabbrev))))
 
-          (setq lsp-keymap-prefix "C-c l")
+      (setq lsp-keymap-prefix "C-c l")
 
-          :hook (
-                 (python-mode . lsp)
-                 (c-mode . lsp)
-                 (f90-mode . lsp)
-                 (julia-mode . lsp)
-                 (go-mode . lsp)
-                 (lsp-mode . lsp-enable-which-key-integration)
-                 (lsp-mode . lsp-ui-mode)
-                 (lsp-completion-mode . my/update-completions-list)
-                )
-          :custom
-            (lsp-completion-provider :none)) ;; we use Corfu!
+      :hook (
+             (python-mode . lsp)
+             (c-mode . lsp)
+             (f90-mode . lsp)
+             (julia-mode . lsp)
+             (go-mode . lsp)
+             (zig-mode . lsp)
+             (lsp-mode . lsp-enable-which-key-integration)
+             (lsp-mode . lsp-ui-mode)
+             (lsp-completion-mode . my/update-completions-list)
+            )
+      :custom
+        (lsp-completion-provider :none)) ;; we use Corfu!
 
-        (use-package dap-mode)
-        ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-    (use-package lsp-pyright
-      :ensure t
-      :hook (python-mode . (lambda ()
-                              (require 'lsp-pyright)
-                              (lsp))))  ; or lsp-deferred
-    (setq lsp-ui-doc-position 'at-point)
-    (setq lsp-ui-sideline-show-hover nil)
-    (setq lsp-ui-sideline-enable t)
-    (setq lsp-ui-sideline-show-diagnostics t)
+    (use-package dap-mode)
+    ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+(setq lsp-ui-doc-position 'at-point)
+(setq lsp-ui-sideline-show-hover nil)
+(setq lsp-ui-sideline-enable t)
+(setq lsp-ui-sideline-show-diagnostics t)
 
-    (setq lsp-idle-delay 0.01)
-;;     (defun lsp-booster--advice-json-parse (old-fn &rest args)
-;;   "Try to parse bytecode instead of json."
-;;   (or
-;;    (when (equal (following-char) ?#)
-;;      (let ((bytecode (read (current-buffer))))
-;;        (when (byte-code-function-p bytecode)
-;;          (funcall bytecode))))
-;;    (apply old-fn args)))
-;; (advice-add (if (progn (require 'json)
-;;                        (fboundp 'json-parse-buffer))
-;;                 'json-parse-buffer
-;;               'json-read)
-;;             :around
-;;             #'lsp-booster--advice-json-parse)
-
-;; (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-;;   "Prepend emacs-lsp-booster command to lsp CMD."
-;;   (let ((orig-result (funcall old-fn cmd test?)))
-;;     (if (and (not test?)                             ;; for check lsp-server-present?
-;;              (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-;;              lsp-use-plists
-;;              (not (functionp 'json-rpc-connection))  ;; native json-rpc
-;;              (executable-find "emacs-lsp-booster"))
-;;         (progn
-;;           (message "Using emacs-lsp-booster for %s!" orig-result)
-;;           (cons "emacs-lsp-booster" orig-result))
-;;       orig-result)))
-;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+(setq lsp-idle-delay 0.01)
+(setq lsp-enable-file-watchers nil)
 
 (require 'dap-python)
 ;; if you installed debugpy, you need to set this
@@ -764,6 +740,8 @@ If on a:
                 (setq python-indent-offset 4)
             (setq evil-shift-width 4)
 ))
+
+(use-package zig-mode)
 
 (use-package go-mode)
 
@@ -1076,6 +1054,14 @@ If on a:
                             (wl . wl)))
                           )
 
+(org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)
+       (shell . nil)))
+
+
+(setq org-confirm-babel-evaluate nil)
+
 (use-package org-fragtog
   :after org
   :custom
@@ -1097,6 +1083,9 @@ If on a:
 (use-package vterm-toggle
     :straight (vterm-toggle :host github
                                 :repo "jixiuf/vterm-toggle"))
+
+(require 'multiple-cursors)
+(global-set-key (kbd "M-d") 'mc/edit-lines)
 
 ;; (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
@@ -1125,35 +1114,6 @@ If on a:
          (magit-pre-refresh  . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :init (global-diff-hl-mode))
-
-(use-package tempel
-  ;; Require trigger prefix before template name when completing.
-  :custom
-  (tempel-trigger-prefix "<")
-
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
-
-  :init
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-complete
-                      completion-at-point-functions)))
-)
-
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-  (add-hook 'python-mode-hook 'tempel-setup-capf)
-  (add-hook 'lsp-mode-hook 'tempel-setup-capf)
 
 ;; Optional: Add tempel-collection.
 ;; The package is young and doesn't have comprehensive coverage.
@@ -1222,6 +1182,35 @@ If on a:
      )
 
 ;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
+
+(use-package tempel
+  ;; Require trigger prefix before template name when completing.
+  :custom
+  (tempel-trigger-prefix "<")
+
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+
+  :init
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.
+    ;; `tempel-expand' only triggers on exact matches. Alternatively use
+    ;; `tempel-complete' if you want to see all matches, but then you
+    ;; should also configure `tempel-trigger-prefix', such that Tempel
+    ;; does not trigger too often when you don't expect it. NOTE: We add
+    ;; `tempel-expand' *before* the main programming mode Capf, such
+    ;; that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-complete
+                      completion-at-point-functions)))
+)
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+  (add-hook 'python-mode-hook 'tempel-setup-capf)
+  (add-hook 'lsp-mode-hook 'tempel-setup-capf)
 
 (use-package orderless
   :custom
@@ -2538,7 +2527,13 @@ stored in `persp-save-dir'.")
     (setq-local compile-command
      (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
 
+    (defun my/compile-go ()
+      "bruh"
+    (setq-local compile-command
+     (concat "go build " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+
 (add-hook 'python-mode-hook 'my/compile-python)
+(add-hook go-mode-hook 'my/compile-go)
 
 (defun in-git-p ()
                  (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
