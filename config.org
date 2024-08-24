@@ -27,6 +27,7 @@
   - [[#language-modes][Language modes]]
   - [[#org-mode][Org Mode]]
   - [[#terminal][Terminal]]
+  - [[#multiple-cursors][multiple cursors]]
 - [[#multi-file-example][Multi File Example]]
   - [[#adding-the-lisp-directory-to-load-path][Adding the lisp directory to load-path]]
   - [[#sourcing-the-files][Sourcing the files]]
@@ -36,6 +37,7 @@
   - [[#git][Git]]
   - [[#corfu][Corfu]]
   - [[#cape][Cape]]
+  - [[#tempel][tempel]]
   - [[#orderless][Orderless]]
   - [[#vertico-and-marginalia][Vertico and Marginalia]]
   - [[#embark][Embark]]
@@ -60,8 +62,15 @@
 - [[#flycheck][flycheck]]
 - [[#org-roam-ui][org roam ui]]
 - [[#org-timeblock][org-timeblock]]
-- [[#git-diff][git diff]]
+- [[#promote-popup-buffer-to-full-buffer][Promote popup buffer to full buffer]]
+- [[#use-new-compiled-package-versions][use new compiled package versions]]
+- [[#default-compilation-for-different-languages][default compilation for different languages]]
+- [[#modeline-git-diff][modeline git-diff]]
 - [[#default-compilation-for-python][default compilation for python]]
+- [[#no-focking-warnings-man][no FOCKING warnings man]]
+- [[#olivetti-mode][olivetti mode]]
+- [[#mu4e][mu4e]]
+- [[#poke-line][poke-line]]
 
 * Important to load first
 
@@ -219,7 +228,7 @@ If you don't want to use evil-mode don't forget to remove:
                     (image-overlays
                      (cl-find-if (lambda (o) (overlay-get o 'org-image-overlay))
                                  overlays)))
-               (+org--toggle-inline-images-in-subtree beg end)
+               (org-toggle-inline-images beg end)
                (if (or image-overlays latex-overlays)
                    (org-clear-latex-preview beg end)
                  (org--latex-preview-region beg end))))
@@ -267,7 +276,7 @@ If you don't want to use evil-mode don't forget to remove:
                     (path (org-element-property :path lineage)))
                (if (or (equal (org-element-property :type lineage) "img")
                        (and path (image-type-from-file-name path)))
-                   (+org--toggle-inline-images-in-subtree
+                   (org-toggle-inline-images
                     (org-element-property :begin lineage)
                     (org-element-property :end lineage))
                  (org-open-at-point arg))))
@@ -276,21 +285,21 @@ If you don't want to use evil-mode don't forget to remove:
              (org-toggle-checkbox))
 
             (`paragraph
-             (+org--toggle-inline-images-in-subtree))
+             (org-toggle-inline-images))
 
             (_
              (if (or (org-in-regexp org-ts-regexp-both nil t)
                      (org-in-regexp org-tsr-regexp-both nil  t)
                      (org-in-regexp org-link-any-re nil t))
                  (call-interactively #'org-open-at-point)
-               (+org--toggle-inline-images-in-subtree
+               (org-toggle-inline-images
                 (org-element-property :begin context)
                 (org-element-property :end context))))))))
 
         ;; (evil-define-key 'normal 'evil-org-mode "RET" #'+org/dwim-at-point)
         ;; (define-key org-mode-map (kbd "RET") #'+org/dwim-at-point)
 #+end_src
-  
+*** Actual evil setup xd
 #+begin_src emacs-lisp
             (use-package evil
               :init ;; Execute code Before a package is loaded
@@ -323,10 +332,25 @@ If you don't want to use evil-mode don't forget to remove:
               :config
               (evil-commentary-mode)
               )
+   (defun my/evil-shift-right ()
+  (interactive)
+  (evil-shift-right evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+
+(defun my/evil-shift-left ()
+  (interactive)
+  (evil-shift-left evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+(evil-define-key 'visual global-map (kbd ">") 'my/evil-shift-right)
+(evil-define-key 'visual global-map (kbd "<") 'my/evil-shift-left)
+
         (with-eval-after-load 'evil-maps
           (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
           (define-key evil-motion-state-map (kbd "RET") nil)
           (define-key evil-motion-state-map (kbd "TAB") nil)
+          (define-key evil-motion-state-map (kbd "K") nil)
           (define-key evil-motion-state-map (kbd "g r") 'lsp-find-references))
         ;; Setting RETURN key in org-mode to follow links
           (setq org-return-follows-link  t)
@@ -339,130 +363,139 @@ A keybinding framework to set keybindings easily.
 The Leader key is what you will press when you want to access your keybindings (SPC + . Find file).
 To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC to replace n to skip).
 #+begin_src emacs-lisp
-            (use-package general
-              :config
-              (general-evil-setup)
-              ;; Set up 'SPC' as the leader key
-              (general-create-definer start/leader-keys
-                :states '(normal insert visual motion emacs)
-                :keymaps 'override
-                :prefix "SPC"           ;; Set leader key
-                :global-prefix "C-SPC") ;; Set global leader key
+                (use-package general
+                  :config
+                  (general-evil-setup)
+                  ;; Set up 'SPC' as the leader key
+                  (general-create-definer start/leader-keys
+                    :states '(normal insert visual motion emacs)
+                    :keymaps 'override
+                    :prefix "SPC"           ;; Set leader key
+                    :global-prefix "C-SPC") ;; Set global leader key
 
-              (start/leader-keys
-                "." '(find-file :wk "Find file")
-                ;; "TAB" '(comment-line :wk "Comment lines")
-                "RET" '(consult-bookmark :wk "Bookmarks!")
-                "p" '(projectile-command-map :wk "Projectile command map")
-                "," '(persp-switch-to-buffer :wk "Switch buffers")
-                "h" '(evil-window-left :wk "Switch to left window")
-                "j" '(evil-window-down :wk "Switch to lower window")
-                "k" '(evil-window-up :wk "Switch to uppper window")
-                "l" '(evil-window-right :wk "Switch to right window")
-               )
-              (start/leader-keys
-                "d" '(lsp-ui-doc-show :wk "show doc"))
+                  (start/leader-keys
+                    "." '(find-file :wk "Find file")
+                    ;; "TAB" '(comment-line :wk "Comment lines")
+                    "RET" '(consult-bookmark :wk "Bookmarks!")
+                    "p" '(projectile-command-map :wk "Projectile command map")
+                    "," '(persp-switch-to-buffer :wk "Switch buffers")
+                    "h" '(evil-window-left :wk "Switch to left window")
+                    "j" '(evil-window-down :wk "Switch to lower window")
+                    "k" '(evil-window-up :wk "Switch to uppper window")
+                    "l" '(evil-window-right :wk "Switch to right window")
+                   )
+                  (start/leader-keys
+                    "d" '(lsp-ui-doc-show :wk "show doc"))
 
-              (start/leader-keys
-                "S" '(yas/insert-snippet :wk "snippet"))
-              (start/leader-keys
-                ;; "H" '(enlight-open :wk "show dashboard"))
-                "H" '(dashboard-open :wk "show dashboard"))
+                  (start/leader-keys
+                    "S" '(yas/insert-snippet :wk "snippet"))
+                  
+                  (start/leader-keys
+                    "D b" '(dap-breakpoint-toggle :wk "toogle breakpoint")
+                    "D c" '(dap-continue :wk "dap continue")
+                    "D n" '(dap-next :wk "dap next")
+                    "D s"'(dap-debug :wk "Start debugger")
+                    "D q"'(dap-disconnect :wk "Exit debugger")
+                    "D d"'(dap-hydra :wk "DAP hydra")
+                    )
+                  (start/leader-keys
+                    ;; "H" '(enlight-open :wk "show dashboard"))
+                    "H" '(dashboard-open :wk "show dashboard"))
 
-              (start/leader-keys
-                "o a" '(org-agenda :wk "Open agenda")
-                "o n" '(treemacs :wk "Treemacs")
-                "o b" '(org-timeblock :wk "Org timeblock")
-                "o t" '(vterm-toggle :wk "Toggle terminal")
-                )
+                  (start/leader-keys
+                    "o a" '(org-agenda :wk "Open agenda")
+                    "o m" '(mu4e :wk "Open mu4e")
+                    "o n" '(treemacs :wk "Treemacs")
+                    "o b" '(org-timeblock :wk "Org timeblock")
+                    "o t" '(vterm-toggle :wk "Toggle terminal")
+                    )
+              
+                  (start/leader-keys
+                    "m p" '(mu4e-update-mail-and-index :wk "pull mail"))
+                (start/leader-keys
+                    "c c" '(compile :wk "compile")
+                    "c k" '(kill-compilation :wk "kill compilation")
+                    "c C" '(recompile :wk "kill compilation")
+                    "c r" '(lsp-rename :wk "rename symbol")
+                    "c s" '(lsp-treemacs-symbols :wk "treemacs symbols"))
 
-            (start/leader-keys
-                "c c" '(compile :wk "compile")
-                "c k" '(kill-compilation :wk "kill compilation")
-                "c C" '(recompile :wk "kill compilation")
-                "c s" '(lsp-treemacs-symbols :wk "treemacs symbols"))
+                  (start/leader-keys
+                    "TAB n" '(+workspace/swap-right :wk "Next workspace")
+                    "TAB p" '(+workspace/swap-left :wk "Previous workspace")
+                    "TAB d" '(+workspace/delete :wk "Delete workspace")
+                    "TAB TAB" '(+workspace/new :wk "New persp"))
 
-              (start/leader-keys
-                "TAB n" '(+workspace/swap-right :wk "Next workspace")
-                "TAB p" '(+workspace/swap-left :wk "Previous workspace")
-                "TAB d" '(+workspace/delete :wk "Delete workspace")
-                "TAB TAB" '(+workspace/new :wk "New persp"))
+                  (start/leader-keys
+                    "s b" '(consult-line :wk "Search buffer")
+                    "s p" '(consult-ripgrep :wk "Search project")
+                    )
 
-              (start/leader-keys
-                "s b" '(consult-line :wk "Search buffer")
-                "s p" '(consult-ripgrep :wk "Search project")
-                )
+                  (start/leader-keys
+                    "w d" '(delete-window :wk "Close window")
+                    "w n" '(split-window-vertically :wk "Split window vertically")
+                    "w v" '(split-window-horizontally :wk "Split window horizontally")
+                   )
+                  (start/leader-keys
+                    "f" '(:ignore t :wk "Find")
+                    "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+                    "f r" '(consult-recent-file :wk "Recent files")
+                    "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-              (start/leader-keys
-                "w d" '(delete-window :wk "Close window")
-                "w n" '(split-window-vertically :wk "Split window vertically")
-                "w v" '(split-window-horizontally :wk "Split window horizontally")
-               )
-              (start/leader-keys
-                "f" '(:ignore t :wk "Find")
-                "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-                "f r" '(consult-recent-file :wk "Recent files")
-                "f i" '(consult-imenu :wk "Imenu buffer locations"))
+                  (start/leader-keys
+                    "b" '(:ignore t :wk "Buffer Bookmarks")
+                    "b b" '(consult-buffer :wk "Switch buffer")
+                    "b d" '(kill-this-buffer :wk "Kill this buffer")
+                    "b i" '(ibuffer :wk "Ibuffer")
+                    "b s" '(bookmark-set :wk "Set bookmark")
+                    "b r" '(my/raise-popup :wk "Raise popup buffer")
+                    "b s" '(bookmark-set :wk "Set bookmark")
+                    "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-              (start/leader-keys
-                "b" '(:ignore t :wk "Buffer Bookmarks")
-                "b b" '(consult-buffer :wk "Switch buffer")
-                "b d" '(kill-this-buffer :wk "Kill this buffer")
-                "b i" '(ibuffer :wk "Ibuffer")
-                "b n" '(next-buffer :wk "Next buffer")
-                "b p" '(previous-buffer :wk "Previous buffer")
-                "b s" '(bookmark-set :wk "Set bookmark")
-                "b r" '(revert-buffer :wk "Reload buffer")
-                "b j" '(consult-bookmark :wk "Bookmark jump"))
+                  (start/leader-keys
+                    "n r f" '(org-roam-node-find :wk "Find roam nodes")
+                    "n r i" '(org-roam-node-insert :wk "Insert node")
+                    "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
 
-              (start/leader-keys
-                "n r f" '(org-roam-node-find :wk "Find roam nodes")
-                "n r i" '(org-roam-node-insert :wk "Insert node")
-                "n r D" '(org-roam-dailies-capture-today :wk "Insert node"))
+                  (start/leader-keys
+                    "m d" '(org-deadline :wk "Deadline")
+                    "m s" '(org-schedule :wk "Schedule")
+                    "m t" '(org-time-stamp :wk "Timestamp"))
 
-              (start/leader-keys
-                "m d" '(org-deadline :wk "Deadline")
-                "m s" '(org-schedule :wk "Schedule")
-                "m t" '(org-time-stamp :wk "Timestamp"))
+                  (start/leader-keys
+                    "e" '(:ignore t :wk "Eglot Evaluate")
+                    "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+                    "e f" '(eglot-format :wk "Eglot Format")
+                    "e l" '(consult-flymake :wk "Consult Flymake")
+                    "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+                    "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-              (start/leader-keys
-                "e" '(:ignore t :wk "Eglot Evaluate")
-                "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-                "e f" '(eglot-format :wk "Eglot Format")
-                "e l" '(consult-flymake :wk "Consult Flymake")
-                "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-                "e r" '(eval-region :wk "Evaluate elisp in region"))
+                  (start/leader-keys
+                    "g" '(:ignore t :wk "Git")
+                    "g g" '(magit-status :wk "Magit status"))
 
-              (start/leader-keys
-                "g" '(:ignore t :wk "Git")
-                "g g" '(magit-status :wk "Magit status"))
+                  (start/leader-keys
+                    "N i" '(citar-open :wk "Open citar")
+                    "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
+                    "N c" '(org-cite-insert :wk "insert orb link"
+            ))
 
-              (start/leader-keys
-                "N i" '(citar-open :wk "Open citar")
-                "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
-                "N c" '(org-cite-insert :wk "insert orb link"
-        ))
-              ;; (start/leader-keys
-              ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-              ;;   "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon"))
+                  (start/leader-keys
+                    "r r" '((lambda () (interactive)
+                              (load-file "~/.config/emacs/init.el"))
+                            :wk "Reload Emacs config"))
 
-              (start/leader-keys
-                "r r" '((lambda () (interactive)
-                          (load-file "~/.config/emacs/init.el"))
-                        :wk "Reload Emacs config"))
+                  (start/leader-keys
+                    "t" '(:ignore t :wk "Toggle")
+                    "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+                    "t i" '(org-toggle-inline-images :wk "Toggle org inline image")
+                    "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 
-              ;; (start/leader-keys
-              ;;   "s" '(:ignore t :wk "Show")
-              ;;   "s e" '(eat :wk "Eat terminal"))
 
-              (start/leader-keys
-                "t" '(:ignore t :wk "Toggle")
-                "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-                "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+            (add-hook 'org-mode-hook (lambda ()
+                   (setq-local electric-pair-inhibit-predicate
+                           `(lambda (c)
+                          (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
-        ;; (add-hook prog-mode-hook
-        ;; (lambda ()
-        ;; (local-set-key "g r" 'lsp-find-references)))
         (define-key evil-normal-state-map (kbd "C-b") 'previous-buffer)
         (define-key evil-normal-state-map (kbd "C-n") 'next-buffer)
         (define-key evil-normal-state-map (kbd "M-1") '(lambda () (interactive) (+workspace/switch-to 0)))
@@ -471,15 +504,9 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         (define-key evil-normal-state-map (kbd "M-4") '(lambda () (interactive) (+workspace/switch-to 3)))
         (define-key evil-normal-state-map (kbd "M-5") '(lambda () (interactive) (+workspace/switch-to 4)))
         (define-key evil-normal-state-map (kbd "M-6") '(lambda () (interactive) (+workspace/switch-to 5)))
-
-        (add-hook 'org-mode-hook (lambda ()
-               (setq-local electric-pair-inhibit-predicate
-                       `(lambda (c)
-                      (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
-
-    (setq initial-frame-alist (append initial-frame-alist '((left . 75) (top . 75) (width . 240) (height . 73 ))))
-    (setq truncate-lines nil)
-    (setq electric-indent-mode t)
+        (setq initial-frame-alist (append initial-frame-alist '((left . 75) (top . 75) (width . 240) (height . 73 ))))
+        (setq truncate-lines nil)
+        (setq electric-indent-mode t)
 #+end_src
 
 ** Good Defaults
@@ -493,7 +520,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
       ;;(inhibit-startup-screen t)  ;; Disable welcome screen
 
       (delete-selection-mode t)   ;; Select text and delete it by typing.
-      (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
+      (electric-indent-mode t)  ;; Turn off the weird indenting that Emacs does by default.
       (electric-pair-mode t)      ;; Turns on automatic parens pairing
 
       (blink-cursor-mode nil)     ;; Don't blink cursor
@@ -531,7 +558,10 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
                     (evil-normalize-keymaps))))
               nil nil t)
       )
+    (setq truncate-lines nil)
+    (setq compilation-always-kill t)
 #+end_src
+
 
 * Appearance
 
@@ -543,8 +573,8 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
       ;; Global settings (defaults)
       (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
             doom-themes-enable-italic t) ; if nil, italics is universally disabled
+      ;; (load-theme 'doom-tomorrow-night t)
       (load-theme 'doom-solarized-light t)
-      ;; (load-theme 'doom-solarized-light t)
 
       ;; Enable flashing mode-line on errors
       (doom-themes-visual-bell-config)
@@ -558,7 +588,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 ** Transparency
 With Emacs version 29, true transparency has been added.
 #+begin_src emacs-lisp
-    (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
+    (add-to-list 'default-frame-alist '(alpha-background . 100)) ;; For all new frames henceforth
 #+end_src
 
 ** Fonts
@@ -566,16 +596,18 @@ With Emacs version 29, true transparency has been added.
 *** Setting fonts
 
 #+begin_src emacs-lisp
-    (set-face-attribute 'default nil
-                        :font "CaskaydiaCove Nerd Font" ;; Set your favorite type of font or download JetBrains Mono
-                        :height 120
-                        :weight 'medium)
-    ;; This sets the default font on all graphical frames created after restarting Emacs.
-    ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-    ;; are not right unless I also add this method of setting the default font.
-
-    ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
-    (setq-default line-spacing 0.12)
+     (set-face-attribute 'default nil
+                         :font "CaskaydiaCove Nerd Font" ;; Set your favorite type of font or download JetBrains Mono
+                         :height 120
+                         :weight 'medium)
+     ;; This sets the default font on all graphical frames created after restarting Emacs.
+     ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+     ;; are not right unless I also add this method of setting the default font.
+     (custom-theme-set-faces 'user
+    ;; '(variable-pitch ((t (:family "Source Code Pro" :height 140 :weight thin))))
+    '(fixed-pitch ((t ( :family "CaskaydiaCove Nerd Font" :height 120 :weight medium)))))
+     (add-to-list 'default-frame-alist '(font . "CaskaydiaCove Nerd Font")) ;; Set your favorite font
+     (setq-default line-spacing 0.12)
 #+end_src
 
 *** Zooming In/Out
@@ -590,16 +622,93 @@ You can use the bindings C-+ C-- for zooming in/out. You can also use CTRL plus 
       ("<C-wheel-down>" . text-scale-decrease))
 #+end_src
 
+*** mixed pitch
+#+begin_src emacs-lisp
+(use-package mixed-pitch
+  :hook
+  ;; If you want it in all text modes:
+  (text-mode . mixed-pitch-mode))
+#+end_src
 ** Modeline
 
 Replace the default modeline with a prettier more useful.
+# <<<<<<< HEAD
 
-Defining some functions for a git diff module ill use instead of the default one.
+# Defining some functions for a git diff module ill use instead of the default one.
+# #+begin_src emacs-lisp
+#     (set-face-attribute 'mode-line nil
+#                        :box `(:line-width 1 :color "gray20"))
+# =======
+The junk in the beginning is a more detailed vcs module that tracks changed lines, aswell as the remote status.
+I also customized the evil mode indicator to be more noticable. Depending on the theme i like to draw an outline as well.
+
+I moded the doom-modeline source code to disable the buffer-percentage segment. Def wanna do this here instead tho.
+
 #+begin_src emacs-lisp
-    (set-face-attribute 'mode-line nil
-                       :box `(:line-width 1 :color "gray20"))
 
-                ;; (setq-default mode-line-misc-info git-modeline)
+        (use-package mu4e-alert
+          :after mu4e
+          :init
+          (mu4e-alert-enable-mode-line-display)
+          (defun gjstein-refresh-mu4e-alert-mode-line ()
+        (interactive)
+        (mu4e-alert-enable-mode-line-display)
+        )
+      (run-with-timer 0 60 'gjstein-refresh-mu4e-alert-mode-line)
+          )
+             (set-face-attribute 'mode-line nil
+                             :box '(:line-width 1 :color "gray20"))
+                 (setq git-modeline "")
+
+                            (use-package doom-modeline
+                              :custom
+                              (doom-modeline-height 30)     ;; Sets modeline height
+                              (doom-modeline-bar-width 5)   ;; Sets right bar width
+                              (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+                              (lsp-modeline-diagnostics-enable nil)
+                              (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+                              (doom-modeline-mu4e t) 
+                              (mu4e-alert-enable-mode-line-display)
+                              (doom-modeline-env-enable-python t)
+                              (doom-modeline-modal-icon nil)
+                              (doom-modeline-always-visible-segments '(mu4e))
+                              (doom-modeline-buffer-file-name-style 'relative-from-project)
+                              ;; (doom-modeline-vcs-max-length 0)
+                              :config
+                              (doom-modeline-def-segment my-vcs
+                                (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
+                                 ))
+
+                        (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                        ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                        (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
+                        (doom-modeline-def-modeline 'my-simple-line
+                          '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
+                          '(mu4e my-vcs misc-info minor-modes major-mode process check))
+                        (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                        ;; Set default mode-line
+
+                (setq doom-modeline-modal-icon nil
+                      evil-normal-state-tag   (propertize " Normal ")
+                      evil-emacs-state-tag    (propertize " Emacs " )
+                      evil-insert-state-tag   (propertize " Insert ")
+                      evil-motion-state-tag   (propertize " Motion ")
+                      evil-visual-state-tag   (propertize " Visual ")
+                      evil-operator-state-tag (propertize " Operator "))
+
+                (defun setup-doom-modeline-evil-states () ;; setting up colors
+                  (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "yellow green"  :foreground "black")
+                  (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange" :foreground "black")
+                  (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "medium aquamarine"    :foreground "white")
+                  (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "deep sky blue"   :foreground "white")
+                  (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "orchid" :foreground "black")
+                  (set-face-attribute 'doom-modeline-evil-operator-state nil :background "firebrick" :foreground "white"))
+
+                :hook
+                (after-init . doom-modeline-mode)
+            )
+    ;; >>>>>>> origin/homeone
+
 #+end_src
 
 #+begin_src emacs-lisp
@@ -628,7 +737,7 @@ Defining some functions for a git diff module ill use instead of the default one
                 (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
                 (doom-modeline-def-modeline 'my-simple-line
                   '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
-                  '(misc-info minor-modes major-mode process check))
+                  '(misc-info minor-modes major-mode vcs process check))
                 (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
                 ;; Set default mode-line
 
@@ -659,76 +768,75 @@ Defining some functions for a git diff module ill use instead of the default one
 
 ** Dashboard
 #+begin_src emacs-lisp
-    (defun my/doom-dashboard-insert-recents-shortmenu (&rest _)
-      "Insert recent files short menu widget."
-      (let* ((fn (alist-get 'recents doom-dashboard-shortmenu-functions))
+         (defun my/doom-dashboard-insert-recents-shortmenu (&rest _)
+          "Insert recent files short menu widget."
+          (let* ((fn (alist-get 'recents doom-dashboard-shortmenu-functions))
+                 (fn-keymap (format "\\[%s]" fn))
+                 (icon-name (alist-get 'recents dashboard-heading-icons))
+                 (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
+            (if dashboard-display-icons-p
+                (insert (format "%-1s   " icon)))
+            (widget-create 'item
+                           :tag (format "%-30s" "Recently opened files")
+                           :action (lambda (&rest _)
+                                     (call-interactively 
+                                      (alist-get 'recents doom-dashboard-shortmenu-functions)))
+                           :mouse-face 'highlight
+                           :button-face 'dashboard-heading
+                           :button-prefix ""
+                           :button-suffix ""
+                           :format "%[%t%]")
+            (if doom-dashboard-set-widget-binding
+                (insert (propertize "SPC f r"
+                                    'face
+                                    'doom-dashboard-bindings-face)))))
+
+    (defun my/doom-dashboard-insert-org-agenda-shortmenu (&rest _)
+      "Insert `org-agenda' shortmenu widget."
+      (let* ((fn (alist-get 'agenda doom-dashboard-shortmenu-functions))
              (fn-keymap (format "\\[%s]" fn))
-             (icon-name (alist-get 'recents dashboard-heading-icons))
+             (icon-name (alist-get 'agenda dashboard-heading-icons))
              (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
         (if dashboard-display-icons-p
             (insert (format "%-1s   " icon)))
         (widget-create 'item
-                       :tag (format "%-30s" "Recently opened files")
+                       :tag (format "%-30s" "Open org-agenda")
                        :action (lambda (&rest _)
                                  (call-interactively 
-                                  (alist-get 'recents doom-dashboard-shortmenu-functions)))
+                                  (alist-get 'agenda doom-dashboard-shortmenu-functions)))
                        :mouse-face 'highlight
                        :button-face 'dashboard-heading
                        :button-prefix ""
                        :button-suffix ""
                        :format "%[%t%]")
         (if doom-dashboard-set-widget-binding
-            (insert (propertize "SPC f r"
+            (insert (propertize "SPC o a"
                                 'face
                                 'doom-dashboard-bindings-face)))))
 
-(defun my/doom-dashboard-insert-org-agenda-shortmenu (&rest _)
-  "Insert `org-agenda' shortmenu widget."
-  (let* ((fn (alist-get 'agenda doom-dashboard-shortmenu-functions))
-         (fn-keymap (format "\\[%s]" fn))
-         (icon-name (alist-get 'agenda dashboard-heading-icons))
-         (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
-    (if dashboard-display-icons-p
-        (insert (format "%-1s   " icon)))
-    (widget-create 'item
-                   :tag (format "%-30s" "Open org-agenda")
-                   :action (lambda (&rest _)
-                             (call-interactively 
-                              (alist-get 'agenda doom-dashboard-shortmenu-functions)))
-                   :mouse-face 'highlight
-                   :button-face 'dashboard-heading
-                   :button-prefix ""
-                   :button-suffix ""
-                   :format "%[%t%]")
-    (if doom-dashboard-set-widget-binding
-        (insert (propertize "SPC o a"
-                            'face
-                            'doom-dashboard-bindings-face)))))
 
-
-(defun my/doom-dashboard-insert-bookmark-shortmenu (&rest _)
-  "Insert bookmark shortmenu widget."
-  (let* ((fn (alist-get 'bookmarks doom-dashboard-shortmenu-functions))
-         (fn-keymap (format "\\[%s]" fn))
-         (icon-name (alist-get 'bookmarks dashboard-heading-icons))
-         (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
-    (if dashboard-display-icons-p
-        (insert (format "%-1s   " icon)))
-    (widget-create 'item
-                   :tag (format "%-30s" "Jump to bookmark")
-                   :action (lambda (&rest _)
-                             (call-interactively 
-                              (alist-get 'bookmarks doom-dashboard-shortmenu-functions)))
-                   :mouse-face 'highlight
-                   :button-face 'dashboard-heading
-                   :button-prefix ""
-                   :button-suffix ""
-                   :format "%[%t%]")
-    (if doom-dashboard-set-widget-binding
-        (insert (propertize "SPC RET"
-                            'face
-                            'doom-dashboard-bindings-face)))))
-
+    (defun my/doom-dashboard-insert-bookmark-shortmenu (&rest _)
+      "Insert bookmark shortmenu widget."
+      (let* ((fn (alist-get 'bookmarks doom-dashboard-shortmenu-functions))
+             (fn-keymap (format "\\[%s]" fn))
+             (icon-name (alist-get 'bookmarks dashboard-heading-icons))
+             (icon (nerd-icons-octicon icon-name :face 'dashboard-heading)))
+        (if dashboard-display-icons-p
+            (insert (format "%-1s   " icon)))
+        (widget-create 'item
+                       :tag (format "%-30s" "Jump to bookmark")
+                       :action (lambda (&rest _)
+                                 (call-interactively 
+                                  (alist-get 'bookmarks doom-dashboard-shortmenu-functions)))
+                       :mouse-face 'highlight
+                       :button-face 'dashboard-heading
+                       :button-prefix ""
+                       :button-suffix ""
+                       :format "%[%t%]")
+        (if doom-dashboard-set-widget-binding
+            (insert (propertize "SPC RET"
+                                'face
+                                'doom-dashboard-bindings-face)))))   
 
         (use-package dashboard
           :ensure t
@@ -779,6 +887,7 @@ Defining some functions for a git diff module ill use instead of the default one
                     (projects  . doom-dashboard-insert-project-shortmenu)
                     (agenda    . my/doom-dashboard-insert-org-agenda-shortmenu)))
                 (dashboard-items '(agenda bookmarks recents)))
+    (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 #+end_src
 
 * Development
@@ -801,46 +910,65 @@ I like it more than eglot.
 - I can easily choose my root directory, useful when working with git submodules
 - better symbol highlighting imo, just works with doom-themes
 #+begin_src emacs-lisp
-        (use-package lsp-ui :commands lsp-ui-mode)
-        (use-package lsp-mode
-          :commands (lsp lsp-deferred)
-        :init
-        (defun my/update-completions-list ()
-            (progn
-                (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
-                (setq completion-at-point-functions
-                    '(non-greedy-lsp cape-file cape-dabbrev))))
+        (setq lsp-use-plists nil)
+            (use-package lsp-ui :commands lsp-ui-mode)
+            (use-package lsp-mode
+              :commands (lsp lsp-deferred)
+            :init
+            (defun my/update-completions-list ()
+                (progn
+                    (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
+                    (setq completion-at-point-functions
+                        '(non-greedy-lsp cape-file cape-dabbrev))))
 
-          (setq lsp-keymap-prefix "C-c l")
+              (setq lsp-keymap-prefix "C-c l")
 
-          :hook (
-                 (python-mode . lsp)
-                 (c-mode . lsp)
-                 (f90-mode . lsp)
-                 (julia-mode . lsp)
-                 (go-mode . lsp)
-                 (lsp-mode . lsp-enable-which-key-integration)
-                 (lsp-mode . lsp-ui-mode)
-                 (lsp-completion-mode . my/update-completions-list)
-                )
-          :custom
-            (lsp-completion-provider :none)) ;; we use Corfu!
+              :hook (
+                     (python-mode . lsp)
+                     (c-mode . lsp)
+                     (f90-mode . lsp)
+                     (julia-mode . lsp)
+                     (go-mode . lsp)
+                     (zig-mode . lsp)
+                     (lsp-mode . lsp-enable-which-key-integration)
+                     (lsp-mode . lsp-ui-mode)
+                     (lsp-completion-mode . my/update-completions-list)
+                    )
+              :custom
+                (lsp-completion-provider :none)) ;; we use Corfu!
 
-        (use-package dap-mode)
-        ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-    (use-package lsp-pyright
-      :ensure t
-      :hook (python-mode . (lambda ()
-                              (require 'lsp-pyright)
-                              (lsp))))  ; or lsp-deferred
-    (setq lsp-ui-doc-position 'at-point)
-    (setq lsp-ui-sideline-show-hover nil)
-    (setq lsp-ui-sideline-enable t)
-    (setq lsp-ui-sideline-show-diagnostics t)
+            (use-package dap-mode)
+            ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+        (use-package lsp-pyright
+          :ensure t
+          :hook (python-mode . (lambda ()
+                                  (require 'lsp-pyright)
+                                  (lsp))))  ; or lsp-deferred
+        (setq lsp-ui-doc-position 'at-point)
+        (setq lsp-ui-sideline-show-hover nil)
+        (setq lsp-ui-sideline-enable t)
+        (setq lsp-ui-sideline-show-diagnostics t)
+
+        (setq lsp-idle-delay 0.01)
+        (setq lsp-enable-file-watchers nil)
+#+end_src
+
+*** DAP Mode
+I never use it but i should.
+#+begin_src emacs-lisp
     (require 'dap-python)
-;; if you installed debugpy, you need to set this
-;; https://github.com/emacs-lsp/dap-mode/issues/306
-(setq dap-python-debugger 'debugpy)
+    ;; if you installed debugpy, you need to set this
+    ;; https://github.com/emacs-lsp/dap-mode/issues/306
+    (setq dap-python-debugger 'debugpy)
+    (dap-register-debug-template "My App"
+      (list :type "python"
+            :args "-i"
+            :cwd nil
+            :env '(("DEBUG" . "1"))
+            :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
+            :request "launch"
+            :name "My App"))
+
 #+end_src
 *** Latex
 #+begin_src emacs-lisp
@@ -920,6 +1048,11 @@ Use SPC-tab to uncomment the lines.
                 (setq evil-shift-width 4)
     ))
 #+end_src
+*** zig mode
+#+begin_src emacs-lisp
+    (use-package zig-mode)
+#+end_src
+
 *** go mode
 #+begin_src emacs-lisp
     (use-package go-mode)
@@ -1037,7 +1170,27 @@ much like the literate programming ideas that Donald Knuth made famous.
             ))
             ))
     (add-hook 'org-mode-hook 'visual-line-mode)
-    (setq org-latex-create-formula-image-program 'dvisvgm)
+ 
+
+    ;; Improve org mode looks
+    (setq-default org-startup-indented t
+                  org-use-sub-superscripts "{}"
+                  org-hide-emphasis-markers t
+                  org-startup-with-inline-images t
+                  org-image-actual-width '(300))
+(setq org-latex-create-formula-image-program 'dvisvgm)
+
+#+end_src
+
+**** org roam ui
+#+begin_src emacs-lisp
+(use-package org-roam-ui)
+#+end_src
+
+**** org-timeblock
+#+begin_src emacs-lisp
+(use-package org-timeblock)
+(setq org-timeblock-span 1)
 #+end_src
 
 **** Table of Contents
@@ -1047,14 +1200,6 @@ much like the literate programming ideas that Donald Knuth made famous.
       :commands toc-org-enable
       :hook (org-mode . toc-org-mode))
 #+end_src
-
-# **** Org Superstar
-# Prettify headings and plain lists in Org mode. Modern version of org-bullets.
-# #+begin_src emacs-lisp
-#     (use-package org-superstar
-#       :after org
-#       :hook (org-mode . org-superstar-mode))
-# #+end_src
 
 **** org-modern
 
@@ -1265,6 +1410,33 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
 #+end_src
 
 
+**** org babel
+
+#+begin_src emacs-lisp
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)
+       (shell . nil)))
+
+
+(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+**** org fragtog
+#+begin_src emacs-lisp
+  (use-package org-fragtog
+    :after org
+    :custom
+    (org-startup-with-latex-preview t)
+    :hook
+    (org-mode . org-fragtog-mode)
+    :custom
+    (org-format-latex-options
+     (plist-put org-format-latex-options :scale 2)
+     (plist-put org-format-latex-options :foreground 'auto)
+     (plist-put org-format-latex-options :background 'auto)))
+#+end_src
+
 ** Terminal
 
 *** Eat
@@ -1273,21 +1445,25 @@ Eat(Emulate A Terminal) is a terminal emulator within Emacs.
 It's more portable and less overhead for users over like vterm or eshell.
 We setup eat with eshell, if you want to use bash, zsh etc., check out their git [[https://codeberg.org/akib/emacs-eat][repository]] how to do it.
 #+begin_src emacs-lisp
-    (use-package eat
-      :hook ('eshell-load-hook #'eat-eshell-mode))
+    ;; (use-package eat
+    ;;   :hook ('eshell-load-hook #'eat-eshell-mode))
+    ;; (defun visit-eat-buffer (&optional prefix) "Create or visit a eat buffer. If PREFIX is not nil, create visit in default-directory" (interactive "P") (let* ((eat-buffer-name (format "*eat<%s>" (if prefix default-directory "0")))) (with-current-buffer (eat) (eat-line-mode)) (pop-to-buffer eat-buffer-name display-comint-buffer-action)))
 #+end_src
 
 *** vterm
 ol' reliable
-
-*** vterm
-ol' reliable
+I use zsh with vim bindings: Make sure that extra keybinds like this ~bindkey "^J" push-line-or-edit~ are not used, they led to return not being accepted by vterm.
 #+begin_src emacs-lisp
     (use-package vterm
         :ensure t)
     (use-package vterm-toggle
         :straight (vterm-toggle :host github
                                     :repo "jixiuf/vterm-toggle"))
+#+end_src
+** multiple cursors
+#+begin_src emacs-lisp
+    (require 'multiple-cursors)
+(global-set-key (kbd "M-d") 'mc/edit-lines)
 #+end_src
 * Multi File Example
 
@@ -1372,45 +1548,19 @@ Corfu is a small package, which relies on the Emacs completion facilities and co
 For more configuration options check out their [[https://github.com/minad/corfu][git repository]].
 Notes:
 - To enter Orderless field separator, use M-SPC.
+  
 
 #+begin_src emacs-lisp
-     (use-package tempel
-  ;; Require trigger prefix before template name when completing.
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
-
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
-
-  :init
-
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
-
 ;; Optional: Add tempel-collection.
 ;; The package is young and doesn't have comprehensive coverage.
 (use-package tempel-collection)   
 
+
+
+
+    ;; Optional: Add tempel-collection.
+    ;; The package is young and doesn't have comprehensive coverage.
+    (use-package tempel-collection)
 
         (use-package corfu
           ;; Optional customizations
@@ -1421,34 +1571,28 @@ Notes:
           (corfu-popupinfo-mode t)       ;; Enable popup information
           (corfu-popupinfo-delay 0.5)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
           (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
-          (corfu-auto-delay 0)
+          (corfu-auto-delay 0.05)
+          ;; (completion-styles '(basic))
           ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-          ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+          (corfu-quit-no-match t)      ;; Never quit, even if there is no match
           ;; (corfu-preview-current nil)    ;; Disable current candidate preview
           ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-          ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+          (corfu-on-exact-match nil)     ;; Configure handling of exact matches
           ;; (corfu-scroll-margin 5)        ;; Use scroll margin
           (completion-ignore-case t)
-          (completion-styles '(basic))
           ;; Enable indentation+completion using the TAB key.
           ;; `completion-at-point' is often bound to M-TAB.
           (tab-always-indent 'complete)
           (corfu-preview-current nil) ;; Don't insert completion without confirmation
-            (add-to-list 'completion-styles-alist
-                        '(tab completion-basic-try-completion ignore
-                        "Completion style which provides TAB completion only."))
-            (corfu-history-mode 1)
-            (savehist-mode 1)
-            (add-to-list 'savehist-additional-variables 'corfu-history)
+
+          (corfu-history-mode 1)
+          (savehist-mode 1)
+          (add-to-list 'savehist-additional-variables 'corfu-history)
           ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
           ;; be used globally (M-/).  See also the customization variable
           ;; `global-corfu-modes' to exclude certain modes.
-            :bind
-            (:map corfu-map ("TAB" . corfu-expand))
           :init
-          (global-corfu-mode)
-    )
-
+          (global-corfu-mode))
 
 
         (use-package nerd-icons-corfu
@@ -1464,31 +1608,64 @@ Notes:
 - Take care when adding Capfs (Completion-at-point-functions) to the list since each of the Capfs adds a small runtime cost.
 Read the [[https://github.com/minad/cape#configuration][configuration section]] in Cape's readme for more information.
 #+begin_src emacs-lisp
-    (use-package cape
-      :after corfu
+       (use-package cape
+         :after corfu
+         :init
+         ;; Add to the global default value of `completion-at-point-functions' which is
+         ;; used by `completion-at-point'.  The order of the functions matters, the
+         ;; first function returning a result wins.  Note that the list of buffer-local
+         ;; completion functions takes precedence over the global list.
+         ;; The functions that are added later will be the first in the list
+
+         (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
+         (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
+         (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
+         (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
+         (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
+
+         ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
+         ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
+         ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
+         ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
+         (add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
+         ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
+         ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
+         )
+
+    ;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
+#+end_src
+
+** tempel
+Snippet framework
+#+begin_src emacs-lisp
+    (use-package tempel
+      ;; Require trigger prefix before template name when completing.
+      :custom
+      (tempel-trigger-prefix "<")
+
+      :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+             ("M-*" . tempel-insert))
+
       :init
-      ;; Add to the global default value of `completion-at-point-functions' which is
-      ;; used by `completion-at-point'.  The order of the functions matters, the
-      ;; first function returning a result wins.  Note that the list of buffer-local
-      ;; completion functions takes precedence over the global list.
-      ;; The functions that are added later will be the first in the list
+      ;; Setup completion at point
+      (defun tempel-setup-capf ()
+        ;; Add the Tempel Capf to `completion-at-point-functions'.
+        ;; `tempel-expand' only triggers on exact matches. Alternatively use
+        ;; `tempel-complete' if you want to see all matches, but then you
+        ;; should also configure `tempel-trigger-prefix', such that Tempel
+        ;; does not trigger too often when you don't expect it. NOTE: We add
+        ;; `tempel-expand' *before* the main programming mode Capf, such
+        ;; that it will be tried first.
+        (setq-local completion-at-point-functions
+                    (cons #'tempel-complete
+                          completion-at-point-functions)))
+    )
 
-      (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
-      (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
-      (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
-      (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
-      (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
-
-      ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
-      ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
-      ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
-      ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
-      ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
-      ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
-      ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
-      )
-
- ;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
+      (add-hook 'conf-mode-hook 'tempel-setup-capf)
+      (add-hook 'prog-mode-hook 'tempel-setup-capf)
+      (add-hook 'text-mode-hook 'tempel-setup-capf)
+      (add-hook 'python-mode-hook 'tempel-setup-capf)
+      (add-hook 'lsp-mode-hook 'tempel-setup-capf)
 #+end_src
 
 ** Orderless
@@ -2519,18 +2696,15 @@ We also increase Read Process Output Max so emacs can read more data.
 
 
       ;;;; Create main workspace
-      ;; The default perspective persp-mode creates is special and doesn't represent
-      ;; a real persp object, so buffers can't really be assigned to it, among other
-      ;; quirks, so I replace it with a "main" perspective.
-      ;; (add-hook '(persp-mode-hook persp-after-load-state-functions)
-      ;;   (defun +workspaces-ensure-no-nil-workspaces-h (&rest _)
-      ;;     (when persp-mode
-      ;;       (dolist (frame (frame-list))
-      ;;         (when (string= (safe-persp-name (get-current-persp frame)) persp-nil-name)
-      ;;           ;; Take extra steps to ensure no frame ends up in the nil perspective
-      ;;           (persp-frame-switch (or (cadr (hash-table-keys *persp-hash*))
-      ;;                                   +workspaces-main)
-      ;;                               frame))))))
+      (add-hook '(persp-mode-hook persp-after-load-state-functions)
+        (defun +workspaces-ensure-no-nil-workspaces-h (&rest _)
+          (when persp-mode
+            (dolist (frame (frame-list))
+              (when (string= (safe-persp-name (get-current-persp frame)) persp-nil-name)
+                ;; Take extra steps to ensure no frame ends up in the nil perspective
+                (persp-frame-switch (or (cadr (hash-table-keys *persp-hash*))
+                                        +workspaces-main)
+                                    frame))))))
 
       (add-hook 'persp-mode-hook
         (defun +workspaces-init-first-workspace-h (&rest _)
@@ -2829,7 +3003,7 @@ We also increase Read Process Output Max so emacs can read more data.
         ;;   :ensure t
         ;;   :config (treemacs-set-scope-type 'Tabs))
 
-    (lsp-treemacs-sync-mode 1)
+    ;; (lsp-treemacs-sync-mode 1)
 #+end_src
 
 * vr replace
@@ -2898,85 +3072,145 @@ Required for lsp-ui
 (setq org-timeblock-span 1)
 #+end_src
 
-* git diff
+* Promote popup buffer to full buffer 
 #+begin_src emacs-lisp
-                   (defun in-git-p ()
-                     (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
-            (defun git-parse-status ()
-                (interactive)
-                (concat 
-            " ["
-            ;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
-            (let ((plus-minus (shell-command-to-string (concat "~/Scripts/git-diff/diff " buffer-file-name))))
-                (if (and plus-minus
-                    ;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
-                    (string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
-                    (concat
-                (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-                (propertize (format "~%s " (match-string 3 plus-minus)) 'face 'nerd-icons-cyan)
-                (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
-                (propertize "✔" 'face '(:foreground "green3" :weight bold))))
-            "]"))
-
-                (defun git-remote-status ()
-                 (let* (;; get the branch we are on.
-                        (branch (s-trim
-                                 (shell-command-to-string
-                                  "git rev-parse --abbrev-ref HEAD")))
-                        ;; get the remote the branch points to.
-                        (remote (s-trim
-                                 (shell-command-to-string
-                                  (format "git config branch.%s.remote" branch))))
-                        (remote-branch (s-trim
-                                        (shell-command-to-string
-                                         "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
-                        (commits (split-string
-                                  (s-trim
-                                   (shell-command-to-string
-                                    (format
-                                     "git rev-list --count --left-right HEAD...%s"
-                                     remote-branch)))))
-                        (local (nth 0 commits))
-                        (remotes (nth 1 commits)))
-                   (concat
-                    (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
-                    (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
-                    "["
-                    (propertize (format "↑%s" local) 'face 'warning)
-                    "|"
-                    (propertize (format "↓%s" remotes) 'face 'warning)
-                    "]"
-                    )))
-    (setq git-modeline-last-update (float-time))
-       (setq git-modeline-update-interval 5 )
-       ;; (defun git-mode ()
-       ;;   (interactive)
-       ;;   "minor mode to put git repo status in modeline"
-       ;;   (let ((git-modeline '(:eval (if
-       ;;                                   (> (- (float-time) git-modeline-last-update)
-       ;;                                      git-modeline-update-interval)
-       ;;                                   ;; we are updating                              
-       ;;                                   (setq git-modeline
-       ;;                                         (if (not (in-git-p))
-       ;;                                             ""                                   
-       ;;                                           (setq  git-modeline-last-update (float-time))
-       ;;                                           (concat 
-       ;;                                            (git-remote-status)
-       ;;                                            (git-parse-status))))
-       ;;                                 git-modeline)
-       ;;                              )))))
-    (defun update-git-diff ()
+    (defun my/raise-popup ()
       (interactive)
-      (setq git-modeline (concat
-             (git-remote-status)
-             (git-parse-status)
-        )
-      ))
-    ;; (add-hook 'after-save-hook 'update-git-diff)
-    ;; (add-hook 'after-revert-hook 'update-git-diff)
-    ;; (add-hook 'before-revert-hook 'update-git-diff)
-    ;; (add-hook 'buffer-list-update-hook 'update-git-diff)
+      (let ((buffer (current-buffer)))
+        (unless (one-window-p)
+          (delete-window))
+        (switch-to-buffer buffer )))
 #+end_src
+
+* use new compiled package versions
+#+begin_src emacs-lisp
+(setq load-prefer-newer t)
+#+end_src
+
+* default compilation for different languages
+
+https://www.youtube.com/watch?v=6oeE52bIFyE
+#+begin_src emacs-lisp
+        (defun my/compile-python ()
+          "bruh"
+        (setq-local compile-command
+         (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+
+        (defun my/compile-go ()
+          "bruh"
+        (setq-local compile-command
+         (concat "go build " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+
+    (add-hook 'python-mode-hook 'my/compile-python)
+    (add-hook go-mode-hook 'my/compile-go)
+
+#+end_src
+
+* modeline git-diff
+Custom git module for doom modeline. Still full of bugs, but does its job fundamentally.
+# #+begin_src emacs-lisp
+
+    ;;                    (defun in-git-p ()
+    ;;                      (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
+    ;;             (defun git-parse-status ()
+    ;;                 (interactive)
+    ;;                 (concat 
+    ;;             " ["
+    ;;             ;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
+    ;; <<<<<<< HEAD
+    ;;             (let ((plus-minus (shell-command-to-string (concat "~/Scripts/git-diff/diff " buffer-file-name))))
+    ;; =======
+    ;;             (let ((plus-minus (shell-command-to-string (concat "~/git-diff/diff " buffer-file-name))))
+    ;; >>>>>>> origin/homeone
+    ;;                 (if (and plus-minus
+    ;;                     ;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
+    ;;                     (string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
+    ;;                     (concat
+    ;;                 (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
+    ;;                 (propertize (format "~%s " (match-string 3 plus-minus)) 'face 'nerd-icons-cyan)
+    ;;                 (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
+    ;;                 (propertize "✔" 'face '(:foreground "green3" :weight bold))))
+    ;;             "]"))
+
+    ;;                 (defun git-remote-status ()
+    ;;                  (let* (;; get the branch we are on.
+    ;;                         (branch (s-trim
+    ;;                                  (shell-command-to-string
+    ;;                                   "git rev-parse --abbrev-ref HEAD")))
+    ;;                         ;; get the remote the branch points to.
+    ;;                         (remote (s-trim
+    ;;                                  (shell-command-to-string
+    ;;                                   (format "git config branch.%s.remote" branch))))
+    ;;                         (remote-branch (s-trim
+    ;;                                         (shell-command-to-string
+    ;;                                          "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
+    ;;                         (commits (split-string
+    ;;                                   (s-trim
+    ;;                                    (shell-command-to-string
+    ;;                                     (format
+    ;;                                      "git rev-list --count --left-right HEAD...%s"
+    ;;                                      remote-branch)))))
+    ;;                         (local (nth 0 commits))
+    ;;                         (remotes (nth 1 commits)))
+    ;;                    (concat
+    ;;                     (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
+    ;;                     (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
+    ;;                     "["
+    ;;                     (propertize (format "↑%s" local) 'face 'warning)
+    ;;                     "|"
+    ;;                     (propertize (format "↓%s" remotes) 'face 'warning)
+    ;;                     "]"
+    ;;                     )))
+    ;;     (setq git-modeline-last-update (float-time))
+    ;;        (setq git-modeline-update-interval 5 )
+    ;; <<<<<<< HEAD
+    ;;        ;; (defun git-mode ()
+    ;;        ;;   (interactive)
+    ;;        ;;   "minor mode to put git repo status in modeline"
+    ;;        ;;   (let ((git-modeline '(:eval (if
+    ;;        ;;                                   (> (- (float-time) git-modeline-last-update)
+    ;;        ;;                                      git-modeline-update-interval)
+    ;;        ;;                                   ;; we are updating                              
+    ;;        ;;                                   (setq git-modeline
+    ;;        ;;                                         (if (not (in-git-p))
+    ;;        ;;                                             ""                                   
+    ;;        ;;                                           (setq  git-modeline-last-update (float-time))
+    ;;        ;;                                           (concat 
+    ;;        ;;                                            (git-remote-status)
+    ;;        ;;                                            (git-parse-status))))
+    ;;        ;;                                 git-modeline)
+    ;;        ;;                              )))))
+    ;; =======
+    ;;        (defun git-mode ()
+    ;;          (interactive)
+    ;;          "minor mode to put git repo status in modeline"
+    ;;          (let ((git-modeline '(:eval (if
+    ;;                                          (> (- (float-time) git-modeline-last-update)
+    ;;                                             git-modeline-update-interval)
+    ;;                                          ;; we are updating                              
+    ;;                                          (setq git-modeline
+    ;;                                                (if (not (in-git-p))
+    ;;                                                    ""                                   
+    ;;                                                  (setq  git-modeline-last-update (float-time))
+    ;;                                                  (concat 
+    ;;                                                   (git-remote-status)
+    ;;                                                   (git-parse-status))))
+    ;;                                        git-modeline)
+    ;;                                     )))))
+    ;; >>>>>>> origin/homeone
+    ;;     (defun update-git-diff ()
+    ;;       (interactive)
+    ;;       (setq git-modeline (concat
+    ;;              (git-remote-status)
+    ;;              (git-parse-status)
+    ;;         )
+    ;;       ))
+    ;; <<<<<<< HEAD
+    ;;     ;; (add-hook 'after-save-hook 'update-git-diff)
+    ;;     ;; (add-hook 'after-revert-hook 'update-git-diff)
+    ;;     ;; (add-hook 'before-revert-hook 'update-git-diff)
+    ;;     ;; (add-hook 'buffer-list-update-hook 'update-git-diff)
+;;#+end_src
 
 * default compilation for python
 https://www.youtube.com/watch?v=6oeE52bIFyE
@@ -2988,4 +3222,122 @@ Set a per line compile command by adding // =-*- compile-command: "gcc -Wall -O3
      (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
 
 (add-hook 'python-mode-hook 'my/compile-python)
+#+end_src
+
+* no FOCKING warnings man
+#+begin_src emacs-lisp
+(setq warning-minimum-level :emergency)
+#+end_src
+
+* olivetti mode
+#+begin_src emacs-lisp
+
+        ;; Distraction-free writing
+        (defun ews-distraction-free ()
+          "Distraction-free writing environment using Olivetti package."
+          (interactive)
+          (if (equal olivetti-mode nil)
+              (progn
+                (window-configuration-to-register 1)
+                (delete-other-windows)
+                (olivetti-set-width 180)
+                (text-scale-set 2)
+                (olivetti-mode t))
+            (progn
+              (if (eq (length (window-list)) 1)
+                  (jump-to-register 1))
+              (olivetti-mode 0)
+              (text-scale-set 0))))
+
+        (use-package olivetti
+          :demand t
+          :bind
+          (("<f9>" . ews-distraction-free)))
+    (add-hook 'olivetti-mode-hook '(lambda () (display-line-numbers-mode -1)))
+#+end_src
+
+* mu4e
+#+begin_src emacs-lisp
+        (require 'smtpmail)
+        (setq send-mail-function 'smtpmail-send-it)
+        (setq message-send-mail-function 'smtpmail-send-it)
+
+                (use-package mu4e
+                  :ensure nil
+                  :load-path "/usr/share/emacs/site-lisp/mu4e/"
+                  :config
+
+                  ;; This is set to 't' to avoid mail syncing issues when using mbsync
+                  (setq mu4e-change-filenames-when-moving t)
+
+                  ;; Refresh mail using isync every 10 minutes
+                  (setq message-send-mail-function 'smtpmail-send-it)
+                  (setq mu4e-update-interval (* 10 60))
+                  (setq mu4e-get-mail-command "mbsync -a")
+                  (setq mu4e-maildir "~/Mail/gmail")
+                  (setq user-mail-address "schautendustin@gmail.com")
+                  (setq smtpmail-smtp-server "smtp.gmail.com")
+                  (setq smtpmail-smtp-service 465)
+                  (setq smtpmail-stream-type ssl)
+                  (setq mu4e-drafts-folder "/[Gmail]/Drafts")
+                  (setq mu4e-sent-folder   "/[Gmail]/Sent Mail")
+                  (setq mu4e-refile-folder "/[Gmail]/All Mail")
+                  (setq mu4e-trash-folder  "/[Gmail]/Trash")
+
+
+                  (setq mu4e-maildir-shortcuts
+                      '(("/Inbox"             . ?i)
+                        ("/[Gmail]/Sent Mail" . ?s)
+                        ("/[Gmail]/Trash"     . ?t)
+                        ("/[Gmail]/Drafts"    . ?d)
+                        ("/[Gmail]/All Mail"  . ?a)))
+    )
+
+
+        (setq mu4e-contexts
+              (list
+               ;; Work account
+               (make-mu4e-context
+                :name "Work"
+                :match-func
+                  (lambda (msg)
+                    (when msg
+                      (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
+                :vars '((user-mail-address . "schautendustin@gmail.com")
+                        (user-full-name    . "Dustin Schauten")
+                        (send-mail-function . 'smtpmail-send-it)
+                        (starttls-use-gnutls . t)
+                        (smtpmail-starttls-credentials . '(("smtp.gmail.com" 465 nil nil)))
+                        (smtpmail-auth-credentials . '(("smtp.gmail.com" 465 "schautendustin@gmail.com" nil)))
+                        (smtpmail-default-smtp-server . "smtp.gmail.com")
+                        (smtpmail-smtp-server . "smtp.gmail.com")
+                        (smtpmail-stream-type  . ssl)
+                        (smtpmail-smtp-service . 465)
+                        (smtpmail-auth-credentials (expand-file-name "~/.authinfo.gpg"))
+                        (mu4e-drafts-folder  . "/Gmail/[Gmail]/Drafts")
+                        (mu4e-sent-folder  . "/Gmail/[Gmail]/Sent Mail")
+                        (mu4e-refile-folder  . "/Gmail/[Gmail]/All Mail")
+                        (mu4e-trash-folder  . "/Gmail/[Gmail]/Trash")))
+
+               ;; Personal account
+               (make-mu4e-context
+                :name "Personal"
+                :match-func
+                  (lambda (msg)
+                    (when msg
+                      (string-prefix-p "/Fastmail" (mu4e-message-field msg :maildir))))
+                :vars '())))
+    (mu4e-alert-set-default-style 'libnotify)
+    (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+    ;; (add-hook 'after-init-hook #'(mu4e-alert-enable-mode-line-display))
+#+end_src
+
+* poke-line
+hell yea pokemon
+#+begin_src emacs-lisp
+(use-package poke-line
+  :ensure t
+  :config
+  (poke-line-global-mode 1)
+  (setq-default poke-line-pokemon "roserade"))
 #+end_src

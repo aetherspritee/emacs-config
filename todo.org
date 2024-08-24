@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 - [ ] org mode schöner machen
 - [ ] default workspace on start-up
 - [ ] better snippet support, more snippets
@@ -9,11 +10,69 @@
   + [X] switch windows
   + [X] switch buffer
   + [X] comments
+=======
+- [-] autocompletion
+  - [X] snippet support
+  - [X] support for custom snippets
+  - [ ] FIX THE REQUIREMENT TO RELOAD BEFORE SNIPPETS WORK
+  - [ ] DONT EXPAND THE FUCKING COMPLETION UNLESS I PRESS TAB BRUH
+  - [ ] expanding of completions
+  - [ ] ignore underscores when suggesting completions (orderless seperator)
+  - [ ] bibtex auto completion pfffffffffffffffff
+- [ ] org code blocks
+  - [ ] set up babel for useful languages
+  - [ ] lsp if possible?
+  - [ ] snippets for python to use org document as jupyter notebook
+- [ ] latex
+  + [ ] :)
+- [-] snippets
+  - [X] tempel as framework
+  - [ ] check latex templates
+  - [ ] write own templates
+- [ ] git-diff modeline segment
+  - [ ] fix git diff running all the fucking time
+  - [ ] fix git-diff "not a git directory" bug, upgrade script for account for changed lines
+  - [ ] fix git-diff to not run in minibuffer
+  - [ ] better handling of image inline toggling
+- [ ] integrate consult with persp-mode if possible (nicer buffer list)
+- [ ] org template for random thoughts
+>>>>>>> origin/homeone
 - [-] org roam
   + [X] keybinds
   + [X] cite ref function using cite: syntax
-  + [ ] automatically start org-roam-bibtex-mode
+  + [ ] properly start org-roam-bibtex-mode
   + [X] get bibtex integration
+- [ ] enlight + grid.el
+  - [ ] use enlight and grid.el and make smth cool looking
+  - [ ] convert termine into diary file, mark in dashboard calendar
+- [-] email
+  - [X] get gmail to work
+  - [X] autoload contexts
+  - [ ] get uni acc to work
+  - [ ] prettify mu4e
+  - [X] get mu4e in modeline to work
+- [ ] try svg-tags again
+  - [ ] custom tags (from old config)
+  - [ ] new ones for date/timestamp
+  - [ ] hook for org-agenda
+
+* Done
+- [X] unbind Shift k
+- [X] keep visual selection after indenting in evil
+- [X] use C-J and C-K to scroll through lists
+- [X] delete word with backspace ONLY in find file
+- [X] better keybinds for workspace and buffer switching
+- [X] lsp
+  - [X] languages and servers
+    * [X] c
+    * [X] fortran (f90)
+    * [X] go
+    * [X] julia
+    * [X] python
+  - [X] autocompletion
+  - [X] fix sideline diagnostics!!
+  - [X] use cape file completion in lsp
+  - [X] goto references keybinds
 - [X] workspaces
   + [X] fix keybinds and errors
 - [X] treesitter
@@ -26,26 +85,27 @@
   + [X] my agenda view
   + [X] use correct files
 - [X] prettify org mode
-- [-] lsp
-  - [-] languages and servers
-    * [X] c
-    * [X] fortran (f90)
-    * [X] go
-    * [X] julia
-    * [X] python
-    * [ ] more?
-  - [X] autocompletion
-  - [X] fix sideline diagnostics!!
-  - [X] use cape file completion in lsp
-  - [X] goto references keybinds
-- [ ] dashboard
-  - [ ] use enlight and grid.el and make smth cool looking
-  - [ ] convert termine into diary file, mark in dashboard calendar
-- [-] latex
-  + [ ] Overall
-  + [X] In Org Mode
+- [X] org roam ui
+- [X] org timeblock
+- [X] magit todos
+- [X] relative lines!!
+- [X] vr/replace!!!
+- [X] return to automatically insert new org item
+- [X] proper keybinds
+  + [X] switch windows
+  + [X] switch buffer
+  + [X] comments
+- [X] popup support for terminal
+- [X] Git Module nicht 1000 mal die Sekunde aufrufen
+- [X] faster completion
 - [X] treemacs
   + [X] lsp integration
   + [X] themes
-- [X] use C-J and C-K to scroll through lists
-- [X] delete word with backspace ONLY in find file
+- [X] org-mode ricin 
+  - [X] mixed fonts
+  - [X] sharper latex
+  - [X] better latex highlighting
+  - [X] fragtog
+- [X] start 1 proper workspace on startup
+- [X] change fonts, make them work with emacsclient
+- [X] fix vterm not accepting return key

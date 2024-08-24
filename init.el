@@ -105,7 +105,7 @@ If on a:
                 (image-overlays
                  (cl-find-if (lambda (o) (overlay-get o 'org-image-overlay))
                              overlays)))
-           (+org--toggle-inline-images-in-subtree beg end)
+           (org-toggle-inline-images beg end)
            (if (or image-overlays latex-overlays)
                (org-clear-latex-preview beg end)
              (org--latex-preview-region beg end))))
@@ -153,7 +153,7 @@ If on a:
                 (path (org-element-property :path lineage)))
            (if (or (equal (org-element-property :type lineage) "img")
                    (and path (image-type-from-file-name path)))
-               (+org--toggle-inline-images-in-subtree
+               (org-toggle-inline-images
                 (org-element-property :begin lineage)
                 (org-element-property :end lineage))
              (org-open-at-point arg))))
@@ -162,14 +162,14 @@ If on a:
          (org-toggle-checkbox))
 
         (`paragraph
-         (+org--toggle-inline-images-in-subtree))
+         (org-toggle-inline-images))
 
         (_
          (if (or (org-in-regexp org-ts-regexp-both nil t)
                  (org-in-regexp org-tsr-regexp-both nil  t)
                  (org-in-regexp org-link-any-re nil t))
              (call-interactively #'org-open-at-point)
-           (+org--toggle-inline-images-in-subtree
+           (org-toggle-inline-images
             (org-element-property :begin context)
             (org-element-property :end context))))))))
 
@@ -177,43 +177,58 @@ If on a:
     ;; (define-key org-mode-map (kbd "RET") #'+org/dwim-at-point)
 
 (use-package evil
-          :init ;; Execute code Before a package is loaded
-          (evil-mode)
-          :config ;; Execute code After a package is loaded
-          (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
-          :custom ;; Customization of package custom variables
-          (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
-          (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
-          (evil-want-C-i-jump nil)      ;; Disables C-i jump
-          (evil-undo-system 'undo-redo) ;; C-r to redo
-          (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
-          ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
-          :bind (:map evil-motion-state-map
-                      ("SPC" . nil)
-                      ("RET" . nil)
-                      ;; ("RET" . org-todo)
-                      ("TAB" . nil)))
-        (use-package evil-collection
-          :after evil
-          :config
-          ;; Setting where to use evil-collection
-          ;; (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult lsp-ui-imenu))
-          (evil-set-initial-state 'package-menu-mode 'motion)
-          (evil-collection-init)
-        (setq evil-collection-want-find-usages-bindings t)
-)
-        (use-package evil-commentary
-          :after evil
-          :config
-          (evil-commentary-mode)
-          )
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)
-      (define-key evil-motion-state-map (kbd "g r") 'lsp-find-references))
-    ;; Setting RETURN key in org-mode to follow links
-      (setq org-return-follows-link  t)
+              :init ;; Execute code Before a package is loaded
+              (evil-mode)
+              :config ;; Execute code After a package is loaded
+              (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
+              :custom ;; Customization of package custom variables
+              (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
+              (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
+              (evil-want-C-i-jump nil)      ;; Disables C-i jump
+              (evil-undo-system 'undo-redo) ;; C-r to redo
+              (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
+              ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
+              :bind (:map evil-motion-state-map
+                          ("SPC" . nil)
+                          ("RET" . nil)
+                          ;; ("RET" . org-todo)
+                          ("TAB" . nil)))
+            (use-package evil-collection
+              :after evil
+              :config
+              ;; Setting where to use evil-collection
+              ;; (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult lsp-ui-imenu))
+              (evil-set-initial-state 'package-menu-mode 'motion)
+              (evil-collection-init)
+            (setq evil-collection-want-find-usages-bindings t)
+    )
+            (use-package evil-commentary
+              :after evil
+              :config
+              (evil-commentary-mode)
+              )
+   (defun my/evil-shift-right ()
+  (interactive)
+  (evil-shift-right evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+
+(defun my/evil-shift-left ()
+  (interactive)
+  (evil-shift-left evil-visual-beginning evil-visual-end)
+  (evil-normal-state)
+  (evil-visual-restore))
+(evil-define-key 'visual global-map (kbd ">") 'my/evil-shift-right)
+(evil-define-key 'visual global-map (kbd "<") 'my/evil-shift-left)
+
+        (with-eval-after-load 'evil-maps
+          (define-key evil-motion-state-map (kbd "SPC") '+org/dwim-at-point)
+          (define-key evil-motion-state-map (kbd "RET") nil)
+          (define-key evil-motion-state-map (kbd "TAB") nil)
+          (define-key evil-motion-state-map (kbd "K") nil)
+          (define-key evil-motion-state-map (kbd "g r") 'lsp-find-references))
+        ;; Setting RETURN key in org-mode to follow links
+          (setq org-return-follows-link  t)
 
 (use-package general
           :config
@@ -241,21 +256,34 @@ If on a:
 
           (start/leader-keys
             "S" '(yas/insert-snippet :wk "snippet"))
+
+          (start/leader-keys
+            "D b" '(dap-breakpoint-toggle :wk "toogle breakpoint")
+            "D c" '(dap-continue :wk "dap continue")
+            "D n" '(dap-next :wk "dap next")
+            "D s"'(dap-debug :wk "Start debugger")
+            "D q"'(dap-disconnect :wk "Exit debugger")
+            "D d"'(dap-hydra :wk "DAP hydra")
+            )
           (start/leader-keys
             ;; "H" '(enlight-open :wk "show dashboard"))
             "H" '(dashboard-open :wk "show dashboard"))
 
           (start/leader-keys
             "o a" '(org-agenda :wk "Open agenda")
+            "o m" '(mu4e :wk "Open mu4e")
             "o n" '(treemacs :wk "Treemacs")
             "o b" '(org-timeblock :wk "Org timeblock")
             "o t" '(vterm-toggle :wk "Toggle terminal")
             )
 
+          (start/leader-keys
+            "m p" '(mu4e-update-mail-and-index :wk "pull mail"))
         (start/leader-keys
             "c c" '(compile :wk "compile")
             "c k" '(kill-compilation :wk "kill compilation")
             "c C" '(recompile :wk "kill compilation")
+            "c r" '(lsp-rename :wk "rename symbol")
             "c s" '(lsp-treemacs-symbols :wk "treemacs symbols"))
 
           (start/leader-keys
@@ -285,10 +313,9 @@ If on a:
             "b b" '(consult-buffer :wk "Switch buffer")
             "b d" '(kill-this-buffer :wk "Kill this buffer")
             "b i" '(ibuffer :wk "Ibuffer")
-            "b n" '(next-buffer :wk "Next buffer")
-            "b p" '(previous-buffer :wk "Previous buffer")
             "b s" '(bookmark-set :wk "Set bookmark")
-            "b r" '(revert-buffer :wk "Reload buffer")
+            "b r" '(my/raise-popup :wk "Raise popup buffer")
+            "b s" '(bookmark-set :wk "Set bookmark")
             "b j" '(consult-bookmark :wk "Bookmark jump"))
 
           (start/leader-keys
@@ -318,41 +345,32 @@ If on a:
             "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
             "N c" '(org-cite-insert :wk "insert orb link"
     ))
-          ;; (start/leader-keys
-          ;;   "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-          ;;   "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon"))
 
           (start/leader-keys
             "r r" '((lambda () (interactive)
                       (load-file "~/.config/emacs/init.el"))
                     :wk "Reload Emacs config"))
 
-          ;; (start/leader-keys
-          ;;   "s" '(:ignore t :wk "Show")
-          ;;   "s e" '(eat :wk "Eat terminal"))
-
           (start/leader-keys
             "t" '(:ignore t :wk "Toggle")
             "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+            "t i" '(org-toggle-inline-images :wk "Toggle org inline image")
             "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 
-    ;; (add-hook prog-mode-hook
-    ;; (lambda ()
-    ;; (local-set-key "g r" 'lsp-find-references)))
-    (define-key evil-normal-state-map (kbd "C-b") 'previous-buffer)
-    (define-key evil-normal-state-map (kbd "C-n") 'next-buffer)
-    (define-key evil-normal-state-map (kbd "M-1") '(lambda () (interactive) (+workspace/switch-to 0)))
-    (define-key evil-normal-state-map (kbd "M-2") '(lambda () (interactive) (+workspace/switch-to 1)))
-    (define-key evil-normal-state-map (kbd "M-3") '(lambda () (interactive) (+workspace/switch-to 2)))
-    (define-key evil-normal-state-map (kbd "M-4") '(lambda () (interactive) (+workspace/switch-to 3)))
-    (define-key evil-normal-state-map (kbd "M-5") '(lambda () (interactive) (+workspace/switch-to 4)))
-    (define-key evil-normal-state-map (kbd "M-6") '(lambda () (interactive) (+workspace/switch-to 5)))
 
     (add-hook 'org-mode-hook (lambda ()
            (setq-local electric-pair-inhibit-predicate
                    `(lambda (c)
                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
+(define-key evil-normal-state-map (kbd "C-b") 'previous-buffer)
+(define-key evil-normal-state-map (kbd "C-n") 'next-buffer)
+(define-key evil-normal-state-map (kbd "M-1") '(lambda () (interactive) (+workspace/switch-to 0)))
+(define-key evil-normal-state-map (kbd "M-2") '(lambda () (interactive) (+workspace/switch-to 1)))
+(define-key evil-normal-state-map (kbd "M-3") '(lambda () (interactive) (+workspace/switch-to 2)))
+(define-key evil-normal-state-map (kbd "M-4") '(lambda () (interactive) (+workspace/switch-to 3)))
+(define-key evil-normal-state-map (kbd "M-5") '(lambda () (interactive) (+workspace/switch-to 4)))
+(define-key evil-normal-state-map (kbd "M-6") '(lambda () (interactive) (+workspace/switch-to 5)))
 (setq initial-frame-alist (append initial-frame-alist '((left . 75) (top . 75) (width . 240) (height . 73 ))))
 (setq truncate-lines nil)
 (setq electric-indent-mode t)
@@ -365,7 +383,7 @@ If on a:
   ;;(inhibit-startup-screen t)  ;; Disable welcome screen
 
   (delete-selection-mode t)   ;; Select text and delete it by typing.
-  (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
+  (electric-indent-mode t)  ;; Turn off the weird indenting that Emacs does by default.
   (electric-pair-mode t)      ;; Turns on automatic parens pairing
 
   (blink-cursor-mode nil)     ;; Don't blink cursor
@@ -403,14 +421,16 @@ If on a:
                 (evil-normalize-keymaps))))
           nil nil t)
   )
+(setq truncate-lines nil)
+(setq compilation-always-kill t)
 
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  ;; (load-theme 'doom-tomorrow-night t)
   (load-theme 'doom-solarized-light t)
-  ;; (load-theme 'doom-solarized-light t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -420,18 +440,20 @@ If on a:
   ;; (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
-(add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
+(add-to-list 'default-frame-alist '(alpha-background . 100)) ;; For all new frames henceforth
 
 (set-face-attribute 'default nil
-                    :font "CaskaydiaCove Nerd Font" ;; Set your favorite type of font or download JetBrains Mono
-                    :height 120
-                    :weight 'medium)
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right unless I also add this method of setting the default font.
-
-;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
-(setq-default line-spacing 0.12)
+                     :font "CaskaydiaCove Nerd Font" ;; Set your favorite type of font or download JetBrains Mono
+                     :height 120
+                     :weight 'medium)
+ ;; This sets the default font on all graphical frames created after restarting Emacs.
+ ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+ ;; are not right unless I also add this method of setting the default font.
+ (custom-theme-set-faces 'user
+;; '(variable-pitch ((t (:family "Source Code Pro" :height 140 :weight thin))))
+'(fixed-pitch ((t ( :family "CaskaydiaCove Nerd Font" :height 120 :weight medium)))))
+ (add-to-list 'default-frame-alist '(font . "CaskaydiaCove Nerd Font")) ;; Set your favorite font
+ (setq-default line-spacing 0.12)
 
 (use-package emacs
   :bind
@@ -440,10 +462,73 @@ If on a:
   ("<C-wheel-up>" . text-scale-increase)
   ("<C-wheel-down>" . text-scale-decrease))
 
-(set-face-attribute 'mode-line nil
-                   :box `(:line-width 1 :color "gray20"))
+(use-package mixed-pitch
+  :hook
+  ;; If you want it in all text modes:
+  (text-mode . mixed-pitch-mode))
 
-            ;; (setq-default mode-line-misc-info git-modeline)
+(use-package mu4e-alert
+      :after mu4e
+      :init
+      (mu4e-alert-enable-mode-line-display)
+      (defun gjstein-refresh-mu4e-alert-mode-line ()
+    (interactive)
+    (mu4e-alert-enable-mode-line-display)
+    )
+  (run-with-timer 0 60 'gjstein-refresh-mu4e-alert-mode-line)
+      )
+         (set-face-attribute 'mode-line nil
+                         :box '(:line-width 1 :color "gray20"))
+             (setq git-modeline "")
+
+                        (use-package doom-modeline
+                          :custom
+                          (doom-modeline-height 30)     ;; Sets modeline height
+                          (doom-modeline-bar-width 5)   ;; Sets right bar width
+                          (doom-modeline-persp-name t)  ;; Adds perspective name to modeline
+                          (lsp-modeline-diagnostics-enable nil)
+                          (doom-modeline-persp-icon t) ;; Adds folder icon next to persp name
+                          (doom-modeline-mu4e t) 
+                          (mu4e-alert-enable-mode-line-display)
+                          (doom-modeline-env-enable-python t)
+                          (doom-modeline-modal-icon nil)
+                          (doom-modeline-always-visible-segments '(mu4e))
+                          (doom-modeline-buffer-file-name-style 'relative-from-project)
+                          ;; (doom-modeline-vcs-max-length 0)
+                          :config
+                          (doom-modeline-def-segment my-vcs
+                            (when (vc-registered (buffer-file-name))(concat (propertize git-modeline))
+                             ))
+
+                    (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                    ;; (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                    (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
+                    (doom-modeline-def-modeline 'my-simple-line
+                      '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
+                      '(mu4e my-vcs misc-info minor-modes major-mode process check))
+                    (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
+                    ;; Set default mode-line
+
+            (setq doom-modeline-modal-icon nil
+                  evil-normal-state-tag   (propertize " Normal ")
+                  evil-emacs-state-tag    (propertize " Emacs " )
+                  evil-insert-state-tag   (propertize " Insert ")
+                  evil-motion-state-tag   (propertize " Motion ")
+                  evil-visual-state-tag   (propertize " Visual ")
+                  evil-operator-state-tag (propertize " Operator "))
+
+            (defun setup-doom-modeline-evil-states () ;; setting up colors
+              (set-face-attribute 'doom-modeline-evil-normal-state nil   :background "yellow green"  :foreground "black")
+              (set-face-attribute 'doom-modeline-evil-emacs-state nil    :background "orange" :foreground "black")
+              (set-face-attribute 'doom-modeline-evil-insert-state nil   :background "medium aquamarine"    :foreground "white")
+              (set-face-attribute 'doom-modeline-evil-motion-state nil   :background "deep sky blue"   :foreground "white")
+              (set-face-attribute 'doom-modeline-evil-visual-state nil   :background "orchid" :foreground "black")
+              (set-face-attribute 'doom-modeline-evil-operator-state nil :background "firebrick" :foreground "white"))
+
+            :hook
+            (after-init . doom-modeline-mode)
+        )
+;; >>>>>>> origin/homeone
 
 (set-face-attribute 'mode-line nil
                  :box '(:line-width 1 :color "gray20"))
@@ -470,7 +555,7 @@ If on a:
             (add-hook 'doom-modeline-mode-hook 'setup-doom-modeline-evil-states)
             (doom-modeline-def-modeline 'my-simple-line
               '(bar matches modals buffer-info remote-host buffer-position parrot selection-info)
-              '(misc-info minor-modes major-mode process check))
+              '(misc-info minor-modes major-mode vcs process check))
             (add-hook 'doom-modeline-mode-hook (lambda () (doom-modeline-set-modeline 'my-simple-line 'default)))
             ;; Set default mode-line
 
@@ -562,58 +647,58 @@ If on a:
     (if doom-dashboard-set-widget-binding
         (insert (propertize "SPC RET"
                             'face
-                            'doom-dashboard-bindings-face)))))
+                            'doom-dashboard-bindings-face)))))   
 
+    (use-package dashboard
+      :ensure t
+        :custom
+        (dashboard-center-content t)
+        (dashboard-icon-type 'nerd-icons)
+        (dashboard-vertically-center-content t)
+      :config
+      (dashboard-setup-startup-hook))
 
-        (use-package dashboard
-          :ensure t
+        (use-package doom-dashboard
+            ;; For Straight Users
+            :straight (doom-dashboard :host github
+                                        :repo "aetherspritee/doom-dashboard")
+            ;; Or for built-in package-vc
+            ;; :vc (:url "https://github.com/emacs-dashboard/doom-dashboard.git" :rev :newest)
+            :after dashboard
+            :demand t
+            ;; Movement keys like doom.
+            :bind
+            (:map dashboard-mode-map
+                ("<remap> <dashboard-previous-line>" . widget-backward)
+                ("<remap> <dashboard-next-line>" . widget-forward)
+                ("<remap> <previous-line>" . widget-backward)
+                ("<remap> <next-line>"  . widget-forward)
+                ("<remap> <right-char>" . widget-forward)
+                ("<remap> <left-char>"  . widget-backward))
             :custom
-            (dashboard-center-content t)
-            (dashboard-icon-type 'nerd-icons)
-            (dashboard-vertically-center-content t)
-          :config
-          (dashboard-setup-startup-hook))
+            (dashboard-banner-logo-title "another day another try . . .")
 
-            (use-package doom-dashboard
-                ;; For Straight Users
-                :straight (doom-dashboard :host github
-                                            :repo "aetherspritee/doom-dashboard")
-                ;; Or for built-in package-vc
-                ;; :vc (:url "https://github.com/emacs-dashboard/doom-dashboard.git" :rev :newest)
-                :after dashboard
-                :demand t
-                ;; Movement keys like doom.
-                :bind
-                (:map dashboard-mode-map
-                    ("<remap> <dashboard-previous-line>" . widget-backward)
-                    ("<remap> <dashboard-next-line>" . widget-forward)
-                    ("<remap> <previous-line>" . widget-backward)
-                    ("<remap> <next-line>"  . widget-forward)
-                    ("<remap> <right-char>" . widget-forward)
-                    ("<remap> <left-char>"  . widget-backward))
-                :custom
-                (dashboard-banner-logo-title "another day another try . . .")
-
-                (dashboard-startup-banner "~/Stuff/nasa.svg") ; Use banner you want
-                (dashboard-footer-icon 
-                (nerd-icons-faicon "nf-fae-planet" :face 'success :height 1.5))
-                (dashboard-page-separator "\n")
-                (dashboard-startupify-list `(dashboard-insert-banner
-                                            dashboard-insert-newline
-                                            dashboard-insert-banner-title
-                                            doom-dashboard-insert-homepage-footer
-                                            dashboard-insert-newline
-                                            dashboard-insert-items
-                                            ,(dashboard-insert-newline 2)
-                                            dashboard-insert-init-info
-                                            ,(dashboard-insert-newline 2)
-                                            ))
-                (dashboard-item-generators
-                '((recents   . my/doom-dashboard-insert-recents-shortmenu)
-                    (bookmarks . my/doom-dashboard-insert-bookmark-shortmenu)
-                    (projects  . doom-dashboard-insert-project-shortmenu)
-                    (agenda    . my/doom-dashboard-insert-org-agenda-shortmenu)))
-                (dashboard-items '(agenda bookmarks recents)))
+            (dashboard-startup-banner "~/Stuff/nasa.svg") ; Use banner you want
+            (dashboard-footer-icon 
+            (nerd-icons-faicon "nf-fae-planet" :face 'success :height 1.5))
+            (dashboard-page-separator "\n")
+            (dashboard-startupify-list `(dashboard-insert-banner
+                                        dashboard-insert-newline
+                                        dashboard-insert-banner-title
+                                        doom-dashboard-insert-homepage-footer
+                                        dashboard-insert-newline
+                                        dashboard-insert-items
+                                        ,(dashboard-insert-newline 2)
+                                        dashboard-insert-init-info
+                                        ,(dashboard-insert-newline 2)
+                                        ))
+            (dashboard-item-generators
+            '((recents   . my/doom-dashboard-insert-recents-shortmenu)
+                (bookmarks . my/doom-dashboard-insert-bookmark-shortmenu)
+                (projects  . doom-dashboard-insert-project-shortmenu)
+                (agenda    . my/doom-dashboard-insert-org-agenda-shortmenu)))
+            (dashboard-items '(agenda bookmarks recents)))
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
 (use-package projectile
   :init
@@ -624,46 +709,60 @@ If on a:
   (projectile-project-search-path '("~/projects/" "~/work/" ("~/github" . 1)))) ;; . 1 means only search the first subdirectory level for projects
 ;; Use Bookmarks for smaller, not standard projects
 
-(use-package lsp-ui :commands lsp-ui-mode)
-        (use-package lsp-mode
-          :commands (lsp lsp-deferred)
-        :init
-        (defun my/update-completions-list ()
-            (progn
-                (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
-                (setq completion-at-point-functions
-                    '(non-greedy-lsp cape-file cape-dabbrev))))
+(setq lsp-use-plists nil)
+    (use-package lsp-ui :commands lsp-ui-mode)
+    (use-package lsp-mode
+      :commands (lsp lsp-deferred)
+    :init
+    (defun my/update-completions-list ()
+        (progn
+            (fset 'non-greedy-lsp (cape-capf-properties #'lsp-completion-at-point :exclusive 'no))
+            (setq completion-at-point-functions
+                '(non-greedy-lsp cape-file cape-dabbrev))))
 
-          (setq lsp-keymap-prefix "C-c l")
+      (setq lsp-keymap-prefix "C-c l")
 
-          :hook (
-                 (python-mode . lsp)
-                 (c-mode . lsp)
-                 (f90-mode . lsp)
-                 (julia-mode . lsp)
-                 (go-mode . lsp)
-                 (lsp-mode . lsp-enable-which-key-integration)
-                 (lsp-mode . lsp-ui-mode)
-                 (lsp-completion-mode . my/update-completions-list)
-                )
-          :custom
-            (lsp-completion-provider :none)) ;; we use Corfu!
+      :hook (
+             (python-mode . lsp)
+             (c-mode . lsp)
+             (f90-mode . lsp)
+             (julia-mode . lsp)
+             (go-mode . lsp)
+             (zig-mode . lsp)
+             (lsp-mode . lsp-enable-which-key-integration)
+             (lsp-mode . lsp-ui-mode)
+             (lsp-completion-mode . my/update-completions-list)
+            )
+      :custom
+        (lsp-completion-provider :none)) ;; we use Corfu!
 
-        (use-package dap-mode)
-        ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-    (use-package lsp-pyright
-      :ensure t
-      :hook (python-mode . (lambda ()
-                              (require 'lsp-pyright)
-                              (lsp))))  ; or lsp-deferred
-    (setq lsp-ui-doc-position 'at-point)
-    (setq lsp-ui-sideline-show-hover nil)
-    (setq lsp-ui-sideline-enable t)
-    (setq lsp-ui-sideline-show-diagnostics t)
-    (require 'dap-python)
+    (use-package dap-mode)
+    ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+(setq lsp-ui-doc-position 'at-point)
+(setq lsp-ui-sideline-show-hover nil)
+(setq lsp-ui-sideline-enable t)
+(setq lsp-ui-sideline-show-diagnostics t)
+
+(setq lsp-idle-delay 0.01)
+(setq lsp-enable-file-watchers nil)
+
+(require 'dap-python)
 ;; if you installed debugpy, you need to set this
 ;; https://github.com/emacs-lsp/dap-mode/issues/306
 (setq dap-python-debugger 'debugpy)
+(dap-register-debug-template "My App"
+  (list :type "python"
+        :args "-i"
+        :cwd nil
+        :env '(("DEBUG" . "1"))
+        :target-module (expand-file-name "~/src/myapp/.env/bin/myapp")
+        :request "launch"
+        :name "My App"))
 
 (use-package lsp-latex)
 (add-to-list 'load-path "/Users/dusc/Code/texlab")
@@ -717,113 +816,128 @@ If on a:
             (setq evil-shift-width 4)
 ))
 
+(use-package zig-mode)
+
 (use-package go-mode)
 
 (use-package julia-mode)
 
 (use-package org
-  :ensure nil
-  :custom
-  (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
+      :ensure nil
+      :custom
+      (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
 
-  :hook
-  (org-mode . org-indent-mode) ;; Indent text
+      :hook
+      (org-mode . org-indent-mode) ;; Indent text
 
-  ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
-  ;; Otherwise, org-tempo is broken when you try to <s TAB...
-  ;;(org-mode . (lambda ()
-  ;;              (setq-local electric-pair-inhibit-predicate
-  ;;                          `(lambda (c)
-  ;;                             (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
-  )
-  (setq org-hide-emphasis-markers t)
-(with-no-warnings
-(custom-declare-face '+org-todo-active  '((t (:inherit (bold font-lock-constant-face org-todo)))) "")
-(custom-declare-face '+org-todo-project '((t (:inherit (bold font-lock-doc-face org-todo)))) "")
-(custom-declare-face '+org-todo-onhold  '((t (:inherit (bold warning org-todo)))) "")
-(custom-declare-face '+org-todo-cancel  '((t (:inherit (bold error org-todo)))) ""))
-    (setq org-todo-keywords
-            '((sequence
-            "TODO(t)"
-            "CURR(c)"                             ; A task that needs doing & is ready to do
-            "PROJ(p)"  ; A project, which usually contains other tasks
-            "WORK(u)"
-            "PRCS(v)"                             ; A recurring task
-            "STRT(s)"
-            "THNK(n)"                             ; A task that is in progress
-            "WAIT(w)"  ; Something external is holding up this task
-            "HOLD(h)"  ; This task is paused/on hold because of me
-            "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-            "|"
-            "DONE(d)"  ; Task successfully completed
-            "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
-            (sequence
-            "[ ](T)"   ; A task that needs doing
-            "[-](S)"   ; Task is in progress
-            "[?](W)"   ; Task is being held up or paused
-            "|"
-            "[X](D)")  ; Task was completed
-            (sequence
-            "|"
-            "OKAY(o)"
-            "YES(y)"
-            "NO(n)"))
-            org-todo-keyword-faces
-            '(("[-]"  . +org-todo-active)
-            ("STRT" . +org-todo-active)
-            ("[?]"  . +org-todo-onhold)
-            ("WAIT" . +org-todo-onhold)
-            ("HOLD" . +org-todo-onhold)
-            ("PROJ" . +org-todo-project)
-            ("NO"   . +org-todo-cancel)
-            ("KILL" . +org-todo-cancel)))
+      ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+      ;; Otherwise, org-tempo is broken when you try to <s TAB...
+      ;;(org-mode . (lambda ()
+      ;;              (setq-local electric-pair-inhibit-predicate
+      ;;                          `(lambda (c)
+      ;;                             (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+      )
+      (setq org-hide-emphasis-markers t)
+    (with-no-warnings
+    (custom-declare-face '+org-todo-active  '((t (:inherit (bold font-lock-constant-face org-todo)))) "")
+    (custom-declare-face '+org-todo-project '((t (:inherit (bold font-lock-doc-face org-todo)))) "")
+    (custom-declare-face '+org-todo-onhold  '((t (:inherit (bold warning org-todo)))) "")
+    (custom-declare-face '+org-todo-cancel  '((t (:inherit (bold error org-todo)))) ""))
+        (setq org-todo-keywords
+                '((sequence
+                "TODO(t)"
+                "CURR(c)"                             ; A task that needs doing & is ready to do
+                "PROJ(p)"  ; A project, which usually contains other tasks
+                "WORK(u)"
+                "PRCS(v)"                             ; A recurring task
+                "STRT(s)"
+                "THNK(n)"                             ; A task that is in progress
+                "WAIT(w)"  ; Something external is holding up this task
+                "HOLD(h)"  ; This task is paused/on hold because of me
+                "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+                "|"
+                "DONE(d)"  ; Task successfully completed
+                "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+                (sequence
+                "[ ](T)"   ; A task that needs doing
+                "[-](S)"   ; Task is in progress
+                "[?](W)"   ; Task is being held up or paused
+                "|"
+                "[X](D)")  ; Task was completed
+                (sequence
+                "|"
+                "OKAY(o)"
+                "YES(y)"
+                "NO(n)"))
+                org-todo-keyword-faces
+                '(("[-]"  . +org-todo-active)
+                ("STRT" . +org-todo-active)
+                ("[?]"  . +org-todo-onhold)
+                ("WAIT" . +org-todo-onhold)
+                ("HOLD" . +org-todo-onhold)
+                ("PROJ" . +org-todo-project)
+                ("NO"   . +org-todo-cancel)
+                ("KILL" . +org-todo-cancel)))
 
-(setq org-agenda-files '("~/Dropbox/Orga/"))
-(setq org-agenda-window-setup 'only-window)
-(setq org-agenda-custom-commands
-    '(
-        ("D" "Meine Agenda"
-        ((todo "THNK|HOLD"
-                (
-                (org-agenda-overriding-header " REMINDER\n")
-                ))
-        (agenda " "
-                (
-                (org-agenda-overriding-header " SOOOON\n")
-                (org-agenda-span 30)
-                (org-agenda-start-day "+0d")
-                (org-agenda-show-all-dates nil)
-                (org-agenda-entry-types '(:deadline))
-                (org-deadline-warning-days 0)
-                ))
-        (agenda " "
-                (
-                (org-agenda-overriding-header " Day\n")
-                (org-agenda-span 1)
-                (org-agenda-start-day "+0d")
-                (org-deadline-warning-days 0)
-                (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
-                ))
-        (agenda " "
-                ((org-agenda-overriding-header "󰎕 Tomorrow\n")
-                (org-agenda-start-day "+1d")
-                (org-agenda-span 1)
-                (org-agenda-show-all-dates nil)
-                ))
-        (todo "PROJ"
-                ((org-agenda-overriding-header "󰀸 Projects i want to do :]\n")))
-        (agenda " "
-                ((org-agenda-overriding-header " ÜBERMORGEN\n")
-                (org-agenda-start-day "+2d")
-                (org-agenda-span 1)
-                (org-agenda-show-all-dates nil)
-                ))
-        (todo "CURR"
-                ((org-agenda-overriding-header " Current projects\n")))
-        ))
-        ))
-(add-hook 'org-mode-hook 'visual-line-mode)
+    (setq org-agenda-files '("~/Dropbox/Orga/"))
+    (setq org-agenda-window-setup 'only-window)
+    (setq org-agenda-custom-commands
+        '(
+            ("D" "Meine Agenda"
+            ((todo "THNK|HOLD"
+                    (
+                    (org-agenda-overriding-header " REMINDER\n")
+                    ))
+            (agenda " "
+                    (
+                    (org-agenda-overriding-header " SOOOON\n")
+                    (org-agenda-span 30)
+                    (org-agenda-start-day "+0d")
+                    (org-agenda-show-all-dates nil)
+                    (org-agenda-entry-types '(:deadline))
+                    (org-deadline-warning-days 0)
+                    ))
+            (agenda " "
+                    (
+                    (org-agenda-overriding-header " Day\n")
+                    (org-agenda-span 1)
+                    (org-agenda-start-day "+0d")
+                    (org-deadline-warning-days 0)
+                    (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                    ))
+            (agenda " "
+                    ((org-agenda-overriding-header "󰎕 Tomorrow\n")
+                    (org-agenda-start-day "+1d")
+                    (org-agenda-span 1)
+                    (org-agenda-show-all-dates nil)
+                    ))
+            (todo "PROJ"
+                    ((org-agenda-overriding-header "󰀸 Projects i want to do :]\n")))
+            (agenda " "
+                    ((org-agenda-overriding-header " ÜBERMORGEN\n")
+                    (org-agenda-start-day "+2d")
+                    (org-agenda-span 1)
+                    (org-agenda-show-all-dates nil)
+                    ))
+            (todo "CURR"
+                    ((org-agenda-overriding-header " Current projects\n")))
+            ))
+            ))
+    (add-hook 'org-mode-hook 'visual-line-mode)
+ 
+
+    ;; Improve org mode looks
+    (setq-default org-startup-indented t
+                  org-use-sub-superscripts "{}"
+                  org-hide-emphasis-markers t
+                  org-startup-with-inline-images t
+                  org-image-actual-width '(300))
 (setq org-latex-create-formula-image-program 'dvisvgm)
+
+(use-package org-roam-ui)
+
+(use-package org-timeblock)
+(setq org-timeblock-span 1)
 
 (use-package toc-org
   :commands toc-org-enable
@@ -1016,14 +1130,38 @@ If on a:
                             (wl . wl)))
                           )
 
-(use-package eat
-  :hook ('eshell-load-hook #'eat-eshell-mode))
+(org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)
+       (shell . nil)))
+
+
+(setq org-confirm-babel-evaluate nil)
+
+(use-package org-fragtog
+  :after org
+  :custom
+  (org-startup-with-latex-preview t)
+  :hook
+  (org-mode . org-fragtog-mode)
+  :custom
+  (org-format-latex-options
+   (plist-put org-format-latex-options :scale 2)
+   (plist-put org-format-latex-options :foreground 'auto)
+   (plist-put org-format-latex-options :background 'auto)))
+
+;; (use-package eat
+;;   :hook ('eshell-load-hook #'eat-eshell-mode))
+;; (defun visit-eat-buffer (&optional prefix) "Create or visit a eat buffer. If PREFIX is not nil, create visit in default-directory" (interactive "P") (let* ((eat-buffer-name (format "*eat<%s>" (if prefix default-directory "0")))) (with-current-buffer (eat) (eat-line-mode)) (pop-to-buffer eat-buffer-name display-comint-buffer-action)))
 
 (use-package vterm
     :ensure t)
 (use-package vterm-toggle
     :straight (vterm-toggle :host github
                                 :repo "jixiuf/vterm-toggle"))
+
+(require 'multiple-cursors)
+(global-set-key (kbd "M-d") 'mc/edit-lines)
 
 ;; (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
@@ -1053,43 +1191,16 @@ If on a:
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :init (global-diff-hl-mode))
 
-(use-package tempel
-  ;; Require trigger prefix before template name when completing.
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
-
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
-
-  :init
-
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
-
 ;; Optional: Add tempel-collection.
 ;; The package is young and doesn't have comprehensive coverage.
 (use-package tempel-collection)   
 
+
+
+
+    ;; Optional: Add tempel-collection.
+    ;; The package is young and doesn't have comprehensive coverage.
+    (use-package tempel-collection)
 
         (use-package corfu
           ;; Optional customizations
@@ -1100,34 +1211,28 @@ If on a:
           (corfu-popupinfo-mode t)       ;; Enable popup information
           (corfu-popupinfo-delay 0.5)    ;; Lower popupinfo delay to 0.5 seconds from 2 seconds
           (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
-          (corfu-auto-delay 0)
+          (corfu-auto-delay 0.05)
+          ;; (completion-styles '(basic))
           ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-          ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+          (corfu-quit-no-match t)      ;; Never quit, even if there is no match
           ;; (corfu-preview-current nil)    ;; Disable current candidate preview
           ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-          ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+          (corfu-on-exact-match nil)     ;; Configure handling of exact matches
           ;; (corfu-scroll-margin 5)        ;; Use scroll margin
           (completion-ignore-case t)
-          (completion-styles '(basic))
           ;; Enable indentation+completion using the TAB key.
           ;; `completion-at-point' is often bound to M-TAB.
           (tab-always-indent 'complete)
           (corfu-preview-current nil) ;; Don't insert completion without confirmation
-            (add-to-list 'completion-styles-alist
-                        '(tab completion-basic-try-completion ignore
-                        "Completion style which provides TAB completion only."))
-            (corfu-history-mode 1)
-            (savehist-mode 1)
-            (add-to-list 'savehist-additional-variables 'corfu-history)
+
+          (corfu-history-mode 1)
+          (savehist-mode 1)
+          (add-to-list 'savehist-additional-variables 'corfu-history)
           ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
           ;; be used globally (M-/).  See also the customization variable
           ;; `global-corfu-modes' to exclude certain modes.
-            :bind
-            (:map corfu-map ("TAB" . corfu-expand))
           :init
-          (global-corfu-mode)
-    )
-
+          (global-corfu-mode))
 
 
         (use-package nerd-icons-corfu
@@ -1153,12 +1258,41 @@ If on a:
      ;;(add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
      ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
      ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
-     ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
+     (add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
      ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
      ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
      )
 
 ;;   (setq-local lsp-mode completion-at-point-functions (list (cape-capf-buster #'cape:lsp-cape) #'cape-file))
+
+(use-package tempel
+  ;; Require trigger prefix before template name when completing.
+  :custom
+  (tempel-trigger-prefix "<")
+
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+
+  :init
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.
+    ;; `tempel-expand' only triggers on exact matches. Alternatively use
+    ;; `tempel-complete' if you want to see all matches, but then you
+    ;; should also configure `tempel-trigger-prefix', such that Tempel
+    ;; does not trigger too often when you don't expect it. NOTE: We add
+    ;; `tempel-expand' *before* the main programming mode Capf, such
+    ;; that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-complete
+                      completion-at-point-functions)))
+)
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+  (add-hook 'python-mode-hook 'tempel-setup-capf)
+  (add-hook 'lsp-mode-hook 'tempel-setup-capf)
 
 (use-package orderless
   :custom
@@ -2115,18 +2249,15 @@ stored in `persp-save-dir'.")
 
 
   ;;;; Create main workspace
-  ;; The default perspective persp-mode creates is special and doesn't represent
-  ;; a real persp object, so buffers can't really be assigned to it, among other
-  ;; quirks, so I replace it with a "main" perspective.
-  ;; (add-hook '(persp-mode-hook persp-after-load-state-functions)
-  ;;   (defun +workspaces-ensure-no-nil-workspaces-h (&rest _)
-  ;;     (when persp-mode
-  ;;       (dolist (frame (frame-list))
-  ;;         (when (string= (safe-persp-name (get-current-persp frame)) persp-nil-name)
-  ;;           ;; Take extra steps to ensure no frame ends up in the nil perspective
-  ;;           (persp-frame-switch (or (cadr (hash-table-keys *persp-hash*))
-  ;;                                   +workspaces-main)
-  ;;                               frame))))))
+  (add-hook '(persp-mode-hook persp-after-load-state-functions)
+    (defun +workspaces-ensure-no-nil-workspaces-h (&rest _)
+      (when persp-mode
+        (dolist (frame (frame-list))
+          (when (string= (safe-persp-name (get-current-persp frame)) persp-nil-name)
+            ;; Take extra steps to ensure no frame ends up in the nil perspective
+            (persp-frame-switch (or (cadr (hash-table-keys *persp-hash*))
+                                    +workspaces-main)
+                                frame))))))
 
   (add-hook 'persp-mode-hook
     (defun +workspaces-init-first-workspace-h (&rest _)
@@ -2421,7 +2552,7 @@ stored in `persp-save-dir'.")
     ;;   :ensure t
     ;;   :config (treemacs-set-scope-type 'Tabs))
 
-(lsp-treemacs-sync-mode 1)
+;; (lsp-treemacs-sync-mode 1)
 
 (use-package visual-regexp-steroids)
 
@@ -2469,82 +2600,27 @@ stored in `persp-save-dir'.")
 (use-package org-timeblock)
 (setq org-timeblock-span 1)
 
-(defun in-git-p ()
-                 (not (string-match "^fatal" (shell-command-to-string "git rev-parse --git-dir"))))
-        (defun git-parse-status ()
-            (interactive)
-            (concat 
-        " ["
-        ;; (let ((plus-minus (vc-git--run-command-string buffer-file-name "diff" "--numstat" "--")))
-        (let ((plus-minus (shell-command-to-string (concat "~/Scripts/git-diff/diff " buffer-file-name))))
-            (if (and plus-minus
-                ;; (string-match "^\\([0-9]+\\)\t\\([0-9]+\\)\t" plus-minus))
-                (string-match "^\\([0-9]+\\) \\([0-9]+\\) \\([0-9]+\\)" plus-minus))
-                (concat
-            (propertize (format "+%s " (match-string 1 plus-minus)) 'face 'nerd-icons-green)
-            (propertize (format "~%s " (match-string 3 plus-minus)) 'face 'nerd-icons-cyan)
-            (propertize (format "-%s" (match-string 2 plus-minus)) 'face 'error))
-            (propertize "✔" 'face '(:foreground "green3" :weight bold))))
-        "]"))
-
-            (defun git-remote-status ()
-             (let* (;; get the branch we are on.
-                    (branch (s-trim
-                             (shell-command-to-string
-                              "git rev-parse --abbrev-ref HEAD")))
-                    ;; get the remote the branch points to.
-                    (remote (s-trim
-                             (shell-command-to-string
-                              (format "git config branch.%s.remote" branch))))
-                    (remote-branch (s-trim
-                                    (shell-command-to-string
-                                     "git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)")))
-                    (commits (split-string
-                              (s-trim
-                               (shell-command-to-string
-                                (format
-                                 "git rev-list --count --left-right HEAD...%s"
-                                 remote-branch)))))
-                    (local (nth 0 commits))
-                    (remotes (nth 1 commits)))
-               (concat
-                (propertize (format "%s " (nerd-icons-octicon "nf-oct-git_branch")) 'face 'doom-modeline-project-dir)
-                (propertize (format "%s " branch) 'face 'doom-modeline-project-dir)
-                "["
-                (propertize (format "↑%s" local) 'face 'warning)
-                "|"
-                (propertize (format "↓%s" remotes) 'face 'warning)
-                "]"
-                )))
-(setq git-modeline-last-update (float-time))
-   (setq git-modeline-update-interval 5 )
-   ;; (defun git-mode ()
-   ;;   (interactive)
-   ;;   "minor mode to put git repo status in modeline"
-   ;;   (let ((git-modeline '(:eval (if
-   ;;                                   (> (- (float-time) git-modeline-last-update)
-   ;;                                      git-modeline-update-interval)
-   ;;                                   ;; we are updating                              
-   ;;                                   (setq git-modeline
-   ;;                                         (if (not (in-git-p))
-   ;;                                             ""                                   
-   ;;                                           (setq  git-modeline-last-update (float-time))
-   ;;                                           (concat 
-   ;;                                            (git-remote-status)
-   ;;                                            (git-parse-status))))
-   ;;                                 git-modeline)
-   ;;                              )))))
-(defun update-git-diff ()
+(defun my/raise-popup ()
   (interactive)
-  (setq git-modeline (concat
-         (git-remote-status)
-         (git-parse-status)
-    )
-  ))
-;; (add-hook 'after-save-hook 'update-git-diff)
-;; (add-hook 'after-revert-hook 'update-git-diff)
-;; (add-hook 'before-revert-hook 'update-git-diff)
-;; (add-hook 'buffer-list-update-hook 'update-git-diff)
+  (let ((buffer (current-buffer)))
+    (unless (one-window-p)
+      (delete-window))
+    (switch-to-buffer buffer )))
+
+(setq load-prefer-newer t)
+
+(defun my/compile-python ()
+      "bruh"
+    (setq-local compile-command
+     (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+
+    (defun my/compile-go ()
+      "bruh"
+    (setq-local compile-command
+     (concat "go build " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
+
+(add-hook 'python-mode-hook 'my/compile-python)
+(add-hook go-mode-hook 'my/compile-go)
 
 (defun my/compile-python ()
       "bruh"
@@ -2552,3 +2628,107 @@ stored in `persp-save-dir'.")
      (concat "python " (when buffer-file-name (shell-quote-argument buffer-file-name)))))
 
 (add-hook 'python-mode-hook 'my/compile-python)
+
+(setq warning-minimum-level :emergency)
+
+;; Distraction-free writing
+    (defun ews-distraction-free ()
+      "Distraction-free writing environment using Olivetti package."
+      (interactive)
+      (if (equal olivetti-mode nil)
+          (progn
+            (window-configuration-to-register 1)
+            (delete-other-windows)
+            (olivetti-set-width 180)
+            (text-scale-set 2)
+            (olivetti-mode t))
+        (progn
+          (if (eq (length (window-list)) 1)
+              (jump-to-register 1))
+          (olivetti-mode 0)
+          (text-scale-set 0))))
+
+    (use-package olivetti
+      :demand t
+      :bind
+      (("<f9>" . ews-distraction-free)))
+(add-hook 'olivetti-mode-hook '(lambda () (display-line-numbers-mode -1)))
+
+(require 'smtpmail)
+    (setq send-mail-function 'smtpmail-send-it)
+    (setq message-send-mail-function 'smtpmail-send-it)
+
+            (use-package mu4e
+              :ensure nil
+              :load-path "/usr/share/emacs/site-lisp/mu4e/"
+              :config
+
+              ;; This is set to 't' to avoid mail syncing issues when using mbsync
+              (setq mu4e-change-filenames-when-moving t)
+
+              ;; Refresh mail using isync every 10 minutes
+              (setq message-send-mail-function 'smtpmail-send-it)
+              (setq mu4e-update-interval (* 10 60))
+              (setq mu4e-get-mail-command "mbsync -a")
+              (setq mu4e-maildir "~/Mail/gmail")
+              (setq user-mail-address "schautendustin@gmail.com")
+              (setq smtpmail-smtp-server "smtp.gmail.com")
+              (setq smtpmail-smtp-service 465)
+              (setq smtpmail-stream-type ssl)
+              (setq mu4e-drafts-folder "/[Gmail]/Drafts")
+              (setq mu4e-sent-folder   "/[Gmail]/Sent Mail")
+              (setq mu4e-refile-folder "/[Gmail]/All Mail")
+              (setq mu4e-trash-folder  "/[Gmail]/Trash")
+
+
+              (setq mu4e-maildir-shortcuts
+                  '(("/Inbox"             . ?i)
+                    ("/[Gmail]/Sent Mail" . ?s)
+                    ("/[Gmail]/Trash"     . ?t)
+                    ("/[Gmail]/Drafts"    . ?d)
+                    ("/[Gmail]/All Mail"  . ?a)))
+)
+
+
+    (setq mu4e-contexts
+          (list
+           ;; Work account
+           (make-mu4e-context
+            :name "Work"
+            :match-func
+              (lambda (msg)
+                (when msg
+                  (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
+            :vars '((user-mail-address . "schautendustin@gmail.com")
+                    (user-full-name    . "Dustin Schauten")
+                    (send-mail-function . 'smtpmail-send-it)
+                    (starttls-use-gnutls . t)
+                    (smtpmail-starttls-credentials . '(("smtp.gmail.com" 465 nil nil)))
+                    (smtpmail-auth-credentials . '(("smtp.gmail.com" 465 "schautendustin@gmail.com" nil)))
+                    (smtpmail-default-smtp-server . "smtp.gmail.com")
+                    (smtpmail-smtp-server . "smtp.gmail.com")
+                    (smtpmail-stream-type  . ssl)
+                    (smtpmail-smtp-service . 465)
+                    (smtpmail-auth-credentials (expand-file-name "~/.authinfo.gpg"))
+                    (mu4e-drafts-folder  . "/Gmail/[Gmail]/Drafts")
+                    (mu4e-sent-folder  . "/Gmail/[Gmail]/Sent Mail")
+                    (mu4e-refile-folder  . "/Gmail/[Gmail]/All Mail")
+                    (mu4e-trash-folder  . "/Gmail/[Gmail]/Trash")))
+
+           ;; Personal account
+           (make-mu4e-context
+            :name "Personal"
+            :match-func
+              (lambda (msg)
+                (when msg
+                  (string-prefix-p "/Fastmail" (mu4e-message-field msg :maildir))))
+            :vars '())))
+(mu4e-alert-set-default-style 'libnotify)
+(add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
+;; (add-hook 'after-init-hook #'(mu4e-alert-enable-mode-line-display))
+
+(use-package poke-line
+  :ensure t
+  :config
+  (poke-line-global-mode 1)
+  (setq-default poke-line-pokemon "roserade"))
