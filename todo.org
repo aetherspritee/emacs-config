@@ -1,4 +1,6 @@
-- [ ] org mode anpassen, olivetty mode + darkroom war das setup glaub ich
+- [ ] org mode schöner machen
+- [ ] default workspace on start-up
+- [ ] better snippet support, more snippets
 - [X] magit todos
 - [X] relative lines!!
 - [X] vr/replace!!!
