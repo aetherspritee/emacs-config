@@ -403,7 +403,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
                 "o b" '(org-timeblock :wk "Org timeblock")
                 "o t" '(vterm-toggle :wk "Terminal")
                 )
-              
+
               (start/leader-keys
                 "m p" '(mu4e-update-mail-and-index :wk "pull mail")
                 )
@@ -466,6 +466,9 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
               (start/leader-keys
                 "g" '(:ignore t :wk "Git")
                 "g g" '(magit-status :wk "Magit status"))
+              
+              (start/leader-keys
+                "v r" '(vr/replace :wk "VR replace"))
 
               (start/leader-keys
                 "N i" '(citar-open :wk "Open citar")

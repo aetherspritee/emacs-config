@@ -338,6 +338,9 @@ If on a:
             "g g" '(magit-status :wk "Magit status"))
 
           (start/leader-keys
+            "v r" '(vr/replace :wk "VR replace"))
+
+          (start/leader-keys
             "N i" '(citar-open :wk "Open citar")
             "N r" '(doi-insert-bibtex :wk "insert bibtex entry from DOI")
             "N c" '(org-cite-insert :wk "insert orb link"
